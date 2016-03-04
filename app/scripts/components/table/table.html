@@ -1,0 +1,25 @@
+<rs-table-toolbar
+  (add)="RsTable.addAction()"
+  (delete)="RsTable.massDeleteAction($event)"
+  [query]="RsTable.query"
+  [title]="RsTable.title"
+  [selected]="RsTable.selected"
+  [options]="RsTable.options">
+</rs-table-toolbar>
+<rs-table-container
+  [fields]="RsTable.fields"
+  [options]="RsTable.options"
+  [query]="RsTable.query"
+  [model]="RsTable.model"
+  [(selected)]="RsTable.selected"
+  [items]="RsTable.items"
+  (preview)="RsTable.previewAction($event, RsTable.selected)"
+  (delete)="RsTable.deleteAction($event, RsTable.selected)"
+  (edit)="RsTable.editAction($event, RsTable.selected)"
+  (reorder)="RsTable.onReorder">
+</rs-table-container>
+<rs-table-pagination
+  [(limit)]=RsTable.query.limit
+  [(page)]="RsTable.query.page"
+  [total]="RsTable.items.length">
+</rs-table-pagination>

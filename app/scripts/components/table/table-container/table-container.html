@@ -1,0 +1,27 @@
+<md-table-container>
+  <table class="md-table" md-table md-row-select="Table.options.rowSelection" ng-model="Table.selected">
+    <thead md-head md-order="Table.query.order" class="md-head">
+      <tr md-row>
+        <!-- <th md-column ng-if="!Table.fields" ng-repeat="(key, value) in Table.items[0]">{{ key }}</th> -->
+        <th md-column ng-repeat="field in Table.fields" md-order-by="{{ field }}">{{ Table.formatField(field) }}</th>
+        <th md-column ng-show="Table.options.actions.length > 0">options</th>
+      </tr>
+    </thead>
+    <tbody md-body>
+      <tr md-row md-select="item[Table.options.selectParam]" md-row-select="Table.query.options.rowSelection" ng-repeat="item in Table.items | filter: Table.query.filter | orderBy: Table.query.order | limitTo: Table.query.limit : (Table.query.page - 1) * Table.query.limit" ng-cloak>
+        <td md-cell ng-repeat="key in Table.fields">{{ Table.format(item, key) }}</td>
+        <td md-cell>
+          <button class="md-button md-icon-button md-ink-ripple" aria-label="preview item" ng-show="Table.options.actions.includes('preview')" (click)="Table.previewAction($event, item)">
+            <md-icon>remove_red_eye</md-icon>
+          </button>
+          <button class="md-button md-icon-button md-ink-ripple" aria-label="edit item" ng-show="Table.options.actions.includes('edit')" (click)="Table.editAction($event, item)">
+            <md-icon>edit</md-icon>
+          </button>
+          <button class="md-button md-icon-button md-ink-ripple" aria-label="delete item" ng-show="Table.options.actions.includes('delete')" (click)="Table.deleteAction($event, item)">
+            <md-icon>clear</md-icon>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</md-table-container>

@@ -1,0 +1,28 @@
+<div class="md-table-pagination">
+  <span class="label" ng-if="Pagination.showPageSelect()">{{ Pagination.$label['page'] }}</span>
+
+  <md-select class="md-table-select" ng-if="Pagination.showPageSelect()" ng-model="Pagination.page" md-container-class="md-pagination-select" ng-change="Pagination.onPaginationChange()" aria-label="Page">
+    <md-option ng-repeat="num in Pagination.range(Pagination.pages()) track by $index" ng-value="$index + 1">{{$index + 1}}</md-option>
+  </md-select>
+
+  <span class="label">{{ Pagination.$label['rowsPerPage'] }}</span>
+
+  <md-select class="md-table-select" ng-model="Pagination.limit" md-container-class="md-pagination-select" aria-label="Rows" placeholder="{{Pagination.options ? Pagination.options[1] : 5}}">
+    <md-option ng-repeat="rows in Pagination.options ? Pagination.options : [5, 10, 15]" ng-value="rows">{{rows}}</md-option>
+  </md-select>
+
+  <span class="label">{{Pagination.min() + 1}} - {{Pagination.max()}} {{ Pagination.$label['of'] }} {{Pagination.total}}</span>
+
+  <md-button class="md-icon-button" type="button" ng-if="Pagination.showBoundaryLinks()" (click)="Pagination.first()" ng-disabled="!Pagination.hasPrevious()" aria-label="First">
+    <md-icon md-svg-icon="navigate-first.svg"></md-icon>
+  </md-button>
+  <md-button class="md-icon-button" type="button" (click)="Pagination.previous()" ng-disabled="!Pagination.hasPrevious()" aria-label="Previous">
+    <md-icon md-svg-icon="navigate-before.svg"></md-icon>
+  </md-button>
+  <md-button class="md-icon-button" type="button" (click)="Pagination.next()" ng-disabled="Pagination.disableNext()" aria-label="Next">
+    <md-icon md-svg-icon="navigate-next.svg"></md-icon>
+  </md-button>
+  <md-button class="md-icon-button" type="button" ng-if="Pagination.showBoundaryLinks()" (click)="Pagination.last()" ng-disabled="Pagination.disableNext()" aria-label="Last">
+    <md-icon md-svg-icon="navigate-last.svg"></md-icon>
+  </md-button>
+</div>

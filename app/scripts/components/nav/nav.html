@@ -1,0 +1,69 @@
+<!-- <md-toolbar layout="row" ng-hide="Nav.evalLoginState()">
+  <div class="md-toolbar-tools" layout-wrap>
+    <md-button class="md-icon-button" aria-label="Favorite">
+      <md-icon (click)="Nav.open('sidebar')">menu</md-icon>
+    </md-button>
+    <span>Rose St. Admin</span>
+    <span flex></span>
+  </div>
+</md-toolbar> -->
+<md-tabs flex md-no-pagination md-selected="Nav.tabIndex" ng-hide="Nav.evalLoginState()">
+  <md-tab id="home" aria-controls="home">
+    <md-tab-label>Home</md-tab-label>
+  </md-tab>
+  <md-tab id="donations" aria-controls="donations">
+    <md-tab-label>Donations</md-tab-label>
+  </md-tab>
+  <md-tab id="messages" aria-controls="messages">
+    <md-tab-label>Messages</md-tab-label>
+  </md-tab>
+  <md-tab id="posts" aria-controls="posts">
+    <md-tab-label>Posts</md-tab-label>
+  </md-tab>
+  <md-tab id="users" aria-controls="users">
+    <md-tab-label>Users</md-tab-label>
+  </md-tab>
+</md-tabs>
+<md-sidenav class="md-sidenav-left" md-component-id="sidebar" ng-cloak>
+  <md-toolbar>
+    <h1 class="md-toolbar-tools">Options</h1>
+  </md-toolbar>
+  <div>
+    <md-list>
+      <md-list-item ui-sref="home">
+        <md-icon>home</md-icon>
+        <p>Home</p>
+      </md-list-item>
+      <md-list-item ui-sref="donations">
+        <md-icon>attach_money</md-icon>
+        <p>Donations</p>
+      </md-list-item>
+      <md-list-item ui-sref="messages">
+        <md-icon>inbox</md-icon>
+        <p>Messages</p>
+      </md-list-item>
+      <md-list-item ui-sref="posts">
+        <md-icon>library_books</md-icon>
+        <p>Posts</p>
+      </md-list-item>
+      <md-list-item ui-sref="users">
+        <md-icon>group</md-icon>
+        <p>Users</p>
+      </md-list-item>
+      <md-divider></md-divider>
+      <md-list-item href="https://dashboard.stripe.com/login">
+        <p>Stripe</p>
+        <md-icon>credit_card</md-icon>
+      </md-list-item>
+      <md-divider></md-divider>
+      <md-list-item href="#/" (click)="Nav.logout($event)">
+        <p>Logout</p>
+        <md-icon>exit_to_app</md-icon>
+      </md-list-item>
+      <md-divider></md-divider>
+      <md-list-item href="#/" (click)="Nav.close('sidebar')" class="md-flat" aria-label="close navbar">
+        <p>Close</p>
+      </md-list-item>
+    </md-list>
+  </div>
+</md-sidenav>

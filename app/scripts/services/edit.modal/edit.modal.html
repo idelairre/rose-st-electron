@@ -1,0 +1,73 @@
+<md-dialog aria-label="{{ name }} edit modal" style="min-height: 100%; min-width: 100%">
+  <form name="modalForm">
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>{{ ::action }} {{ ::name }}</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" (click)="dismiss()">
+          <md-icon aria-label="Close dialog">close</md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+    <md-dialog-content class="dialog-content">
+      <div layout-padding class="title-heading">
+        <md-input-container class="md-block" ng-repeat="(key, value) in filterProps(object._meta_, 'string')" ng-hide="value === 'hidden' || value === 'date' || value === 'text' || value === 'password'">
+          <label ng-hide="value === 'hidden' || value === 'date' || value === 'text' || value === 'password'">{{ ::parseField(key) }}</label>
+          <input name="{{ ::key }}" ng-model="object[key]" type="text" ng-if="key !== 'email'" required />
+          <input name="email" ng-model="object[key]" type="email" ng-if="key === 'email'" required />
+          <div ng-messages="modalForm[key].$error" ng-if="modalForm.$submitted || modalForm[key].$dirty">
+            <div ng-message="required">This is required!</div>
+            <div ng-message="email" ng-if="key === 'email'">This is required!</div>
+          </div>
+        </md-input-container>
+        <md-input-container class="md-block" ng-if="checkUserField()">
+          <md-select style="width=100%" name="user" ng-model="object.user_id" placeholder="user" required>
+            <md-option ng-value="user.id" ng-repeat="user in users">{{ ::user.email }}</md-option>
+          </md-select>
+          <div ng-messages="modalForm[key].$error" ng-if="modalForm.$submitted || modalForm[key].$dirty">
+            <div ng-message="required">This is required!</div>
+          </div>
+        </md-input-container>
+        <md-input-container class="md-block" ng-if="checkPasswordField() && action !== 'Update'">
+          <label>password</label>
+          <input type="password" name="password" ng-model="object.password" required />
+          <div ng-messages="modalForm.password.$error" ng-if="modalForm.$submitted || modalForm.password.$dirty" ng-messages-multiple="ng-messages-multiple">
+            <div ng-message="required">You did not enter a password</div>
+            <div ng-message="passwordMatch">Your passwords did not match.</div>
+          </div>
+        </md-input-container>
+        <md-input-container class="md-block" ng-if="checkPasswordField() && action !== 'Update'">
+          <label>password confirm</label>
+          <input type="password" name="confirmPassword" match-password="password" ng-model="object.confirmPassword" required />
+          <div ng-messages="modalForm.confirmPassword.$error" ng-if="modalForm.$submitted || modalForm.confirmPassword.$dirty">
+            <div ng-message="passwordMatch">Your passwords did not match.</div>
+          </div>
+        </md-input-container>
+        <md-input-container class="md-block" ng-repeat="(key, value) in filterProps(object._meta_, 'boolean')">
+          <md-select name="user" ng-model="object[key]" placeholder="{{ ::parseField(key) }}" required>
+            <md-option ng-value="true">true</md-option>
+            <md-option ng-value="false">false</md-option>
+          </md-select>
+          <div ng-messages="modalForm[key].$error" ng-if="modalForm.$submitted || modalForm[key].$dirty">
+            <div ng-message="required">This is required!</div>
+          </div>
+        </md-input-container>
+        <md-input-container class="md-block" ng-repeat="(key, value) in filterProps(object._meta_, 'text')">
+          <textarea name="body" ui-tinymce="tinymceOptions" ng-model="object[key]" aria-label="text editor" required></textarea>
+        </md-input-container>
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <md-button (click)="reset()">
+        Reset
+      </md-button>
+      <span flex></span>
+      <md-button (click)="dismiss()">
+        Cancel
+      </md-button>
+      <md-button (click)="ok()" style="margin-right: 20px;" ng-disabled="modalForm.$invalid">
+        Submit
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>
