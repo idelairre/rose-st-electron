@@ -22,7 +22,7 @@ export default class EditModal {
     this.$scope.master = Object.assign({}, object);
     this.$scope.name = object.constructor.name;
     this.$scope.object = Object.assign({}, object);
-    this.$scope.users = users;
+    this.$scope.users = (typeof users === 'undefined' ? [] : users);
     this.$scope.filterProps = ::this.filterProps;
     this.$scope.checkUserField = ::this.checkUserField;
     this.$scope.checkPasswordField = ::this.checkPasswordField;
@@ -36,11 +36,12 @@ export default class EditModal {
       width: '100%',
       height: '100%'
     };
+    console.log(this);
   }
 
   parseField(field) {
-    const PARSED = inflect.underscore(field);
-    return inflect.humanize(PARSED).toLowerCase();
+    let parsedField = inflect.underscore(field.toLowerCase());
+    return inflect.humanize(parsedField);
   }
 
   filterProps(model, property) {
@@ -63,7 +64,7 @@ export default class EditModal {
 
   dismiss() {
     this.reset();
-    this.$mdDialog.cancel();
+    return this.$mdDialog.cancel();
   }
 
   ok(object) {

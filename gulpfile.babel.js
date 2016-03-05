@@ -71,6 +71,8 @@ gulp.task('serve', function () {
   electron.start();
 
   // Restart browser process
+  gulp.watch('app/scripts/**/*.html', ['scripts', electron.restart]);
+
   gulp.watch('app/scripts/**/*.js', ['scripts', electron.restart]);
 
   // Reload renderer process
@@ -139,17 +141,6 @@ gulp.task('minify:css', function() {
 
 gulp.task('set-production', function() {
   process.env.NODE_ENV = 'production';
-});
-
-gulp.task('change-path', function() { // not in the mood for regex today
-  var prodUrl = 'https://idelairre.github.io/rose_st_admin/';
-  return gulp.src(['app/index.html'])
-    .pipe(replace(/scripts/g, prodUrl + 'scripts'))
-    .pipe(replace(/styles\/styles.css/g, prodUrl + 'styles/styles.css'))
-    .pipe(replace(/assets/g, prodUrl + 'assets'))
-    .pipe(replace(/favicon.ico/g, prodUrl + 'favicon.ico'))
-    .pipe(gulp.dest('dist'))
-    .pipe($.size());
 });
 
 var logger = (function() {

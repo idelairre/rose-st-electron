@@ -1,21 +1,86 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="">
-  <meta name="author" content="">
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="">
+	<meta name="author" content="">
 
-  <title>Rose St. Admin</title>
-  <meta name="viewport">
-  <link rel="stylesheet" type="text/css" href="dist/styles/styles.css">
-  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <script type="text/javascript" src="dist/assets/tinymce.min.js"></script>
+	<title>Rose St. Admin</title>
+	<meta name="viewport">
+	<link rel="stylesheet" type="text/css" href="dist/styles/styles.css">
+	<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<script type="text/javascript" src="dist/assets/tinymce.min.js"></script>
 </head>
 
 <body>
-  <rose-st-admin></rose-st-admin>
-  <script type="text/javascript" src="dist/scripts/app.js"></script>
+	<rose-st-admin></rose-st-admin>
+	<script type="text/javascript" src="dist/scripts/app.js"></script>
+	<script>
+    console.log(angular);
+
+		const remote = require('electron').remote;
+		const Menu = remote.Menu;
+		const MenuItem = remote.MenuItem;
+    const eventListener = require('ipc');
+
+		var menu = new Menu();
+		menu.append(new MenuItem({
+			label: 'Undo',
+			click: function() {
+				console.log('item 1 clicked');
+			}
+		}));
+		menu.append(new MenuItem({
+			label: 'Redo',
+			click: function() {
+				console.log('item 1 clicked');
+			}
+		}));
+		menu.append(new MenuItem({
+			type: 'separator'
+		}));
+		menu.append(new MenuItem({
+			label: 'Cut',
+			click: function() {
+				console.log('item 1 clicked');
+			}
+		}));
+		menu.append(new MenuItem({
+			label: 'Copy',
+			click: function() {
+				console.log('item 1 clicked');
+			}
+		}));
+		menu.append(new MenuItem({
+			label: 'Paste',
+			click: function() {
+				console.log('item 1 clicked');
+			}
+		}));
+		menu.append(new MenuItem({
+			label: 'Select all',
+			click: function() {
+				console.log('item 1 clicked');
+			}
+		}));
+
+		window.addEventListener('contextmenu', function(e) {
+			e.preventDefault();
+			menu.popup(remote.getCurrentWindow());
+		}, false);
+
+    eventListener.on('logout', function() {
+      var logout = new Event('logout');
+      window.dispatchEvent(logout);
+		});
+    eventListener.on('authUrl', function(params) {
+      var auth = new Event('auth');
+      window.authParams = params;
+      window.dispatchEvent(auth);
+    });
+	</script>
 </body>
+
 </html>

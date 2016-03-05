@@ -2,9 +2,10 @@ import axios from 'axios';
 import { Inject } from 'ng-forward';
 import ModalService from '../services/modal.service';
 
-@Inject(ModalService)
+@Inject('$state', ModalService)
 class HttpInterceptor {
-	constructor(ModalService) {
+	constructor($state, ModalService) {
+    this.$state = $state;
     this.modalService = ModalService;
 
 		axios.interceptors.request.use((config) => {
@@ -18,21 +19,22 @@ class HttpInterceptor {
 		});
 
     axios.interceptors.response.use((response) => {
-      console.log(response);
-      this.modalService.hide()
-      return response;
+    	console.log(response);
+    	this.modalService.hide();
+    	return response;
     }, (error) => {
-      console.log(error);
-      return Promise.reject(error);
+    	this.modalService.hide();
+    	this.modalService.error(error.statusText);
+    	return Promise.reject(error);
     });
-	}
+  }
 
-  @Inject(ModalService)
-  static init(ModalService) {
-    HttpInterceptor.instance = new HttpInterceptor(ModalService);
+  @Inject('$state', ModalService)
+  static init($state, ModalService) {
+    HttpInterceptor.instance = new HttpInterceptor($state, ModalService);
     return HttpInterceptor.instance;
   }
 
 }
 
-export default angular.module('roseStAdmin.interceptor', []).run(HttpInterceptor.init);
+export default angular.module('roseStAdmin.interceptor', ['ui.router']).run(HttpInterceptor.init);

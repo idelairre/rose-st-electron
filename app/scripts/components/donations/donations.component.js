@@ -28,7 +28,6 @@ const CUSTOMER_FIELDS = ['id', 'email', 'subscriptions', 'created_at'];
 
 const SUBSCRIPTION_FIELDS = ['id', 'customer', 'amount', 'created_at'];
 
-
 @Component({
   selector: 'donations',
   controllerAs: 'Donations',

@@ -1,17 +1,22 @@
 import { Injectable, Inject } from 'ng-forward';
 import Auth from 'j-toker';
-import { SERVER_URL } from '../constants/constants';
+import axios from 'axios';
+import { SERVER_URL, REDIRECT_URL } from '../constants/constants';
+import qs from 'qs';
 import 'babel-polyfill';
 
 @Injectable()
 export default class AuthenticationService {
   constructor($mdDialog) {
-    Auth.configure({
-      apiUrl: SERVER_URL,
-      storage: 'localStorage',
-      cookieExpiry: 14,
-      cookiePath: '/'
-    });
+  	Auth.configure({
+  		apiUrl: SERVER_URL,
+  		storage: 'localStorage',
+  		cookieExpiry: 14,
+  		cookiePath: '/',
+  		passwordResetSuccessUrl: () => {
+  			return window.location.href.replace(/#.*/g, '');
+  		}
+  	});
   }
 
   getHeaders() {
@@ -29,7 +34,7 @@ export default class AuthenticationService {
 
   async logout() {
     try {
-      let response = await auth.signOut();
+      let response = await Auth.signOut();
       console.log('logged out: ', response);
       return response;
     } catch (error) {
@@ -43,7 +48,37 @@ export default class AuthenticationService {
   }
 
   resetPassword(credentials) {
-    return Auth.requestPasswordReset(credentials.email);
+    return Auth.requestPasswordReset({ email: credentials.email });
+  }
+
+  // NOTE: these have scary names so they will never be used instead of Auth methods
+
+  async getTokenAfterPasswordReset(params) {
+    let serializedParams = qs.stringify(params, {
+      arrayFormat: 'brackets'
+    });
+  	try {
+  		let response = await axios.get(`${SERVER_URL}/auth/password/edit?${serializedParams}`);
+  		return response;
+  	} catch (error) {
+  		console.error(error);
+  	}
+  }
+
+  setTokenAfterPasswordReset(params) {
+    params = Auth.normalizeTokenKeys(params);
+    let headers = Auth.buildAuthHeaders(params);
+    Auth.persistData('authHeaders', headers);
+    Auth.persistData('mustResetPassword', true);
+    return Promise.resolve();
+  }
+
+  updatePassword(credentials) {
+    return Auth.updatePassword(credentials);
+  }
+
+  updateAccount(user) {
+    return Auth.updateAccount(user);
   }
 
   isAdmin() {

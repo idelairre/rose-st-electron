@@ -1,10 +1,12 @@
 import { Injectable, Inject } from 'ng-forward';
-import path from 'path'
 import EditModal from './edit.modal/edit.modal.component';
+import Password from '../components/auth/password/password.component';
 import User from '../components/users/user.model';
 let inflect = require('i')();
 
-let normalizedPath = require('path').resolve(__dirname, '..', 'components');
+// NOTE: make sure locals resolve BEFORE they reach this service or
+// or the context of the modals will get screwed up since loading modals
+// are produced after each ajax request
 
 @Injectable()
 @Inject('$mdDialog')
@@ -13,7 +15,8 @@ export default class ModalService {
     this.$mdDialog = $mdDialog;
   }
 
-  addDialog(locals) {
+  async addDialog(locals) {
+    locals.users = await User.query();
     let dialog = {
       controller: EditModal,
       template: require('./edit.modal/edit.modal.html'),
@@ -22,20 +25,20 @@ export default class ModalService {
       fullscreen: true,
       locals: locals
     };
-    dialog.locals.users = User.query();
     return this.$mdDialog.show(dialog);
   }
 
-  edit(locals) {
+  async edit(locals) {
+    locals.users = await User.query();
     let dialog = {
       controller: EditModal,
       template: require('./edit.modal/edit.modal.html'),
       clickOutsideToClose: true,
+      escapeToClose: true,
       parent: angular.element(document.body),
       fullscreen: true,
-      locals: locals
+      locals: locals,
     };
-    dialog.locals.users = User.query();
     return this.$mdDialog.show(dialog);
   }
 
@@ -94,5 +97,28 @@ export default class ModalService {
 
   hide() {
     return this.$mdDialog.hide();
+  }
+
+  passwordWarn() {
+    return this.$mdDialog.show(this.$mdDialog.alert()
+      .title('Login successful')
+      .clickOutsideToClose(true)
+      .textContent('You can reset your password in the profile tab')
+      .ariaLabel('reset password warning')
+      .ok('close')
+    );
+  }
+
+  async resetPassword() {
+    let dialog = {
+      controller: Password,
+      controllerAs: 'Password',
+      template: require('../components/auth/password/password.modal.html'),
+      clickOutsideToClose: true,
+      escapeToClose: true,
+      parent: angular.element(document.body),
+      fullscreen: true
+    };
+    return this.$mdDialog.show(dialog);
   }
 }

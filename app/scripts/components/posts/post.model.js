@@ -14,7 +14,6 @@ const POST_FIELDS = {
 
 export default class Post extends Model {
   constructor() {
-    console.log(arguments);
     super();
     super.initialize(arguments, POST_FIELDS);
   }

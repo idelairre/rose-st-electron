@@ -1,0 +1,26 @@
+<md-dialog aria-label="new password token modal" ng-cloak>
+  <form>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Enter Token</h2>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <md-input-container layout="row" style="max-width: 90%; margin-left: auto; margin-right: auto">
+          <label>Token</label>
+          <input ng-model="credentials.token" type="password">
+        </md-input-container>
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <span flex></span>
+      <md-button class="md-raised md-primary" (click)="dismiss()" style="margin-right:20px;">
+        Close
+      </md-button>
+      <md-button class="md-raised" (click)="submit(credentials)" style="margin-right:20px;">
+        Reset
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

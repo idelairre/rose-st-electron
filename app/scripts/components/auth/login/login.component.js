@@ -1,5 +1,8 @@
 import { Component, Inject } from 'ng-forward';
+import AuthModal from '../auth.modal';
 import AuthenticationService from '../../../services/authentication.service';
+import RecoverPassword from '../recover-password/recover-password.component';
+import Unlock from '../unlock/unlock.component';
 import 'reflect-metadata';
 
 @Component({
@@ -10,32 +13,21 @@ import 'reflect-metadata';
 })
 
 @Inject('$mdDialog', '$scope', '$state', AuthenticationService)
-export default class Login {
+export default class Login extends AuthModal {
   constructor($mdDialog, $scope, $state, AuthenticationService) {
-    this.$mdDialog = $mdDialog;
-    this.$scope = $scope;
-    this.$scope.credentials = {};
-    this.$scope.dismiss = ::this.dismiss;
+    super($mdDialog, $scope, $state, AuthenticationService);
     this.$scope.submit = ::this.submit;
     this.$scope.resetPassword = ::this.resetPassword;
-    this.$state = $state;
-    this.authService = AuthenticationService;
-  }
-
-  dismiss() {
-    this.reset();
   }
 
   resetPassword(credentials) {
-    // this.authService.resetPassword(credentials);
-    let redirectDialog = this.$mdDialog.confirm()
-      .title('Reset password')
-      .clickOutsideToClose(false)
-      .textContent('An email has been sent to your address with instructions')
-      .ariaLabel('redirect notice')
-      .cancel('cancel')
-      .ok('ok');
-    this.$mdDialog.show(redirectDialog).then(::this.openLogin, ::this.openLogin);
+    let resetPasswordDialog = {
+      controller: RecoverPassword,
+      template: require('../recover-password/recover-password.html'),
+      parent: angular.element(document.body)
+    };
+
+    this.$mdDialog.show(resetPasswordDialog);
   }
 
   handleErrors(error) {
@@ -64,7 +56,7 @@ export default class Login {
   }
 
   handleLogin(response) {
-    this.$mdDialog.hide();
+    // this.$mdDialog.hide();
     let loginSuccess = this.$mdDialog.alert()
       .title('Login Successful')
       .textContent(`Welcome ${response.uid}`)

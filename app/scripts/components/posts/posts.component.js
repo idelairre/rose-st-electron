@@ -3,6 +3,7 @@ import { CLIENT_URL } from '../../constants/constants';
 import Post from './post.model';
 import ModalService from '../../services/modal.service';
 import Table, { TableComponent } from '../table/table.component';
+import User from '../users/user.model';
 import 'angular-ui-tinymce';
 import 'babel-polyfill';
 import 'reflect-metadata';
@@ -41,7 +42,8 @@ export default class Posts extends TableComponent {
   add(event) {
     let locals = {
       action: 'Create',
-      object: new Post()
+      object: new Post(),
+      users: User.query()
     };
     this.modalService.addDialog(locals).then(::this.handleSubmit);
   }
@@ -50,7 +52,8 @@ export default class Posts extends TableComponent {
     let post = this.getSelected();
     let locals = {
       action: 'Update',
-      object: post
+      object: post,
+      users: User.query()
     };
     this.modalService.edit(locals).then(::this.handleSubmit);
   }
@@ -63,7 +66,6 @@ export default class Posts extends TableComponent {
   }
 
   async handleSubmit(slug) {
-    debugger;
     try {
       let action = slug.action;
       let postSlug = slug.objectSlug;
@@ -71,7 +73,6 @@ export default class Posts extends TableComponent {
         let post = this.posts.filter(post => { return postSlug.id === post.id })[0];
         await post.save(postSlug);
       } else if (action === 'Create') {
-        console.log(slug, post);
         let post = new Post(postSlug);
         this.posts.push(post);
       }

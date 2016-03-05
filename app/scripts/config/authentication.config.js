@@ -1,33 +1,58 @@
 import { Inject } from 'ng-forward';
+import EventEmitter from 'events';
 import AuthenticationService from '../services/authentication.service';
 import LoginComponent from '../components/auth/login/login.component';
 import 'reflect-metadata';
 
-@Inject('$mdDialog', '$state', AuthenticationService)
+@Inject('$mdDialog', '$state', '$window', AuthenticationService)
 class AuthenticationConfig {
-  constructor($mdDialog, $state, AuthenticationService) {
+  constructor($mdDialog, $state, $window, AuthenticationService) {
     this.$mdDialog = $mdDialog;
+    this.$window = $window;
     this.$state = $state;
-    return AuthenticationService.isAuthenticated().then().fail(::this.redirectToLogin);
+    this.authService = AuthenticationService;
+
+    this.$window.addEventListener('logout', ::this.logout);
+    this.$window.addEventListener('auth', ::this.validateTempToken);
+
+    return this.validateUser();
+  }
+
+  logout() {
+    this.redirectToLogin();
+    this.authService.logout();
+  }
+
+  async validateTempToken() {
+    try {
+      await this.authService.setTokenAfterPasswordReset(this.$window.authParams);
+      await setTimeout(this.authService.isAuthenticated, 300);
+      this.$state.go('home');
+      this.modalService.passwordWarn();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async validateUser() {
+    try {
+      return this.authService.isAuthenticated();
+    } catch (error) {
+      console.error(error);
+      this.redirectToLogin();
+    }
   }
 
   redirectToLogin() {
-    console.log(this.$state.current.name);
     if (this.$state.current.name === 'login') {
       return;
     }
     this.$state.go('login');
-    // this.$mdDialog.show({
-    //   controller: LoginComponent,
-    //   template: require('../components/auth/login/login.modal.html'),
-    //   parent: angular.element(document.body),
-    //   clickOutsideToClose: false
-    // });
   }
 
-  @Inject('$mdDialog', '$state', AuthenticationService)
-  static init($mdDialog, $state, AuthenticationService) {
-    AuthenticationConfig.instance = new AuthenticationConfig($mdDialog, $state, AuthenticationService);
+  @Inject('$mdDialog', '$state', '$window', AuthenticationService)
+  static init($mdDialog, $state, $window, AuthenticationService) {
+    AuthenticationConfig.instance = new AuthenticationConfig($mdDialog, $state, $window, AuthenticationService);
     return AuthenticationConfig.instance;
   }
 }

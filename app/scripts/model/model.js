@@ -29,16 +29,14 @@ export default class Model {
   }
 
   initialize(args, fields) {
-    console.log('initializing...');
     args = args[0] || {};
     for (let key in fields) {
       this[key] = (args[key] !== undefined) ? args[key] : undefined;
     }
-    if (this.initialized(fields)) { // this seems bogus, the purpose of this is to make sure that dummy instances are not posted
+    if (this.initialized(fields) && this.id === undefined) { // NOTE: this causes trouble, this seems bogus, the purpose of this is to make sure that dummy instances are not posted
       this.save();
     }
     this._meta_ = fields;
-    console.log(this, this.initialized(fields));
   }
 
   initialized(fields) {
@@ -55,22 +53,34 @@ export default class Model {
     return true;
   }
 
+  static async get(param) {
+  	try {
+  		let response = await axios.get(`${SERVER_URL}/${this.getInstance()._route}/`, {
+        headers: Auth.retrieveData('authHeaders'),
+        params: param
+      });
+      console.log(response.data[0]);
+      let item = this.getInstance().assignProps(response.data[0]);
+      return Promise.resolve(item);
+  	} catch (error) {
+  		console.error(error);
+      return Promise.reject(error);
+  	}
+  }
+
   async save(data) {
-    console.log(data);
-    debugger;
     try {
       const OBJ = this.constructor.name.toLowerCase();
       if (!data) {
         let params = {};
         params[OBJ] = this;
         let response = await axios.post(`${SERVER_URL}/${this._route}/`, Object.assign(params, Auth.retrieveData('authHeaders')));
-        console.log(response);
         this.assignProps(response.data);
         return Promise.resolve(this);
       } else if (data.id) {
         let params = {};
         params[OBJ] = data;
-        let response = await axios.put(`${SERVER_URL}/${this._route}/${this.id}`, Object.assign(params, Auth.retrieveData('authHeaders')));
+        let response = await axios.patch(`${SERVER_URL}/${this._route}/${this.id}`, Object.assign(params, Auth.retrieveData('authHeaders')));
         this.assignProps(response.data);
         return Promise.resolve(this);
       }

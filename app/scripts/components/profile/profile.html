@@ -1,0 +1,76 @@
+<md-content layout="column" flex class="layout-column">
+  <md-card>
+    <md-card-title flex="none">
+      <md-card-title-text>
+        <span class="md-headline">Profile</span>
+      </md-card-title-text>
+      <md-card-icon-actions>
+        <span flex></span>
+        <md-button class="md-icon-button" (click)="Profile.editProfileAction()" aria-label="edit profile"><md-icon class="material-icons">border_color</md-icon></md-button>
+      </md-card-icon-actions>
+    </md-card-title>
+    <md-card-content>
+      <md-list>
+      <!-- <md-subheader class="md-no-sticky"></md-subheader> -->
+      <md-list-item class="md-2-line">
+        <md-icon>email</md-icon>
+        <div class="md-list-item-text" class="md-offset">
+          <p>Email</p>
+          <h3>{{ Profile.profile.email }}</h3>
+        </div>
+      </md-list-item>
+      <md-list-item class="md-2-line" ng-show="Profile.profile.name">
+        <md-icon>email</md-icon>
+        <div class="md-list-item-text" class="md-offset">
+          <p>Name</p>
+          <h3>{{ Profile.profile.name }}</h3>
+        </div>
+      </md-list-item>
+      <md-list-item class="md-2-line" ng-show="Profile.profile.nickname">
+        <md-icon>account_circle</md-icon>
+        <div class="md-list-item-text" class="md-offset">
+          <p>Nickname</p>
+          <h3>{{ Profile.profile.nickname }}</h3>
+        </div>
+      </md-list-item>
+      <md-list-item class="md-2-line" ng-show="Profile.profile.admin">
+        <md-icon>supervisor_account</md-icon>
+        <div class="md-list-item-text" class="md-offset">
+          <p>Role</p>
+          <h3>{{ Profile.profile.admin ? 'Admin' : 'User' }}</h3>
+        </div>
+      </md-list-item>
+    </md-list>
+    </md-card-content>
+  </md-card>
+  <md-card>
+    <md-card-title flex="none">
+      <md-card-title-text>
+        <span class="md-headline">Options</span>
+      </md-card-title-text>
+    </md-card-title>
+    <md-card-content>
+      <md-list>
+      <md-list-item class="secondary-button-padding" ng-click="Profile.resetPasswordAction()">
+        <p>Change password</p>
+        <md-icon class="md-secondary" aria-label="reset password" ng-click="Profile.resetPasswordAction()">vpn_key</md-icon>
+      </md-list-item>
+    </md-list>
+    </md-card-content>
+  </md-card>
+  <md-card>
+    <md-card-title flex="none">
+      <md-card-title-text>
+        <span class="md-headline">Content</span>
+      </md-card-title-text>
+    </md-card-title>
+    <md-card-content>
+      <md-list>
+      <md-list-item class="secondary-button-padding" ng-repeat="post in Profile.profile.posts" ng-click="Profile.editPostAction(post)">
+        <p>{{ post.title }}</p>
+        <md-icon class="md-secondary" aria-label="edit post" ng-click="Profile.editPostAction(post)">edit</md-icon>
+      </md-list-item>
+    </md-list>
+    </md-card-content>
+  </md-card>
+</md-content>

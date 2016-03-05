@@ -1,6 +1,6 @@
 {
-  "name": "electron-test",
-  "productName": "ElectronTest",
+  "name": "rose-st-admin",
+  "productName": "Rose St. Admin",
   "version": "0.0.0",
   "description": "My beautiful app",
   "license": "MIT",
@@ -13,7 +13,7 @@
   "electronVersion": "0.36.0",
   "scripts": {
     "test": "xo",
-    "start": "gulp build:production && electron .",
+    "start": "gulp serve",
     "build": "electron-packager . $npm_package_productName --out=dist --ignore='^/dist$' --prune --asar --all --version=$npm_package_electronVersion"
   },
   "files": [
@@ -49,7 +49,9 @@
     "i": "^0.3.4",
     "j-toker": "0.0.10-beta3",
     "ng-forward": "0.0.1-alpha.12",
+    "node-ipc": "^6.0.0",
     "open": "0.0.5",
+    "qs": "^6.1.0",
     "slug": "^0.9.1",
     "tc-angular-chartjs": "git+https://github.com/carlcraig/tc-angular-chartjs.git",
     "tinymce": "^4.3.5"

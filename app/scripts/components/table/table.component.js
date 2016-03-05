@@ -122,8 +122,5 @@ export class TableComponent {
     return this.modalService.hide().then(() => {
       this.modalService.error(error);
     });
-    // .then(() => {
-    //   this.$window.location.reload(true);
-    // });
   }
 }

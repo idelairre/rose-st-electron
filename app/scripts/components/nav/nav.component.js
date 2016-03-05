@@ -20,7 +20,7 @@ export default class Nav {
     this.$window = $window;
     this.Auth = AuthenticationService;
     this.tabIndex = 0;
-    this.routes = ['home', 'donations', 'messages', 'posts', 'users']
+    this.routes = ['home', 'donations', 'messages', 'posts', 'profile', 'users'];
     this.$scope.$watch(::this.evalTabIndex, ::this.setState);
     this.$scope.$watch(::this.evalState, ::this.setTabIndex);
   }
@@ -51,7 +51,7 @@ export default class Nav {
 
   async logout() {
     await this.Auth.logout();
-    this.$mdSidenav('sidebar').close();
+    // this.$mdSidenav('sidebar').close();
     this.$state.go('login');
   }
 

@@ -1,8 +1,30 @@
 'use strict';
+
 const electron = require('electron');
 const path = require('path');
 const app = electron.app;
 const Menu = require('menu');
+const qs = require('qs');
+
+var parseLocation = function(location) {
+	var i, locationSubstring, obj, pair, pairs;
+	locationSubstring = location.substring(1);
+	obj = {};
+	if (locationSubstring) {
+		pairs = locationSubstring.split('&');
+		pair = void 0;
+		i = void 0;
+		for (i in pairs) {
+			i = i;
+			if ((pairs[i] === '') || (typeof pairs[i] === 'function')) {
+				continue;
+			}
+			pair = pairs[i].split('=');
+			obj[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+		}
+	}
+	return obj;
+}
 
 let options = {
 	"debug": true,
@@ -33,6 +55,25 @@ function createMainWindow() {
 	win.loadURL(path.join('file://', __dirname, options.root_view));
 	win.on('closed', onClosed);
 
+	win.webContents.on('did-get-redirect-request', function (event, oldUrl, newUrl, isMainFrame) {
+	  event.preventDefault();
+		let params = qs.parse(newUrl);
+		for (let key in params) {
+			if (key.includes('client_id')) {
+				let clientId = params[key];
+				delete params[key];
+				params['client_id'] = clientId;
+			}
+			if (key.includes('uid')) {
+				let val = params[key];
+				val = val.replace(/#.*/g, ''); // stripout angular shit
+				params[key] = val;
+			}
+		}
+		console.log(params);
+		win.webContents.send('authUrl', params);
+	});
+
 	return win;
 }
 
@@ -56,6 +97,11 @@ app.on('ready', () => {
 	let menuTmpl = [{
 		label: 'File',
 		submenu: [{
+			label: 'Logout',
+			click: function() {
+				mainWindow.webContents.send('logout');
+			}
+		}, {
 			label: 'Quit',
 			accelerator: 'Command+Q',
 			click: function() {
