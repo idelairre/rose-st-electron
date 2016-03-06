@@ -17,13 +17,13 @@
   <md-tab id="messages" aria-controls="messages">
     <md-tab-label>Messages</md-tab-label>
   </md-tab>
-  <md-tab id="posts" aria-controls="posts">
+  <md-tab id="posts" aria-controls="posts" ng-show="Nav.isAdmin">
     <md-tab-label>Posts</md-tab-label>
   </md-tab>
   <md-tab id="profile" aria-controls="profile">
     <md-tab-label>Profile</md-tab-label>
   </md-tab>
-  <md-tab id="users" aria-controls="users">
+  <md-tab id="users" aria-controls="users" ng-show="Nav.isAdmin">
     <md-tab-label>Users</md-tab-label>
   </md-tab>
 </md-tabs>

@@ -61,3 +61,7 @@ md-card {
   flex: 0 0 auto;
   position: relative;
 }
+
+body.mceContentBody {
+   background: #FFF;
+}

@@ -20,30 +20,38 @@ export default class Profile {
   @Resolve()
   @Inject(AuthenticationService)
   static profile(AuthenticationService) {
-    let headers = AuthenticationService.getHeaders();
-    return User.get({ uid: headers.uid });
+    let user = AuthenticationService.getUser();
+    return User.get(user.id);
   }
 
   constructor(profile, AuthenticationService, ModalService) {
     this.authService = AuthenticationService;
     this.modalService = ModalService;
-    this.profile = profile;
+    this.user = profile;
+    this.addPost = new EventEmitter();
+    this.editField = new EventEmitter();
     this.editProfile = new EventEmitter();
     this.editPost = new EventEmitter();
     this.resetPassword = new EventEmitter();
-
     this.editProfile.subscribe(::this.openProfileModal);
+    this.editField.subscribe(::this.openFieldModal);
     this.editPost.subscribe(::this.openPostModal);
     this.resetPassword.subscribe(::this.openResetPasswordModal);
+    this.defaultFields = Object.assign({}, profile._meta_);
   }
 
   // this is contrived, but it gets around some fucking awful bugs in angular material at the moment
-
-  editPostAction(post) {
-    this.editPost.next(post);
+  editFieldAction(field) {
+    this.resetFields();
+    this.editField.next(field);
   }
 
-  editProfileAction(event) {
+  editPostAction(slug) {
+    this.editPost.next(slug);
+  }
+
+  editProfileAction() {
+    this.resetFields();
     this.editProfile.next();
   }
 
@@ -51,20 +59,41 @@ export default class Profile {
     this.resetPassword.next();
   }
 
-  openProfileModal() {
-    let locals = {
-      action: 'Update',
-      object: this.profile
-    };
-    this.modalService.edit(locals).then(::this.handleSubmit);
+  resetFields() {
+    this.user._meta_ = Object.assign({}, this.defaultFields);
   }
 
-  openPostModal(post) {
+  openFieldModal(field) {
+    for (let key in this.user._meta_) {
+      if (key !== field) {
+        this.user._meta_[key] = 'hidden';
+      }
+    }
     let locals = {
       action: 'Update',
-      object: new Post(post)
+      object: this.user
     };
-    this.modalService.edit(locals).then(::this.handleSubmit);
+    return this.modalService.edit(locals).then(::this.handleSubmitUser);
+  }
+
+  openProfileModal() {
+    this.resetFields();
+    this.user._meta_.admin = 'hidden';
+    let locals = {
+      action: 'Update',
+      object: this.user
+    };
+    this.modalService.edit(locals).then(::this.handleSubmitUser);
+  }
+
+  openPostModal(slug) {
+    slug.post = (typeof slug.post !== 'undefined' ? new Post(slug.post) : new Post() )
+    slug.post._meta_.user = 'hidden';
+    let locals = {
+      action: slug.action,
+      object: slug.post
+    };
+    this.modalService.edit(locals).then(::this.handleSubmitPost);
   }
 
   openResetPasswordModal() {
@@ -78,11 +107,22 @@ export default class Profile {
     });
   }
 
-  handleSubmit(slug) {
+  handleSubmitPost(slug) {
     console.log(slug);
-    let userSlug = slug.objectSlug;
+    let post = slug.objectSlug;
     try {
-      // new User(userSlug);
+      post.user_id = this.user.id;
+      post.save();
+    } catch (error) {
+      this.handleErrors(error);
+    }
+  }
+
+  handleSubmitUser(slug) {
+    let user = slug.objectSlug;
+    try {
+      user.save();
+      this.user = user;
     } catch (error) {
       this.handleErrors(error);
     }

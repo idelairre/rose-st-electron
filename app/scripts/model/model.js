@@ -9,7 +9,6 @@ let inflect = require('i')();
 export default class Model {
   constructor() {
     this._route = `${inflect.pluralize(this.constructor.name.toLowerCase())}`;
-
   }
 
   assignProps(params) {
@@ -34,7 +33,7 @@ export default class Model {
       this[key] = (args[key] !== undefined) ? args[key] : undefined;
     }
     if (this.initialized(fields) && this.id === undefined) { // NOTE: this causes trouble, this seems bogus, the purpose of this is to make sure that dummy instances are not posted
-      this.save();
+      this.save(this);
     }
     this._meta_ = fields;
   }
@@ -55,12 +54,11 @@ export default class Model {
 
   static async get(param) {
   	try {
-  		let response = await axios.get(`${SERVER_URL}/${this.getInstance()._route}/`, {
-        headers: Auth.retrieveData('authHeaders'),
-        params: param
+  		let response = await axios.get(`${SERVER_URL}/${this.getInstance()._route}/${param}`, {
+        headers: Auth.retrieveData('authHeaders')
       });
-      console.log(response.data[0]);
-      let item = this.getInstance().assignProps(response.data[0]);
+      console.log(response.data);
+      let item = this.getInstance().assignProps(response.data);
       return Promise.resolve(item);
   	} catch (error) {
   		console.error(error);
@@ -71,18 +69,17 @@ export default class Model {
   async save(data) {
     try {
       const OBJ = this.constructor.name.toLowerCase();
-      if (!data) {
-        let params = {};
+      let params = {};
+      if (typeof data === 'undefined') {
         params[OBJ] = this;
-        let response = await axios.post(`${SERVER_URL}/${this._route}/`, Object.assign(params, Auth.retrieveData('authHeaders')));
-        this.assignProps(response.data);
-        return Promise.resolve(this);
-      } else if (data.id) {
-        let params = {};
-        params[OBJ] = data;
         let response = await axios.patch(`${SERVER_URL}/${this._route}/${this.id}`, Object.assign(params, Auth.retrieveData('authHeaders')));
         this.assignProps(response.data);
         return Promise.resolve(this);
+      } else {
+        params[OBJ] = data;
+        let response = await axios.post(`${SERVER_URL}/${this._route}/`, Object.assign(params, Auth.retrieveData('authHeaders')));
+        this.assignProps(response.data);
+        return Promise.resolve(response.data);
       }
     } catch (error) {
       Promise.reject(error);

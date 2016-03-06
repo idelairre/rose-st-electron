@@ -16,6 +16,7 @@ export default class RecoverPassword extends AuthModal {
   constructor($mdDialog, $scope, $state, AuthenticationService) {
     super($mdDialog, $scope, $state, AuthenticationService);
     this.$scope.submit = ::this.submit;
+    this.$scope.dismiss = ::this.dismiss;
   }
 
   dismiss() {

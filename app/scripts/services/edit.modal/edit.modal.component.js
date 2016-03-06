@@ -15,28 +15,24 @@ export default class EditModal {
   constructor($mdDialog, $scope, action, object, users) {
     this.$mdDialog = $mdDialog;
     this.$scope = $scope;
-    this.$scope.dismiss = ::this.dismiss;
-    this.$scope.ok = ::this.ok;
-    this.$scope.reset = ::this.reset;
-    this.$scope.action = action;
-    this.$scope.master = Object.assign({}, object);
-    this.$scope.name = object.constructor.name;
-    this.$scope.object = Object.assign({}, object);
-    this.$scope.users = (typeof users === 'undefined' ? [] : users);
-    this.$scope.filterProps = ::this.filterProps;
-    this.$scope.checkUserField = ::this.checkUserField;
-    this.$scope.checkPasswordField = ::this.checkPasswordField;
-    this.$scope.parseField = ::this.parseField;
-    this.$scope.inflect = inflect;
+    this.action = action;
+    this.fields = object._meta_;
+    this.name = object.constructor.name;
+    this.object = object;
+    this.master = angular.copy(object);
+    this.users = (typeof users === 'undefined') ? [] : users;
     this.$scope.tinymceOptions = {
+      skin_url: 'app/assets/skins/light/',
+      content_css: 'app/assets/skins/light/content.min.css',
+      content_style: 'div { font-size: 12px }',
       inline: false,
       menubar: '',
-      toolbar: 'styleselect | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist | link image',
+      toolbar: 'styleselect | fontsizeselect | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist | link image',
+      fontsize_formats: '8pt 10pt 12pt 14pt 18pt 24pt 36pt',
       plugins: 'link image',
       width: '100%',
       height: '100%'
     };
-    console.log(this);
   }
 
   parseField(field) {
@@ -55,10 +51,10 @@ export default class EditModal {
   }
 
   reset() {
-    if (this.$scope.action === 'Create') {
-      this.$scope.object = {};
+    if (this.action === 'Create') {
+      this.object = {};
     } else {
-      this.$scope.object = Object.assign({}, this.$scope.master);
+      angular.copy(this.master, this.object);
     }
   }
 
@@ -68,23 +64,16 @@ export default class EditModal {
   }
 
   ok(object) {
-    console.log(this.$scope.object);
-    return this.$mdDialog.hide({ action: this.$scope.action, objectSlug: this.$scope.object });
+    console.log(this.object);
+    return this.$mdDialog.hide({ action: this.action, objectSlug: this.object });
   }
 
-  checkUserField() {
-    for (let key in this.$scope.object) {
-      if (key === 'user') {
+  checkField(field) {
+    for (let key in this.object) {
+      if (key === field && this.object._meta_[key] !== 'hidden') {
         return true;
       }
     }
-  }
-
-  checkPasswordField() {
-    for (let key in this.$scope.object) {
-      if (key === 'password') {
-        return true;
-      }
-    }
+    return false;
   }
 }

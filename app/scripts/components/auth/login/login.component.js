@@ -55,6 +55,10 @@ export default class Login extends AuthModal {
     });
   }
 
+  register() {
+    this.$state.go('registration');
+  }
+
   handleLogin(response) {
     // this.$mdDialog.hide();
     let loginSuccess = this.$mdDialog.alert()

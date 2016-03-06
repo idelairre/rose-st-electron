@@ -1,52 +1,52 @@
-<md-dialog aria-label="{{ name }} edit modal" style="min-height: 100%; min-width: 100%">
+<md-dialog aria-label="{{ Edit.name }} edit modal" ng-class="{ 'min-width: 702px' : Edit.parseField('text') }">
   <form name="modalForm">
     <md-toolbar>
       <div class="md-toolbar-tools">
-        <h2>{{ ::action }} {{ ::name }}</h2>
+        <h2>{{ ::Edit.action }} {{ ::Edit.name }}</h2>
         <span flex></span>
-        <md-button class="md-icon-button" (click)="dismiss()">
+        <md-button class="md-icon-button" (click)="Edit.dismiss()">
           <md-icon aria-label="Close dialog">close</md-icon>
         </md-button>
       </div>
     </md-toolbar>
-    <md-dialog-content class="dialog-content">
-      <div layout-padding class="title-heading">
-        <md-input-container class="md-block" ng-repeat="(key, value) in filterProps(object._meta_, 'string')" ng-hide="value === 'hidden' || value === 'date' || value === 'text' || value === 'password'">
-          <label ng-hide="value === 'hidden' || value === 'date' || value === 'text' || value === 'password'">{{ ::parseField(key) }}</label>
-          <input name="{{ ::key }}" ng-model="object[key]" type="text" ng-if="key !== 'email'" required />
-          <input name="email" ng-model="object[key]" type="email" ng-if="key === 'email'" required />
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <md-input-container class="md-block" ng-repeat="(key, value) in Edit.filterProps(Edit.object._meta_, 'string')" ng-hide="value === 'hidden' || value === 'date' || value === 'text' || value === 'password'">
+          <label ng-hide="value === 'hidden' || value === 'date' || value === 'text' || value === 'password'">{{ ::Edit.parseField(key) }}</label>
+          <input name="{{ ::key }}" ng-model="Edit.object[key]" type="text" ng-if="key !== 'email'" required />
+          <input name="email" ng-model="Edit.object[key]" type="email" ng-if="key === 'email'" required />
           <div ng-messages="modalForm[key].$error" ng-if="modalForm.$submitted || modalForm[key].$dirty">
             <div ng-message="required">This is required!</div>
             <div ng-message="email" ng-if="key === 'email'">This is required!</div>
           </div>
         </md-input-container>
-        <md-input-container class="md-block" ng-if="checkUserField()">
+        <md-input-container class="md-block" ng-if="Edit.checkField('user')">
           <label>User</label>
-          <md-select style="width=100%" name="user" ng-model="object.user_id" placeholder="User" required>
-            <md-option ng-value="user.id" ng-repeat="user in users">{{ ::user.email }}</md-option>
+          <md-select style="width=100%" name="user" ng-model="Edit.object.user_id" placeholder="User" required>
+            <md-option ng-value="user.id" ng-repeat="user in Edit.users">{{ ::user.email }}</md-option>
           </md-select>
           <div ng-messages="modalForm[key].$error" ng-if="modalForm.$submitted || modalForm[key].$dirty">
             <div ng-message="required">This is required!</div>
           </div>
         </md-input-container>
-        <md-input-container class="md-block" ng-if="checkPasswordField() && action !== 'Update'">
+        <md-input-container class="md-block" ng-if="Edit.checkField('password') && Edit.action !== 'Update'">
           <label>Password</label>
-          <input type="password" name="password" ng-model="object.password" required />
+          <input type="password" name="password" ng-model="Edit.object.password" required />
           <div ng-messages="modalForm.password.$error" ng-if="modalForm.$submitted || modalForm.password.$dirty" ng-messages-multiple="ng-messages-multiple">
             <div ng-message="required">You did not enter a password</div>
             <div ng-message="passwordMatch">Your passwords did not match.</div>
           </div>
         </md-input-container>
-        <md-input-container class="md-block" ng-if="checkPasswordField() && action !== 'Update'">
+        <md-input-container class="md-block" ng-if="Edit.checkField('password') && Edit.action !== 'Update'">
           <label>Password confirmation</label>
-          <input type="password" name="confirmPassword" match-password="password" ng-model="object.confirmPassword" required />
+          <input type="password" name="confirmPassword" match-password="password" ng-model="Edit.object.confirmPassword" required />
           <div ng-messages="modalForm.confirmPassword.$error" ng-if="modalForm.$submitted || modalForm.confirmPassword.$dirty">
             <div ng-message="passwordMatch">Your passwords did not match.</div>
           </div>
         </md-input-container>
-        <md-input-container class="md-block" ng-repeat="(key, value) in filterProps(object._meta_, 'boolean')">
-          <label>{{ ::parseField(key) }}</label>
-          <md-select name="{{ key }}" ng-model="object[key]" placeholder="{{ ::parseField(key) }}" required>
+        <md-input-container class="md-block" ng-repeat="(key, value) in Edit.filterProps(Edit.object._meta_, 'boolean')">
+          <label>{{ ::Edit.parseField(key) }}</label>
+          <md-select name="{{ key }}" ng-model="Edit.object[key]" placeholder="{{ ::Edit.parseField(key) }}" required>
             <md-option ng-value="true">true</md-option>
             <md-option ng-value="false">false</md-option>
           </md-select>
@@ -54,20 +54,17 @@
             <div ng-message="required">This is required!</div>
           </div>
         </md-input-container>
-        <md-input-container class="md-block" ng-repeat="(key, value) in filterProps(object._meta_, 'text')">
-          <textarea name="body" ui-tinymce="tinymceOptions" ng-model="object[key]" aria-label="text editor" required></textarea>
+        <md-input-container class="md-block" ng-repeat="(key, value) in Edit.filterProps(Edit.object._meta_, 'text')">
+          <textarea name="body" ui-tinymce="tinymceOptions" ng-model="Edit.object[key]" aria-label="text editor" required></textarea>
         </md-input-container>
       </div>
     </md-dialog-content>
     <md-dialog-actions layout="row">
-      <md-button (click)="reset()">
-        Reset
-      </md-button>
       <span flex></span>
-      <md-button (click)="dismiss()">
+      <md-button (click)="Edit.dismiss()">
         Cancel
       </md-button>
-      <md-button (click)="ok()" style="margin-right: 20px;" ng-disabled="modalForm.$invalid">
+      <md-button (click)="Edit.ok()" style="margin-right: 20px;" ng-disabled="modalForm.$invalid">
         Submit
       </md-button>
     </md-dialog-actions>

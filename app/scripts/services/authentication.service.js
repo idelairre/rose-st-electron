@@ -88,4 +88,8 @@ export default class AuthenticationService {
   isAuthenticated() {
     return Auth.validateToken();
   }
+
+  getUser() {
+    return Auth.user;
+  }
 }

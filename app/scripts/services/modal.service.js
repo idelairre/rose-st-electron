@@ -19,10 +19,10 @@ export default class ModalService {
     locals.users = await User.query();
     let dialog = {
       controller: EditModal,
+      controllerAs: 'Edit',
       template: require('./edit.modal/edit.modal.html'),
       clickOutsideToClose: true,
       parent: angular.element(document.body),
-      fullscreen: true,
       locals: locals
     };
     return this.$mdDialog.show(dialog);
@@ -32,12 +32,12 @@ export default class ModalService {
     locals.users = await User.query();
     let dialog = {
       controller: EditModal,
+      controllerAs: 'Edit',
       template: require('./edit.modal/edit.modal.html'),
       clickOutsideToClose: true,
       escapeToClose: true,
       parent: angular.element(document.body),
-      fullscreen: true,
-      locals: locals,
+      locals: locals
     };
     return this.$mdDialog.show(dialog);
   }
@@ -85,6 +85,7 @@ export default class ModalService {
     );
   }
 
+  // TODO: make this more generalized
   success(model, response) {
     return this.$mdDialog.show(
       this.$mdDialog.alert()
@@ -109,7 +110,7 @@ export default class ModalService {
     );
   }
 
-  async resetPassword() {
+  resetPassword() {
     let dialog = {
       controller: Password,
       controllerAs: 'Password',
@@ -117,7 +118,6 @@ export default class ModalService {
       clickOutsideToClose: true,
       escapeToClose: true,
       parent: angular.element(document.body),
-      fullscreen: true
     };
     return this.$mdDialog.show(dialog);
   }

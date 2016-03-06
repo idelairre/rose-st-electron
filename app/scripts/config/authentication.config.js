@@ -12,9 +12,9 @@ class AuthenticationConfig {
     this.$state = $state;
     this.authService = AuthenticationService;
 
-    this.$window.addEventListener('logout', ::this.logout);
     this.$window.addEventListener('auth', ::this.validateTempToken);
-
+    this.$window.addEventListener('logout', ::this.logout);
+    this.$window.addEventListener('loaded', ::this.validateUser);
     return this.validateUser();
   }
 
@@ -35,12 +35,9 @@ class AuthenticationConfig {
   }
 
   async validateUser() {
-    try {
-      return this.authService.isAuthenticated();
-    } catch (error) {
-      console.error(error);
-      this.redirectToLogin();
-    }
+    return this.authService.isAuthenticated().then(() => {
+      console.log(this.authService.getUser());
+    }).fail(::this.redirectToLogin);
   }
 
   redirectToLogin() {

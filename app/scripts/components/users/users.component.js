@@ -12,8 +12,7 @@ import 'reflect-metadata';
   selector: 'users',
   controllerAs: 'Users',
   template: require('./users.html'),
-  providers: ['ngMessages', 'ngPassword', Table, ModalService],
-  directives: []
+  providers: ['ngMessages', 'ngPassword', Table, ModalService]
 })
 
 @Inject('$mdDialog', 'users', AuthenticationService, ModalService)

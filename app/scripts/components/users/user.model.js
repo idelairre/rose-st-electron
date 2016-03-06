@@ -5,6 +5,7 @@ const USER_FIELDS = {
   email: 'string',
   confirmed: 'hidden',
   nickname: 'string',
+  name: 'string',
   password: 'password',
   admin: 'boolean',
   posts: 'array',

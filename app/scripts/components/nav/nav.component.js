@@ -18,7 +18,7 @@ export default class Nav {
     this.$scope = $scope;
     this.$state = $state;
     this.$window = $window;
-    this.Auth = AuthenticationService;
+    this.authService = AuthenticationService;
     this.tabIndex = 0;
     this.routes = ['home', 'donations', 'messages', 'posts', 'profile', 'users'];
     this.$scope.$watch(::this.evalTabIndex, ::this.setState);
@@ -33,8 +33,12 @@ export default class Nav {
     this.$mdSidenav(navId).close();
   }
 
+  evalAdmin() {
+    return this.authService.getUser.admin;
+  }
+
   evalLoginState() {
-    return this.$state.current.name === 'login';
+    return this.$state.current.name === 'login' || this.$state.current.name === 'registration';
   }
 
   evalState() {
@@ -50,7 +54,7 @@ export default class Nav {
   }
 
   async logout() {
-    await this.Auth.logout();
+    await this.authService.logout();
     // this.$mdSidenav('sidebar').close();
     this.$state.go('login');
   }

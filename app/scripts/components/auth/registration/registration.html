@@ -1,0 +1,36 @@
+<div layout="column" flex>
+  <md-content layout="row" layout-align="center center" layout-fill>
+    <md-whiteframe class="md-whiteframe-z1" flex="35" layout-padding>
+      <md-content layout-align="center center">
+        <form name="registrationForm">
+          <md-input-container class="md-block">
+            <label>Email</label>
+            <input type="email" name="email" ng-model="Registration.credentials.email" required />
+            <div ng-messages=registrationForm.email.$error" ng-if=registrationForm.$submitted || registrationForm.email.$dirty" ng-messages-multiple="ng-messages-multiple">
+              <div ng-message="required">You did not enter a valid email!</div>
+            </div>
+          </md-input-container>
+          <md-input-container class="md-block">
+            <label>Password</label>
+            <input type="password" name="password" ng-model="Registration.credentials.password" required />
+            <div ng-messages=registrationForm.password.$error" ng-if=registrationForm.$submitted || registrationForm.password.$dirty" ng-messages-multiple="ng-messages-multiple">
+              <div ng-message="required">You did not enter a password</div>
+              <div ng-message="passwordMatch">Your passwords did not match.</div>
+            </div>
+          </md-input-container>
+          <md-input-container class="md-block">
+            <label>Password confirmation</label>
+            <input type="password" name="confirmPassword" match-password="password" ng-model="Registration.credentials.password_confirmation" required />
+            <div ng-messages=registrationForm.confirmPassword.$error" ng-if=registrationForm.$submitted || registrationForm.confirmPassword.$dirty">
+              <div ng-message="passwordMatch">Your passwords did not match.</div>
+            </div>
+          </md-input-container>
+          <md-input-container layout="row" layout-align="space-between center">
+            <md-button ui-sref="login">Back</md-button>
+            <md-button (click)="Registration.register(Registration.credentials)" ng-disabled="registrationForm.$invalid">Submit</md-button>
+          </md-input-container>
+        </form>
+      </md-content>
+    </md-whiteframe>
+  </md-content>
+</div>

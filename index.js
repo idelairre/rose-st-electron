@@ -74,6 +74,10 @@ function createMainWindow() {
 		win.webContents.send('authUrl', params);
 	});
 
+	win.webContents.on('did-finish-load', function () {
+		win.webContents.send('loaded');
+	});
+
 	return win;
 }
 
@@ -113,29 +117,47 @@ app.on('ready', () => {
 		submenu: [{
 			label: 'Undo',
 			accelerator: 'Command+Z',
-			selector: 'undo:'
+			selector: 'undo:',
+			click: function() {
+				win.webContents.undo();
+			}
 		}, {
 			label: 'Redo',
 			accelerator: 'Shift+Command+Z',
-			selector: 'redo:'
+			selector: 'redo:',
+			click: function() {
+				win.webContents.redo();
+			}
 		}, {
 			type: 'separator'
 		}, {
 			label: 'Cut',
 			accelerator: 'Command+X',
-			selector: 'cut:'
+			selector: 'cut:',
+			click: function() {
+				win.webContents.cut();
+			}
 		}, {
 			label: 'Copy',
 			accelerator: 'Command+C',
-			selector: 'copy:'
+			selector: 'copy:',
+			click: function() {
+				win.webContents.copy();
+			}
 		}, {
 			label: 'Paste',
 			accelerator: 'Command+V',
-			selector: 'paste:'
+			selector: 'paste:',
+			click: function() {
+				win.webContents.paste();
+			}
 		}, {
 			label: 'Select All',
 			accelerator: 'Command+A',
-			selector: 'selectAll:'
+			selector: 'selectAll:',
+			click: function() {
+				win.webContents.selectAll();
+			}
 		}]
 	}, {
 		label: 'View',

@@ -42,8 +42,7 @@ export default class Posts extends TableComponent {
   add(event) {
     let locals = {
       action: 'Create',
-      object: new Post(),
-      users: User.query()
+      object: new Post()
     };
     this.modalService.addDialog(locals).then(::this.handleSubmit);
   }
@@ -53,7 +52,7 @@ export default class Posts extends TableComponent {
     let locals = {
       action: 'Update',
       object: post,
-      users: User.query()
+      users: users
     };
     this.modalService.edit(locals).then(::this.handleSubmit);
   }
