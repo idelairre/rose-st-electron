@@ -13,6 +13,7 @@ var source = require('vinyl-source-stream');
 var stringify = require('stringify');
 var del = require('del');
 var electron = require('electron-connect').server.create();
+var winInstaller = require('electron-windows-installer');
 
 var bundler = {
   w: null,
@@ -128,6 +129,14 @@ gulp.task('minify:js', function() {
     }))
     .pipe(gulp.dest('dist/scripts'))
     .pipe($.size());
+});
+
+gulp.task('create-windows-installer', function(done) {
+  winInstaller({
+    appDirectory: './build/win32',
+    outputDirectory: './release',
+    arch: 'ia32'
+  }).then(done).catch(done);
 });
 
 gulp.task('minify:css', function() {

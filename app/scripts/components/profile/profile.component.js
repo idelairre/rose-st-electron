@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Inject, Resolve } from 'ng-forward';
-
 import AuthenticationService from '../../services/authentication.service';
 import ModalService from '../../services/modal.service';
 import Post from '../posts/post.model';

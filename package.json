@@ -2,13 +2,13 @@
   "name": "rose-st-admin",
   "productName": "Rose St. Admin",
   "version": "0.0.0",
-  "description": "My beautiful app",
+  "description": "Rose st. admin app",
   "license": "MIT",
   "repository": "idelairre/electron-test",
   "author": {
     "name": "idelairre",
     "email": "idelairre@gmail.com",
-    "url": "whatever"
+    "url": "idelairre.github.io"
   },
   "electronVersion": "0.36.0",
   "scripts": {
@@ -72,6 +72,7 @@
     "electron-connect": "^0.3.7",
     "electron-packager": "^5.0.0",
     "electron-prebuilt": "^0.36.0",
+    "electron-windows-installer": "^1.2.4",
     "factory-girl": "^2.2.2",
     "gulp": "^3.9.0",
     "gulp-assetpaths": "^0.1.2",
