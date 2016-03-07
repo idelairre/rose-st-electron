@@ -14,7 +14,7 @@ class HttpInterceptor {
       return config;
 		}, (error) => {
       console.log(error);
-      this.modalService.hide()
+      this.modalService.hide();
 			return Promise.reject(error);
 		});
 

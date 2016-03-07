@@ -7,9 +7,9 @@ const app = electron.app;
 const Menu = require('menu');
 const qs = require('qs');
 
-let options = {
-	"debug": true,
-	"root_view": "index.html"
+const options = {
+	debug: true,
+	rootView: 'index.html'
 };
 
 // report crashes to the Electron project
@@ -33,17 +33,17 @@ function createMainWindow() {
 		height: 640
 	});
 
-	win.loadURL(path.join('file://', __dirname, options.root_view));
+	win.loadURL(path.join('file://', __dirname, options.rootView));
 	win.on('closed', onClosed);
 
-	win.webContents.on('did-get-redirect-request', function(event, oldUrl, newUrl, isMainFrame) {
+	win.webContents.on('did-get-redirect-request', (e =>vent, oldUrl, newUrl, isMainFrame) {
 		event.preventDefault();
 		let params = qs.parse(newUrl);
 		for (let key in params) {
 			if (key.includes('client_id')) {
 				let clientId = params[key];
 				delete params[key];
-				params['client_id'] = clientId;
+				params.client_id = clientId;
 			}
 			if (key.includes('uid')) {
 				let val = params[key];
@@ -54,7 +54,7 @@ function createMainWindow() {
 		win.webContents.send('authUrl', params);
 	});
 
-	win.webContents.on('did-finish-load', function() {
+	win.webContents.on('did-finish-load', () => {
 		win.webContents.send('loaded');
 	});
 
@@ -82,13 +82,13 @@ app.on('ready', () => {
 		label: 'File',
 		submenu: [{
 			label: 'Logout',
-			click: function() {
+			click: () => {
 				mainWindow.webContents.send('logout');
 			}
 		}, {
 			label: 'Quit',
 			accelerator: 'CmdOrCtrl+Z',
-			click: function() {
+			click: () => {
 				app.quit();
 			}
 		}]
@@ -126,31 +126,31 @@ app.on('ready', () => {
 		submenu: [{
 			label: 'Reload',
 			accelerator: 'CmdOrCtrl+R',
-			click: function(item, focusedWindow) {
+			click: (i =>tem, focusedWindow) {
 				if (focusedWindow)
 					focusedWindow.reload();
 			}
 		}, {
 			label: 'Toggle Full Screen',
-			accelerator: (function() {
-				if (process.platform == 'darwin')
+			accelerator: (() => {
+				if (process.platform === 'darwin')
 					return 'Ctrl+Command+F';
 				else
 					return 'F11';
 			})(),
-			click: function(item, focusedWindow) {
+			click: (i =>tem, focusedWindow) {
 				if (focusedWindow)
 					focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
 			}
 		}, {
 			label: 'Toggle Developer Tools',
-			accelerator: (function() {
-				if (process.platform == 'darwin')
+			accelerator: (() => {
+				if (process.platform === 'darwin')
 					return 'Alt+Command+I';
 				else
 					return 'Ctrl+Shift+I';
 			})(),
-			click: function(item, focusedWindow) {
+			click: (i =>tem, focusedWindow) {
 				if (focusedWindow)
 					focusedWindow.toggleDevTools();
 			}
@@ -172,24 +172,24 @@ app.on('ready', () => {
 		role: 'help',
 		submenu: [{
 			label: 'Learn More',
-			click: function() {
+			click: () => {
 				shell.openExternal('http://electron.atom.io');
 			}
 		}, {
 			label: 'Documentation',
-			click: function() {
+			click: () => {
 				shell.openExternal(
 					`https://github.com/atom/electron/tree/v${process.versions.electron}/docs#readme`
 				);
 			}
 		}, {
 			label: 'Community Discussions',
-			click: function() {
+			click: () => {
 				shell.openExternal('https://discuss.atom.io/c/electron');
 			}
 		}, {
 			label: 'Search Issues',
-			click: function() {
+			click: () => {
 				shell.openExternal('https://github.com/atom/electron/issues');
 			}
 		}]
@@ -225,7 +225,7 @@ app.on('ready', () => {
 			}, {
 				label: 'Quit',
 				accelerator: 'Command+Q',
-				click: function() {
+				click: () => {
 					app.quit();
 				}
 			}, ]

@@ -133,7 +133,7 @@ gulp.task('minify:js', function() {
 
 gulp.task('create-windows-installer', function(done) {
   winInstaller({
-    appDirectory: './build/win32',
+    appDirectory: './',
     outputDirectory: './release',
     arch: 'ia32'
   }).then(done).catch(done);

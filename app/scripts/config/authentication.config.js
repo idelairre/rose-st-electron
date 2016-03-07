@@ -1,7 +1,5 @@
 import { Inject } from 'ng-forward';
-import EventEmitter from 'events';
 import AuthenticationService from '../services/authentication.service';
-import LoginComponent from '../components/auth/login/login.component';
 import 'reflect-metadata';
 
 @Inject('$mdDialog', '$state', '$window', AuthenticationService)

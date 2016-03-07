@@ -4,7 +4,7 @@ import { SERVER_URL } from '../constants/constants';
 import 'babel-polyfill';
 import 'reflect-metadata';
 
-let inflect = require('i')();
+const inflect = require('i')();
 
 export default class Model {
   constructor() {
@@ -12,7 +12,7 @@ export default class Model {
   }
 
   assignProps(params) {
-    if (params === undefined) {
+    if (typeof params === 'undefined') {
       return;
     }
     for (let key in params) {
@@ -30,9 +30,9 @@ export default class Model {
   initialize(args, fields) {
     args = args[0] || {};
     for (let key in fields) {
-      this[key] = (args[key] !== undefined) ? args[key] : undefined;
+      this[key] = (typeof args[key] !== 'undefined') ? args[key] : undefined;
     }
-    if (this.initialized(fields) && this.id === undefined) { // NOTE: this causes trouble, this seems bogus, the purpose of this is to make sure that dummy instances are not posted
+    if (this.initialized(fields) && typeof this.id === 'undefined') { // NOTE: this causes trouble, this seems bogus, the purpose of this is to make sure that dummy instances are not posted
       this.save(this);
     }
     this._meta_ = fields;
@@ -42,7 +42,7 @@ export default class Model {
     let undefinedCount = 0;
     fields = Object.keys(fields);
     fields.map(field => {
-      if (this[field] === undefined) {
+      if (typeof this[field] === 'undefined') {
         undefinedCount += 1;
       }
     });

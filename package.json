@@ -2,7 +2,8 @@
   "name": "rose-st-admin",
   "productName": "Rose St. Admin",
   "version": "0.0.0",
-  "description": "Rose st. admin app",
+  "description": "Rose St. admin app",
+  "companyName": "Rose St. Community Center",
   "license": "MIT",
   "repository": "idelairre/electron-test",
   "author": {
@@ -13,15 +14,17 @@
   "electronVersion": "0.36.0",
   "scripts": {
     "test": "xo",
+    "karma": "karma start karma.conf.js",
     "start": "gulp watch",
     "build": "electron-packager . $npm_package_productName --out=dist --ignore='^/dist$' --prune --asar --all --version=$npm_package_electronVersion"
   },
   "files": [
     "index.js",
     "index.html",
-    "scripts/app.js",
-    "styles/styles.css",
-    "assets/tinymce.min.js"
+    "app/scripts/app.js",
+    "app/events.js",
+    "app/menu.js",
+    "styles/styles.css"
   ],
   "keywords": [
     "electron-app",
@@ -121,6 +124,7 @@
     "envs": [
       "node",
       "browser"
-    ]
+    ],
+    "ignores": ["app/assets/**/*.js", "gulpfile.babel.js"]
   }
 }

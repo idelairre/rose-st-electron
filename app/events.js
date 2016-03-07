@@ -8,15 +8,15 @@ window.addEventListener('contextmenu', function(e) {
 }, false);
 
 eventListener.on('logout', function() {
-  var logout = new Event('logout');
+  let logout = new Event('logout');
   window.dispatchEvent(logout);
 });
 eventListener.on('authUrl', function(params) {
-  var auth = new Event('auth');
+  let auth = new Event('auth');
   window.authParams = params;
   window.dispatchEvent(auth);
 });
 eventListener.on('loaded', function() {
-  var loaded = new Event('loaded');
+  let loaded = new Event('loaded');
   window.dispatchEvent(loaded);
 });
