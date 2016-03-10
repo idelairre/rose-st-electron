@@ -5,7 +5,7 @@
   "description": "Rose St. admin app",
   "companyName": "Rose St. Community Center",
   "license": "MIT",
-  "repository": "idelairre/electron-test",
+  "repository": "idelairre/rose-st-electron",
   "author": {
     "name": "idelairre",
     "email": "idelairre@gmail.com",
@@ -16,7 +16,7 @@
     "test": "xo",
     "karma": "karma start karma.conf.js",
     "start": "gulp watch",
-    "build": "electron-packager . $npm_package_productName --out=dist --ignore='^/dist$' --prune --asar --all --version=$npm_package_electronVersion"
+    "build": "electron-packager ./build rose-st-admin --out=dist --ignore='^/dist$' --prune --asar --all --version=0.36.0"
   },
   "files": [
     "index.js",
@@ -48,12 +48,10 @@
     "chart.js": "^1.0.2",
     "connect-modrewrite": "^0.8.2",
     "electron-debug": "^0.5.0",
-    "filereader": "^0.10.3",
     "i": "^0.3.4",
     "j-toker": "0.0.10-beta3",
     "ng-forward": "0.0.1-alpha.12",
     "node-ipc": "^6.0.0",
-    "open": "0.0.5",
     "qs": "^6.1.0",
     "slug": "^0.9.1",
     "tc-angular-chartjs": "git+https://github.com/carlcraig/tc-angular-chartjs.git",
@@ -74,9 +72,8 @@
     "del": "^2.2.0",
     "electron-connect": "^0.3.7",
     "electron-packager": "^5.0.0",
-    "electron-prebuilt": "^0.36.0",
+    "electron-prebuilt": "^0.36.10",
     "electron-windows-installer": "^1.2.4",
-    "factory-girl": "^2.2.2",
     "gulp": "^3.9.0",
     "gulp-assetpaths": "^0.1.2",
     "gulp-autoprefixer": "^3.1.0",
@@ -110,7 +107,6 @@
     "karma-mocha-reporter": "^1.1.5",
     "karma-ng-html2js-preprocessor": "^0.2.0",
     "karma-phantomjs-launcher": "^1.0.0",
-    "karma-requirejs": "^0.2.4",
     "karma-sinon": "^1.0.4",
     "sinon": "^1.17.3",
     "stringify": "^4.0.1",
@@ -125,6 +121,11 @@
       "node",
       "browser"
     ],
-    "ignores": ["app/assets/**/*.js", "gulpfile.babel.js"]
+    "ignores": [
+      "app/assets/**/*.js",
+      "build",
+      "dist",
+      "gulpfile.babel.js"
+    ]
   }
 }

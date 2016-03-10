@@ -15,6 +15,8 @@ var del = require('del');
 var electron = require('electron-connect').server.create();
 var winInstaller = require('electron-windows-installer');
 
+var BUILDDIR = './build';
+
 var bundler = {
   w: null,
   init: function() {
@@ -36,7 +38,7 @@ var bundler = {
       .on('start', logger.start)
       .on('error', handleErrors)
       .pipe(source('app.js'))
-      .pipe(gulp.dest('./dist/scripts/'))
+      .pipe(gulp.dest(BUILDDIR + '/scripts/'))
       .pipe(browserSync.reload({
         stream: true
       }));
@@ -49,20 +51,9 @@ var bundler = {
   }
 };
 
-gulp.task('images', function() {
-  return gulp.src('app/assets/**/*')
-    .pipe($.cache($.imagemin({
-      optimizationLevel: 3,
-      progressive: true,
-      interlaced: true
-    })))
-    .pipe(gulp.dest('dist'))
-    .pipe($.size());
-});
-
 gulp.task('tinymce', function() {
   return gulp.src('node_modules/tinymce/**/*.*')
-  .pipe(gulp.dest('dist/assets'))
+  .pipe(gulp.dest(BUILDDIR + '/assets'))
   .pipe($.size())
 });
 
@@ -85,7 +76,7 @@ gulp.task('styles', function() {
     .on('error', handleErrors)
     .pipe($.autoprefixer('last 1 version'))
     .pipe($.concat('styles.css'))
-    .pipe(gulp.dest('dist/styles'))
+    .pipe(gulp.dest(BUILDDIR + '/styles'))
     .pipe(browserSync.reload({
       stream: true
     }))
@@ -99,7 +90,7 @@ gulp.task('scripts', function() {
 
 gulp.task('html', function() {
   return gulp.src(['app/index.html'])
-    .pipe(gulp.dest('dist'))
+    .pipe(gulp.dest(BUILDDIR))
     .pipe(browserSync.reload({
       stream: true
     }))
@@ -107,27 +98,27 @@ gulp.task('html', function() {
 });
 
 gulp.task('clean', function () {
-  return del.sync(['dist']);
+  return del.sync([BUILDDIR]);
 })
 
 gulp.task('extras', function() {
   return gulp.src(['app/*.txt', 'app/*.ico', 'app/**/*.svg'])
-    .pipe(gulp.dest('dist/'))
+    .pipe(gulp.dest(BUILDDIR))
     .pipe($.size());
 });
 
 gulp.task('electron', function() {
   return gulp.src(['app/events.js', 'app/menu.js'])
-    .pipe(gulp.dest('dist/'))
+    .pipe(gulp.dest(BUILDDIR + '/'))
     .pipe($.size());
 });
 
 gulp.task('minify:js', function() {
-  return gulp.src('dist/scripts/**/*.js')
+  return gulp.src(BUILDDIR + '/scripts/**/*.js')
     .pipe($.uglify({
       mangle: false
     }))
-    .pipe(gulp.dest('dist/scripts'))
+    .pipe(gulp.dest(BUILDDIR + '/scripts'))
     .pipe($.size());
 });
 
@@ -145,7 +136,7 @@ gulp.task('minify:css', function() {
       html: ['app/**/*.html', 'app/index.html']
     }))
     .pipe($.cssnano())
-    .pipe(gulp.dest('dist/styles'))
+    .pipe(gulp.dest(BUILDDIR + '/styles'))
     .pipe($.size());
 });
 
