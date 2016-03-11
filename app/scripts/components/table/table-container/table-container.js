@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Inject, Input, Output } from 'ng-forward';
 import ngTable from 'angular-material-data-table';
 
-let inflect = require('i')();
+const inflect = require('inflected');
 
 @Component({
   selector: 'rs-table-container',

@@ -1,24 +1,21 @@
 <md-dialog aria-label="new password token modal" ng-cloak>
-  <form>
-    <md-toolbar>
-      <div class="md-toolbar-tools">
-        <h2>Enter Token</h2>
-      </div>
-    </md-toolbar>
-    <md-dialog-content>
-      <div class="md-dialog-content">
-        <md-input-container layout="row" style="max-width: 90%; margin-left: auto; margin-right: auto">
-          <label>Token</label>
-          <input ng-model="credentials.token" type="password">
-        </md-input-container>
-      </div>
+  <form name="unlockForm">
+    <md-dialog-content class="md-dialog-content">
+      <p>Enter the token you recieved in your email</p>
+      <md-input-container layout="row" style="max-width: 100%">
+        <label>Token</label>
+        <input ng-model="Unlock.credentials.token" type="password" required>
+        <div ng-messages="unlockForm.email.$error" ng-if="unlockForm.email.$submitted && unlockForm.email.$error">
+          <div ng-message="required">You must enter a valid email address!</div>
+        </div>
+      </md-input-container>
     </md-dialog-content>
     <md-dialog-actions layout="row">
       <span flex></span>
-      <md-button class="md-raised md-primary" (click)="dismiss()" style="margin-right:20px;">
+      <md-button class="md-primary" (click)="Unlock.dismiss()">
         Close
       </md-button>
-      <md-button class="md-raised" (click)="submit(credentials)" style="margin-right:20px;">
+      <md-button class="" (click)="Unlock.submit(credentials)" ng-disabled="unlockForm.$invalid">
         Reset
       </md-button>
     </md-dialog-actions>

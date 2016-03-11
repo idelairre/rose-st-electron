@@ -8,7 +8,7 @@ const Menu = require('menu');
 const qs = require('qs');
 
 const options = {
-	debug: true,
+	debug: (process.env.NODE_ENV === 'production' ? false : true),
 	rootView: 'index.html'
 };
 
@@ -36,7 +36,7 @@ function createMainWindow() {
 	win.loadURL(path.join('file://', __dirname, options.rootView));
 	win.on('closed', onClosed);
 
-	win.webContents.on('did-get-redirect-request', (e =>vent, oldUrl, newUrl, isMainFrame) {
+	win.webContents.on('did-get-redirect-request', (event, oldUrl, newUrl, isMainFrame) => {
 		event.preventDefault();
 		let params = qs.parse(newUrl);
 		for (let key in params) {
@@ -78,7 +78,7 @@ app.on('ready', () => {
 	if (options.debug) {
 		mainWindow.openDevTools();
 	}
-	let template = [{
+	const template = [{
 		label: 'File',
 		submenu: [{
 			label: 'Logout',
@@ -120,80 +120,80 @@ app.on('ready', () => {
 			label: 'Select All',
 			accelerator: 'CmdOrCtrl+A',
 			role: 'selectall'
-		}, ]
+		}]
+	}, {
+		label: 'Tabs',
+		submenu: [{
+			label: 'Home',
+			click: () => {
+				mainWindow.webContents.send('goto', 'home');
+			}
+		}, {
+			label: 'Donations',
+			click: () => {
+				mainWindow.webContents.send('goto', 'donations');
+			}
+		}, {
+			label: 'Messages',
+			click: () => {
+				mainWindow.webContents.send('goto', 'messages');
+			}
+		}, {
+			label: 'Posts',
+			click: () => {
+				mainWindow.webContents.send('goto', 'posts');
+			}
+		}, {
+			label: 'Profile',
+			click: () => {
+				mainWindow.webContents.send('goto', 'profile');
+			}
+		}, {
+			label: 'Users',
+			click: () => {
+				mainWindow.webContents.send('goto', 'users');
+			}
+		}]
 	}, {
 		label: 'View',
 		submenu: [{
 			label: 'Reload',
 			accelerator: 'CmdOrCtrl+R',
-			click: (i =>tem, focusedWindow) {
-				if (focusedWindow)
-					focusedWindow.reload();
+			click: (item, focusedWindow) => {
+				focusedWindow ? focusedWindow.reload() : null;
 			}
 		}, {
 			label: 'Toggle Full Screen',
 			accelerator: (() => {
-				if (process.platform === 'darwin')
-					return 'Ctrl+Command+F';
-				else
-					return 'F11';
+				if (process.platform === 'darwin') { return 'Ctrl+Command+F' } else {	return 'F11' }
 			})(),
-			click: (i =>tem, focusedWindow) {
-				if (focusedWindow)
-					focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
+			click: (item, focusedWindow) => {
+				focusedWindow ? focusedWindow.setFullScreen(!focusedWindow.isFullScreen()) : null ;
 			}
 		}, {
 			label: 'Toggle Developer Tools',
 			accelerator: (() => {
-				if (process.platform === 'darwin')
-					return 'Alt+Command+I';
-				else
-					return 'Ctrl+Shift+I';
+				if (process.platform === 'darwin') { return 'Alt+Command+I' } else { return 'Ctrl+Shift+I' }
 			})(),
-			click: (i =>tem, focusedWindow) {
-				if (focusedWindow)
-					focusedWindow.toggleDevTools();
+			click: (item, focusedWindow) => {
+				focusedWindow ? focusedWindow.toggleDevTools() : null;
 			}
-		}, ]
-	}, {
-		label: 'Window',
-		role: 'window',
-		submenu: [{
-			label: 'Minimize',
-			accelerator: 'CmdOrCtrl+M',
-			role: 'minimize'
-		}, {
-			label: 'Close',
-			accelerator: 'CmdOrCtrl+W',
-			role: 'close'
-		}, ]
+		}]
 	}, {
 		label: 'Help',
 		role: 'help',
 		submenu: [{
-			label: 'Learn More',
-			click: () => {
-				shell.openExternal('http://electron.atom.io');
-			}
-		}, {
 			label: 'Documentation',
 			click: () => {
-				shell.openExternal(
-					`https://github.com/atom/electron/tree/v${process.versions.electron}/docs#readme`
-				);
-			}
-		}, {
-			label: 'Community Discussions',
-			click: () => {
-				shell.openExternal('https://discuss.atom.io/c/electron');
+				shell.openExternal(`https://github.com/atom/electron/tree/v${process.versions.electron}/docs#readme`);
 			}
 		}, {
 			label: 'Search Issues',
 			click: () => {
-				shell.openExternal('https://github.com/atom/electron/issues');
+				shell.openExternal('https://github.com/idelairre/rose_st_electron/issues');
 			}
 		}]
-	}, ];
+	}];
 
 	if (process.platform == 'darwin') {
 		template.unshift({
@@ -228,7 +228,7 @@ app.on('ready', () => {
 				click: () => {
 					app.quit();
 				}
-			}, ]
+			}]
 		});
 		template[3].submenu.push({
 			type: 'separator'

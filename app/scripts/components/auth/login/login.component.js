@@ -9,20 +9,24 @@ import 'reflect-metadata';
     selector: 'login',
     controllerAs: 'Login',
     template: require('./login.screen.html'),
-    providers: ['ngMaterial', AuthenticationService]
+    providers: ['ngMaterial', 'ngMessages', AuthenticationService]
 })
 
-@Inject('$mdDialog', '$scope', '$state', AuthenticationService)
+@Inject('$mdDialog', '$state', '$window', AuthenticationService)
 export default class Login extends AuthModal {
-  constructor($mdDialog, $scope, $state, AuthenticationService) {
-    super($mdDialog, $scope, $state, AuthenticationService);
-    this.$scope.submit = ::this.submit;
-    this.$scope.resetPassword = ::this.resetPassword;
+  constructor($mdDialog, $state, $window, AuthenticationService) {
+    super($mdDialog, $state, AuthenticationService);
+    this.$window = $window;
+    this.credentials = {
+      email: '',
+      password: ''
+    };
   }
 
   resetPassword(credentials) {
     let resetPasswordDialog = {
       controller: RecoverPassword,
+      controllerAs: 'RecoverPassword',
       template: require('../recover-password/recover-password.html'),
       parent: angular.element(document.body)
     };
@@ -32,7 +36,7 @@ export default class Login extends AuthModal {
 
   handleErrors(error) {
     console.error(error);
-    let errorDialogue = this.$mdDialog.confirm()
+    let errorDialogue = this.$mdDialog.alert()
       .title('Login Failed')
       .clickOutsideToClose(false)
       .escapeToClose(false)
@@ -42,12 +46,24 @@ export default class Login extends AuthModal {
     this.$mdDialog.show(errorDialogue).then(::this.openLogin);
   }
 
+
+  onEnter(event, loginForm) {
+    const ENTER_KEY = 13;
+    if (event.keyCode === 13) {
+      if (loginForm.$valid) {
+        this.submit(this.credentials);
+      }
+      console.log(loginForm);
+    }
+  }
+
   openLogin() {
     if (this.$state.current.name === 'login') {
       return;
     }
     this.$mdDialog.show({
       controller: Login,
+      controllerAs: 'Login',
       template: require('./login.modal.html'),
       parent: angular.element(document.body),
       clickOutsideToClose: false,
@@ -60,15 +76,16 @@ export default class Login extends AuthModal {
   }
 
   handleLogin(response) {
-    // this.$mdDialog.hide();
-    let loginSuccess = this.$mdDialog.alert()
-      .title('Login Successful')
-      .textContent(`Welcome ${response.uid}`)
-      .ariaLabel('login successful alert modal')
-      .ok('ok');
     if (this.$state.current.name === 'login') {
+      this.$window.dispatchEvent(new Event('loginSuccess'));
       this.$state.go('home');
     } else {
+      let loginSuccess = this.$mdDialog.alert()
+        .title('Login Successful')
+        .textContent(`Welcome ${response.uid}`)
+        .ariaLabel('login successful alert modal')
+        .ok('ok');
+
       this.$mdDialog.show(loginSuccess).then(() => {
         setTimeout(() => {
           this.$mdDialog.hide();
@@ -80,10 +97,12 @@ export default class Login extends AuthModal {
 
   async submit(credentials) {
     try {
+      this.$window.dispatchEvent(new Event('loginStarted'));
       let response = await this.authService.login(credentials);
       this.handleLogin(response.data);
     } catch (error) {
-      this.handleErrors(error)
+      this.handleErrors(error);
+      this.$window.dispatchEvent(new Event('loginFailed'));
     }
   }
 }

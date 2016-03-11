@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 <md-content layout="column">
+=======
+<md-content flex layout="column">
+>>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
   <md-card>
     <md-card-title flex="none">
       <md-card-title-text>
@@ -10,7 +14,11 @@
       <md-card-title-media layout-align="end center" class="md-table-pagination limit">
         <md-datepicker ng-model="Donations.chartOptions.startDate" ng-change="Donations.setTransactions(Donations.transactions)" md-placeholder="Start date" md-max-date="Donations.maxStartDate"></md-datepicker>
         <span class="label limit-label">to: </span>
+<<<<<<< HEAD
         <md-datepicker ng-model="Donations.chartOptions.endDate" ng-change="Donations.setTransactions(Donations.transactions)" md-placeholder="End date" md-min-date="Donations.chartOptions.startDate" md-max-date="Donations.maxEndDate"></md-datepicker>
+=======
+        <md-datepicker ng-model="Donations.chartOptions.endDate" ng-change="Donations.setTransactions(Donations.transactions)" md-placeholder="End date" md-min-date="Donations.chartOptions.startDate"></md-datepicker>
+>>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
         <span class="label limit-label">Limit: </span>
         <md-input-container>
           <md-select ng-model="Donations.chartOptions.limit" ng-change="Donations.setLimit(Donations.chartOptions.limit)" aria-label="Rows" placeholder="100" md-container-class="md-pagination-select limit-select">

@@ -4,7 +4,7 @@ import { SERVER_URL } from '../constants/constants';
 import 'babel-polyfill';
 import 'reflect-metadata';
 
-const inflect = require('i')();
+const inflect = require('inflected');
 
 export default class Model {
   constructor() {

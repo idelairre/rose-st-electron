@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Injectable, Inject, Output } from 'ng-forward';
+import AuthenticationService from '../../services/authentication.service';
 import ModalService from '../../services/modal.service';
 import Pagination from './pagination/pagination';
 import TableContainer from './table-container/table-container';
 import Toolbar from './toolbar/toolbar';
 
-let inflect = require('i')();
+const inflect = require('inflected');
 
 @Component({
   selector: 'rs-table',
@@ -58,9 +59,15 @@ export default class Table {
 }
 
 @Injectable()
+<<<<<<< HEAD
 @Inject(ModalService)
 export class TableComponent {
   constructor(ModalService) {
+=======
+@Inject(ModalService, AuthenticationService)
+export class TableComponent {
+  constructor(ModalService, AuthenticationService) {
+>>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
     this.selected = [];
 
     this.options = {
@@ -77,9 +84,21 @@ export class TableComponent {
       page: 1
     };
 
+<<<<<<< HEAD
     this.modalService = ModalService;
   }
 
+=======
+    this.authService = AuthenticationService;
+    this.modalService = ModalService;
+  }
+
+  evalAdmin() {
+    let user = this.authService.getUser();
+    this.isAdmin = user.admin;
+  }
+
+>>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
   getSelected() {
     const OBJ = this.model.getInstance().constructor.name.toLowerCase();
     const OBJ_PLURAL = inflect.pluralize(OBJ);

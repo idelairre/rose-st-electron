@@ -2,7 +2,7 @@ import { Component, Inject } from 'ng-forward';
 import 'reflect-metadata';
 import 'angular-ui-tinymce';
 
-let inflect = require('i')();
+const inflect = require('inflected');
 
 @Component({
   selector: 'edit-modal',

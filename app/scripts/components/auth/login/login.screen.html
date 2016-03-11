@@ -1,5 +1,6 @@
 <div layout="column" flex id="content" role="main">
   <md-content layout="row" layout-align="center center" layout-fill id="content">
+<<<<<<< HEAD
     <md-whiteframe class="md-whiteframe-z1" flex="30" layout-padding style="min-width: 350px">
       <md-content layout-align="center center">
         <h1 class="md-display-2">Rose St. Admin</h1>
@@ -23,5 +24,36 @@
         </md-input-container>
       </md-content>
     </md-whiteframe>
+=======
+      <md-whiteframe class="md-whiteframe-z1" flex="30" layout-padding style="min-width: 350px">
+        <form name="loginForm">
+        <md-content layout-align="center center">
+          <h1 class="md-display-2">Rose St. Admin</h1>
+          <md-divider></md-divider>
+          <md-input-container class="md-block">
+            <label>Email</label>
+            <input ng-model="Login.credentials.email" name="email" type="email" ng-keypress="Login.onEnter($event, loginForm)" required />
+            <div ng-messages="loginForm.email.$error" ng-if="loginForm.email.$dirty && loginForm.email.$error.email" ng-messages-multiple="ng-messages-multiple">
+              <div ng-message="email">You must enter a valid email address!</div>
+              <div ng-message="required">You forgot to enter your email address!</div>
+            </div>
+          </md-input-container>
+          <md-input-container class="md-block">
+            <label>Password</label>
+            <input ng-model="Login.credentials.password" name="password" type="password" ng-keypress="Login.onEnter($event, loginForm)" required />
+          </md-input-container>
+          <div layout="row" layout-align="space-between center">
+            <md-button flex class="md-raised md-primary" (click)="Login.submit(credentials)">Login</md-button>
+          </div>
+          <div layout="row" layout-align="space-between center">
+            <md-button flex class="md-raised" (click)="Login.resetPassword()">Forgot Password?</md-button>
+          </div>
+          <div layout="row" layout-align="space-between center">
+            <md-button flex class="md-raised" (click)="Login.register()">Don't have an account?</md-button>
+          </div>
+        </md-content>
+      </form>
+      </md-whiteframe>
+>>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
   </md-content>
 </div>

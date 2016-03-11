@@ -2,7 +2,6 @@ import { Injectable, Inject } from 'ng-forward';
 import EditModal from './edit.modal/edit.modal.component';
 import Password from '../components/auth/password/password.component';
 import User from '../components/users/user.model';
-let inflect = require('i')();
 
 // NOTE: make sure locals resolve BEFORE they reach this service or
 // or the context of the modals will get screwed up since loading modals

@@ -10,11 +10,6 @@
   cursor: pointer;
 }
 
-.md-cell:nth-child(2) {
-  min-width: 160px;
-  max-width: 360px;
-}
-
 md-backdrop.md-edit-dialog-backdrop {
   z-index: 80;
 }
