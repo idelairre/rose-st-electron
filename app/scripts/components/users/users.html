@@ -1,0 +1,18 @@
+<md-content layout="column" flex class="layout-column">
+  <md-card>
+    <rs-table
+     [fields]="Users.fields"
+     [options]="Users.options"
+     [model]="Users.model"
+     [query]="Users.query"
+     title="Users"
+     (add)="Users.add()"
+     (edit)="Users.edit(Users.selected)"
+     (delete)="Users.delete($event)"
+     [(selected)]="Users.selected"
+     [items]="Users.users"
+     (paginate)="Users.onPaginate"
+     (reorder)="Users.onReorder">
+   </rs-table>
+  </md-card>
+</md-content>

@@ -1,0 +1,20 @@
+<md-content layout="column" flex class="layout-column">
+  <md-card>
+    <rs-table
+     [fields]="Posts.fields"
+     [options]="Posts.options"
+     [model]="Posts.model"
+     [query]="Posts.query"
+     title="Posts"
+     (add)="Posts.add()"
+     (edit)="Posts.edit(Posts.selected)"
+     (delete)="Posts.delete($event)"
+     (preview)="Posts.preview($event)"
+     (mass-delete)="Posts.deleteAll($event)"
+     [(selected)]="Posts.selected"
+     [items]="Posts.posts"
+     (paginate)="Posts.onPaginate"
+     (reorder)="Posts.onReorder">
+   </rs-table>
+  </md-card>
+</md-content>

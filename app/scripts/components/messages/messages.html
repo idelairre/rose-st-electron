@@ -1,0 +1,20 @@
+<md-content layout="column" flex class="layout-column">
+  <md-card>
+    <rs-table
+     [fields]="Messages.fields"
+     [options]="Messages.options"
+     [model]="Messages.model"
+     [query]="Messages.query"
+     title="Messages"
+     (add)="Messages.add()"
+     (edit)="Messages.edit(Messages.selected)"
+     (delete)="Messages.delete($event)"
+     (preview)="Messages.preview($event)"
+     (mass-delete)="Messages.deleteAll($event)"
+     [(selected)]="Messages.selected"
+     [items]="Messages.messages"
+     (paginate)="Messages.onPaginate"
+     (reorder)="Messages.onReorder">
+   </rs-table>
+  </md-card>
+</md-content>

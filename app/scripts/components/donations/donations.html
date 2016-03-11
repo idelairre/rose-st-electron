@@ -1,0 +1,71 @@
+<md-content flex layout="column">
+  <md-card>
+    <md-card-title flex="none">
+      <md-card-title-text>
+        <span class="md-headline" ng-show="!Donations.state.customers">Gross Volume</span>
+        <span class="md-subhead" ng-show="!Donations.state.customers">Total {{ Donations.total | currency }}</span>
+        <span class="md-headline" ng-show="Donations.state.customers">Customers</span>
+        <span class="md-subhead" ng-show="Donations.state.customers">Total {{ Donations.transactions.length }}</span>
+      </md-card-title-text>
+      <md-card-title-media layout-align="end center" class="md-table-pagination limit">
+        <md-datepicker ng-model="Donations.chartOptions.startDate" ng-change="Donations.setTransactions(Donations.transactions)" md-placeholder="Start date" md-max-date="Donations.maxStartDate"></md-datepicker>
+        <span class="label limit-label">to: </span>
+        <md-datepicker ng-model="Donations.chartOptions.endDate" ng-change="Donations.setTransactions(Donations.transactions)" md-placeholder="End date" md-min-date="Donations.chartOptions.startDate"></md-datepicker>
+        <span class="label limit-label">Limit: </span>
+        <md-input-container>
+          <md-select ng-model="Donations.chartOptions.limit" ng-change="Donations.setLimit(Donations.chartOptions.limit)" aria-label="Rows" placeholder="100" md-container-class="md-pagination-select limit-select">
+            <md-option ng-repeat="option in Donations.limits ? Donations.limits: [5, 10, 15]" ng-value="option">{{ option === 100 ? 'Max' : option }}</md-option>
+          </md-select>
+        </md-input-container>
+        <md-menu>
+          <md-button class="md-icon-button" aria-label="graph options menu" ng-click="Donations.openMenu($mdOpenMenu, $event)">
+            <md-icon md-menu-origin>more_vert</md-icon>
+          </md-button>
+          <md-menu-content width="4">
+            <md-menu-item>
+              <button class="md-button md-ink-ripple" ng-click="Donations.setState('charges')">
+                <md-icon md-menu-align-target>credit_card</md-icon>
+                <p>Charges</p>
+              </button>
+            </md-menu-item>
+            <md-menu-item>
+              <button class="md-button md-ink-ripple" ng-click="Donations.setState('customers')">
+                <md-icon md-menu-align-target>people</md-icon>
+                <p>Customers</p>
+              </button>
+            </md-menu-item>
+            <md-menu-item>
+              <button class="md-button md-ink-ripple" ng-click="Donations.setState('subscriptions')">
+                <md-icon md-menu-align-target>card_membership</md-icon>
+                <p>Subscriptions</p>
+              </button>
+            </md-menu-item>
+            <md-menu-item>
+              <button class="md-button md-ink-ripple" ng-click="Donations.setState('transactions')">
+                <md-icon md-menu-align-target>show_chart</md-icon>
+                <p>Total</p>
+              </button>
+            </md-menu-item>
+            <md-divider></md-divider>
+            <md-menu-item>
+              <button class="md-button md-ink-ripple" ng-click="Donations.toggleChart()">
+                <md-icon md-menu-align-target ng-show="Donations.showChart">keyboard_arrow_up</md-icon>
+                <md-icon md-menu-align-target ng-show="!Donations.showChart">keyboard_arrow_down</md-icon>
+                <p ng-show="Donations.showChart">Hide chart</p>
+                <p ng-show="!Donations.showChart">Show chart</p>
+              </button>
+            </md-menu-item>
+          </md-menu-content>
+        </md-menu>
+      </md-card-title-media>
+    </md-card-title>
+    <md-card-content layout="column" layout-align="space-between" layout-wrap ng-class="{ hide : !Donations.showChart }">
+      <div layout="row" flex="initial" class="widget">
+        <canvas id="chart" class="chart-line" tc-chartjs chart-type="line" chart-data="Donations.data" chart-labels="Donations.labels" chart-options="Donations.chartOptions"></canvas>
+      </div>
+    </md-card-content>
+  </md-card>
+  <md-card>
+    <rs-table [fields]="Donations.fields" [options]="Donations.options" [model]="Donations.model" [query]="Donations.query" [title]="Donations.chartTitle" [(selected)]="Donations.selected" [items]="Donations.transactions"></rs-table>
+  </md-card>
+</md-content>
