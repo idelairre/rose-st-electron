@@ -99,12 +99,12 @@ export default class Donations extends TableComponent {
     let today = new Date();
 
     let maxStartDate = new Date(today.getFullYear(), today.getMonth(), today.getDay() - 1);
-    let maxEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDay() + 1);
+    // let maxEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDay());
 
     this.limits = array;
 
     this.maxStartDate = maxStartDate;
-    this.maxEndDate = maxEndDate;
+    // this.maxEndDate = maxEndDate;
 
     this.chartOptions = {
       limit: 100,
@@ -179,10 +179,12 @@ export default class Donations extends TableComponent {
 
   async setTransactions(transactions) {
     this.transactions = transactions;
+    this.cachedTransactions = transactions;
     this.total = this.parseTotal(transactions);
     let transactionsCopy = Object.assign([], transactions);
 
     if (this.state.customers) {
+      console.log(transactions);
       let { datesArray, data } = this.parseCustomers(transactionsCopy);
       this.data.datasets[0].data = data;
       this.data.labels = datesArray.map(date => { return this.$filter('date')(date, 'shortDate')});
@@ -202,14 +204,13 @@ export default class Donations extends TableComponent {
 
   initializeDates(transactions, type) {
     let dates = {};
-
-    if (this.chartOptions.startDate === undefined) {
+    if (typeof this.chartOptions.startDate === 'undefined') {
       let startDate = Math.min.apply(Math, transactions.map(transaction => {
         return transaction.created_at * 1000;
       }));
       this.chartOptions.startDate = new Date(startDate);
     }
-    if (this.chartOptions.endDate === undefined) {
+    if (typeof this.chartOptions.endDate === 'undefined') {
       this.chartOptions.endDate = new Date().addDays(1)
     }
 
@@ -234,25 +235,27 @@ export default class Donations extends TableComponent {
     let data = [];
     let { datesArray, dates } = this.initializeDates(customers, 'customers');
 
-    let parseDates = (customers) => {
+    let parseCustomerDates = (customers) => {
       for (let i = 0; customers.length > i;) {
         const DATE_KEY = this.parseDate(customers[i]);
-        dates[DATE_KEY] += 1;
+        dates[DATE_KEY] === 0 ? dates[DATE_KEY] += 1 : null;
         customers.splice(i, 1);
         if (customers[i + 1]) {
-          parseDates(customers);
+          parseCustomerDates(customers);
         } else {
           break;
         }
       }
     }
 
-    parseDates(customers);
+    parseCustomerDates(customers);
 
     for (let key in dates) {
-      data.push(dates[key]);
+      console.log(dates[key]);
+      // if (dates[key]) {
+        data.push(dates[key]);
+      // }
     }
-
     return { datesArray, data };
   }
 
@@ -274,7 +277,7 @@ export default class Donations extends TableComponent {
     let data = [];
     let { datesArray, dates } = this.initializeDates(transactions, 'transactions');
 
-    let parseDate = (transactions) => { // i hate math and fuck unix time
+    let parseChargeDates = (transactions) => { // i hate math and fuck unix time
       for (let i = 0; transactions.length > i;) {
         const DATE_KEY = this.parseDate(transactions[i]);
         if (dates[DATE_KEY]) {
@@ -282,14 +285,14 @@ export default class Donations extends TableComponent {
         }
         transactions.splice(i, 1);
         if (transactions[i + 1]) {
-          parseDate(dates, transactions);
+          parseChargeDates(transactions);
         } else {
           break;
         }
       }
     }
 
-    parseDate(transactions);
+    parseChargeDates(transactions);
     data = this.reduceAmounts(data, dates);
     return { datesArray, data };
   }
@@ -307,8 +310,9 @@ export default class Donations extends TableComponent {
   async setLimit(limit) {
     if (limit > this.transactions.length) {
       this.transactions = Object.assign([], this.cachedTransactions);
+    } else if (limit <= this.transactions.length) {
+      this.transactions.length = limit;
     }
-    this.transactions.length = limit;
     this.setTransactions(this.transactions);
   }
 

@@ -101,7 +101,7 @@ gulp.task('electron', function() {
 });
 
 gulp.task('minify:js', function() {
-  return gulp.src(BUILDDIR + '/**/*.js')
+  return gulp.src(BUILDDIR + '/scripts/**/*.js')
     .pipe($.uglify({
       mangle: false
     }))
@@ -167,6 +167,8 @@ gulp.task('assets', ['styles', 'tinymce', 'electron']);
 gulp.task('bundle', ['html', 'assets', 'styles', 'scripts', 'extras']);
 
 gulp.task('build:production', gulpsync.sync(['clean', 'html', 'set-production', 'bundle', 'minify', 'build']));
+
+gulp.task('serve:production', gulpsync.sync(['build:production', 'serve']));
 
 gulp.task('default', ['build']);
 

@@ -28,7 +28,7 @@ export default class Users extends TableComponent {
 
     this.authService = AuthenticationService;
 
-    this.fields = ['id', 'email', 'nickname', 'posts', 'sign_in_count', 'confirmed', 'created_at', 'updated_at'];
+    this.fields = ['id', 'email', 'name', 'posts', 'sign_in_count', 'confirmed', 'created_at', 'updated_at'];
 
     this.options.actions = (::this.evalAdmin() ? ['add', 'edit', 'delete', 'deleteAll'] : []);
     this.options.selectParam = 'email';
