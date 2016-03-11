@@ -7,19 +7,13 @@ import 'reflect-metadata';
     selector: 'unlock',
     controllerAs: 'Unlock',
     template: require('./unlock.modal.html'),
-    providers: ['ngMaterial', AuthenticationService]
+    providers: ['ngMaterial', 'ngMessages', AuthenticationService]
 })
 
-@Inject('$mdDialog', '$scope', '$state', AuthenticationService)
+@Inject('$mdDialog', '$state', AuthenticationService)
 export default class Unlock extends AuthModal {
-  constructor($mdDialog, $scope, $state, AuthenticationService) {
-    super($mdDialog, $scope, $state, AuthenticationService);
-    this.$scope.dismiss = ::this.dismiss;
-    this.$scope.submit = ::this.submit;
-  }
-
-  dismiss() {
-    this.$mdDialog.hide();
+  constructor($mdDialog, $state, AuthenticationService) {
+    super($mdDialog,$state, AuthenticationService);
   }
 
   async submit(credentails) {
@@ -29,10 +23,8 @@ export default class Unlock extends AuthModal {
         redirect_url: window.location.href.replace(/#.*/g, ''),
         reset_password_token: credentails.token
       };
-      console.log(this.authService.getHeaders());
       this.dismiss();
       await this.authService.getTokenAfterPasswordReset(params);
-      console.log(window.location.pathname);
     } catch (error) {
       this.handleErrors(error);
     }

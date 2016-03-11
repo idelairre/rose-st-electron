@@ -12,7 +12,8 @@ import 'reflect-metadata';
   selector: 'users',
   controllerAs: 'Users',
   template: require('./users.html'),
-  providers: ['ngMessages', 'ngPassword', Table, ModalService]
+  providers: ['ngMessages', 'ngPassword', AuthenticationService, ModalService],
+  directives: [Table]
 })
 
 @Inject('$mdDialog', 'users', AuthenticationService, ModalService)
@@ -25,11 +26,11 @@ export default class Users extends TableComponent {
   constructor($mdDialog, users, AuthenticationService, ModalService) {
     super(ModalService);
 
-    this.AuthService = AuthenticationService;
+    this.authService = AuthenticationService;
 
-    this.fields = ['id', 'email', 'nickname', 'posts', 'created_at', 'updated_at'];
+    this.fields = ['id', 'email', 'nickname', 'posts', 'sign_in_count', 'confirmed', 'created_at', 'updated_at'];
 
-    this.options.actions = ['add', 'edit', 'delete', 'deleteAll'];
+    this.options.actions = (::this.evalAdmin() ? ['add', 'edit', 'delete', 'deleteAll'] : []);
     this.options.selectParam = 'email';
     this.options.filterFields = {
       created_at: 'date',
@@ -65,14 +66,13 @@ export default class Users extends TableComponent {
 
   handleSubmit(slug) {
     console.log(slug);
-    let userSlug = slug.objectSlug;
+    let user = slug.objectSlug;
     let action = slug.action;
     try {
       if (action === 'Update') {
-        let user = this.users.filter(user => { return userSlug.id === user.id })[0];
-        user.save(userSlug);
+        user.save();
       } else if (action === 'Create') {
-        this.AuthService.register(userSlug).then(::this.handleRegister).fail(::this.handleErrors);
+        this.authService.register(userSlug).then(::this.handleRegister).fail(::this.handleErrors);
       }
     } catch (error) {
       this.handleErrors(error);

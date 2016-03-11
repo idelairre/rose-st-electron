@@ -1,9 +1,6 @@
 var gulp = require('gulp');
 var gulpsync = require('gulp-sync')(gulp);
 var babel = require('gulp-babel');
-var replace = require('gulp-replace-path');
-var browserSync = require('browser-sync');
-var gulpFilter = require('gulp-filter');
 var fs = require('fs');
 var $ = require('gulp-load-plugins')(); // loads other gulp plugins
 var browserify = require('browserify');
@@ -13,7 +10,6 @@ var source = require('vinyl-source-stream');
 var stringify = require('stringify');
 var del = require('del');
 var electron = require('electron-connect').server.create();
-var winInstaller = require('electron-windows-installer');
 
 var BUILDDIR = './build';
 
@@ -39,9 +35,6 @@ var bundler = {
       .on('error', handleErrors)
       .pipe(source('app.js'))
       .pipe(gulp.dest(BUILDDIR + '/scripts/'))
-      .pipe(browserSync.reload({
-        stream: true
-      }));
   },
   watch: function() {
     this.w && this.w.on('update', this.bundle.bind(this));
@@ -65,10 +58,10 @@ gulp.task('serve', function () {
   // Restart browser process
   gulp.watch('app/scripts/**/*.html', ['scripts', electron.restart]);
 
-  gulp.watch('app/scripts/**/*.js', ['scripts', electron.restart]);
+  gulp.watch('app/**/*.js', ['scripts', electron.restart]);
 
   // Reload renderer process
-  gulp.watch(['index.js', 'index.html'], electron.reload);
+  gulp.watch(['index.js', 'app/events.js', 'app/menu.js', 'index.html'], electron.restart, electron.reload);
 });
 
 gulp.task('styles', function() {
@@ -77,9 +70,6 @@ gulp.task('styles', function() {
     .pipe($.autoprefixer('last 1 version'))
     .pipe($.concat('styles.css'))
     .pipe(gulp.dest(BUILDDIR + '/styles'))
-    .pipe(browserSync.reload({
-      stream: true
-    }))
     .pipe($.size());
 });
 
@@ -91,9 +81,6 @@ gulp.task('scripts', function() {
 gulp.task('html', function() {
   return gulp.src(['app/index.html'])
     .pipe(gulp.dest(BUILDDIR))
-    .pipe(browserSync.reload({
-      stream: true
-    }))
   .pipe($.size());
 });
 
@@ -109,25 +96,17 @@ gulp.task('extras', function() {
 
 gulp.task('electron', function() {
   return gulp.src(['app/events.js', 'app/menu.js'])
-    .pipe(gulp.dest(BUILDDIR + '/'))
+    .pipe(gulp.dest(BUILDDIR))
     .pipe($.size());
 });
 
 gulp.task('minify:js', function() {
-  return gulp.src(BUILDDIR + '/scripts/**/*.js')
+  return gulp.src(BUILDDIR + '/**/*.js')
     .pipe($.uglify({
       mangle: false
     }))
-    .pipe(gulp.dest(BUILDDIR + '/scripts'))
+    .pipe(gulp.dest(BUILDDIR))
     .pipe($.size());
-});
-
-gulp.task('create-windows-installer', function(done) {
-  winInstaller({
-    appDirectory: './',
-    outputDirectory: './release',
-    arch: 'ia32'
-  }).then(done).catch(done);
 });
 
 gulp.task('minify:css', function() {

@@ -8,22 +8,17 @@ import 'reflect-metadata';
     selector: 'recover-password',
     controllerAs: 'RecoverPassword',
     template: require('./recover-password.html'),
-    providers: ['ngMaterial', AuthenticationService]
+    providers: ['ngMaterial', 'ngMessages', AuthenticationService]
 })
 
-@Inject('$mdDialog', '$scope', '$state', AuthenticationService)
+@Inject('$mdDialog', '$state', AuthenticationService)
 export default class RecoverPassword extends AuthModal {
   constructor($mdDialog, $scope, $state, AuthenticationService) {
-    super($mdDialog, $scope, $state, AuthenticationService);
-    this.$scope.submit = ::this.submit;
-    this.$scope.dismiss = ::this.dismiss;
-  }
-
-  dismiss() {
-    this.$mdDialog.hide();
+    super($mdDialog, $state, AuthenticationService);
   }
 
   async submit(credentials) {
+    console.log(credentials);
     try {
       let redirectDialog = this.$mdDialog.alert()
         .title('Reset password')
@@ -33,6 +28,7 @@ export default class RecoverPassword extends AuthModal {
 
       let unlockDialog = {
         controller: Unlock,
+        controllerAs: 'Unlock',
         template: require('../unlock/unlock.modal.html'),
         parent: angular.element(document.body)
       };

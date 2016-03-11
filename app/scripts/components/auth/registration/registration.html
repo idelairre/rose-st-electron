@@ -1,34 +1,38 @@
-<div layout="column" flex>
-  <md-content layout="row" layout-align="center center" layout-fill>
-    <md-whiteframe class="md-whiteframe-z1" flex="35" layout-padding>
+<div layout="column" flex id="content" role="main">
+  <md-content layout="row" layout-align="center center" layout-fill id="content">
+    <md-whiteframe class="md-whiteframe-z1" flex="30" layout-padding style="min-width: 350px">
       <md-content layout-align="center center">
+        <h1 class="md-display-2">Register</h1>
+        <md-divider></md-divider>
         <form name="registrationForm">
           <md-input-container class="md-block">
             <label>Email</label>
             <input type="email" name="email" ng-model="Registration.credentials.email" required />
-            <div ng-messages=registrationForm.email.$error" ng-if=registrationForm.$submitted || registrationForm.email.$dirty" ng-messages-multiple="ng-messages-multiple">
-              <div ng-message="required">You did not enter a valid email!</div>
+            <div ng-messages="registrationForm.email.$error" ng-if="registrationForm.email.$touched && registrationForm.email.$error.email" ng-messages-multiple="ng-messages-multiple">
+              <div ng-message="email">You did not enter a valid email!</div>
+              <div ng-message="required">You forgot to enter your email address!</div>
             </div>
           </md-input-container>
           <md-input-container class="md-block">
             <label>Password</label>
-            <input type="password" name="password" ng-model="Registration.credentials.password" required />
-            <div ng-messages=registrationForm.password.$error" ng-if=registrationForm.$submitted || registrationForm.password.$dirty" ng-messages-multiple="ng-messages-multiple">
-              <div ng-message="required">You did not enter a password</div>
-              <div ng-message="passwordMatch">Your passwords did not match.</div>
+            <input type="password" name="password" ng-model="Registration.credentials.password" minlength="8" required />
+            <div ng-messages="registrationForm.password.$error" ng-if="registrationForm.password.$dirty && registrationForm.password.$error" ng-messages-multiple="ng-messages-multiple">
+              <div ng-message="required">You did not enter a password!</div>
+              <div ng-message="minlength">Your password is too short!</div>
+              <div ng-message="passwordMatch">Your passwords did not match!</div>
             </div>
           </md-input-container>
           <md-input-container class="md-block">
             <label>Password confirmation</label>
             <input type="password" name="confirmPassword" match-password="password" ng-model="Registration.credentials.password_confirmation" required />
-            <div ng-messages=registrationForm.confirmPassword.$error" ng-if=registrationForm.$submitted || registrationForm.confirmPassword.$dirty">
-              <div ng-message="passwordMatch">Your passwords did not match.</div>
+            <div ng-messages="registrationForm.confirmPassword.$error" ng-if="registrationForm.confirmPassword.$dirty">
+              <div ng-message="passwordMatch">Your passwords did not match!</div>
             </div>
           </md-input-container>
-          <md-input-container layout="row" layout-align="space-between center">
-            <md-button ui-sref="login">Back</md-button>
-            <md-button (click)="Registration.register(Registration.credentials)" ng-disabled="registrationForm.$invalid">Submit</md-button>
-          </md-input-container>
+          <div layout="row" layout-align="space-between center">
+            <md-button class="md-raised" ui-sref="login">Back</md-button>
+            <md-button class="md-raised md-primary" (click)="Registration.register(Registration.credentials)" ng-disabled="registrationForm.$invalid">Submit</md-button>
+          </div>
         </form>
       </md-content>
     </md-whiteframe>

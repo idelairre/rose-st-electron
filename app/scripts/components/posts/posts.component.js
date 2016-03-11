@@ -1,6 +1,7 @@
 import { Component, Inject, Resolve } from 'ng-forward';
 import { CLIENT_URL } from '../../constants/constants';
 import Post from './post.model';
+import AuthenticationService from '../../services/authentication.service';
 import ModalService from '../../services/modal.service';
 import Table, { TableComponent } from '../table/table.component';
 import User from '../users/user.model';
@@ -8,28 +9,27 @@ import 'angular-ui-tinymce';
 import 'babel-polyfill';
 import 'reflect-metadata';
 
-let open = require('open');
-
 @Component({
   selector: 'posts',
   controllerAs: 'Posts',
   template: require('./posts.html'),
   directives: [Table],
-  providers: ['ui.tinymce']
+  providers: ['ui.tinymce', AuthenticationService, ModalService]
 })
 
-@Inject('posts', ModalService)
+@Inject('posts', AuthenticationService, ModalService)
 export default class Posts extends TableComponent {
   @Resolve()
   static posts() {
     return Post.query();
   }
 
-  constructor(posts, ModalService) {
-    super(ModalService);
+  constructor(posts, AuthenticationService, ModalService) {
+    super(AuthenticationService, ModalService);
 
+    this.authService = AuthenticationService;
     this.fields = ['id', 'title', 'subheading', 'user', 'created_at', 'updated_at'];
-    this.options.actions = ['add', 'preview', 'edit', 'delete', 'deleteAll'];
+    this.options.actions = (::this.evalAdmin() ? ['add', 'preview', 'edit', 'delete', 'deleteAll'] : ['preview']);
     this.options.selectParam = 'title';
     this.options.filterFields = {
       created_at: 'date',
@@ -57,20 +57,19 @@ export default class Posts extends TableComponent {
     this.modalService.edit(locals).then(::this.handleSubmit);
   }
 
-  preview(event) {
+  // TODO: use electron spawn to open browser
+  preview() {
     let post = this.getSelected();
-    this.modalService.redirect().then(() => {
-      open(`${CLIENT_URL}/${post.title_url}`);
-    });
+    let event = new CustomEvent('openBrowser', { detail: `${CLIENT_URL}/posts/${post.title_url}` });
+    window.dispatchEvent(event);
   }
 
   async handleSubmit(slug) {
     try {
       let action = slug.action;
-      let postSlug = slug.objectSlug;
       if (action === 'Update') {
-        let post = this.posts.filter(post => { return postSlug.id === post.id })[0];
-        await post.save(postSlug);
+        let post = slug.objectSlug;
+        post.save();
       } else if (action === 'Create') {
         let post = new Post(postSlug);
         this.posts.push(post);

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Injectable, Inject, Output } from 'ng-forward';
+import AuthenticationService from '../../services/authentication.service';
 import ModalService from '../../services/modal.service';
 import Pagination from './pagination/pagination';
 import TableContainer from './table-container/table-container';
@@ -58,9 +59,9 @@ export default class Table {
 }
 
 @Injectable()
-@Inject(ModalService)
+@Inject(ModalService, AuthenticationService)
 export class TableComponent {
-  constructor(ModalService) {
+  constructor(ModalService, AuthenticationService) {
     this.selected = [];
 
     this.options = {
@@ -77,7 +78,13 @@ export class TableComponent {
       page: 1
     };
 
+    this.authService = AuthenticationService;
     this.modalService = ModalService;
+  }
+
+  evalAdmin() {
+    let user = this.authService.getUser();
+    this.isAdmin = user.admin;
   }
 
   getSelected() {

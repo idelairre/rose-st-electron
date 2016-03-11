@@ -20,7 +20,7 @@ export default class Nav {
     this.$window = $window;
     this.authService = AuthenticationService;
     this.tabIndex = 0;
-    this.routes = ['home', 'donations', 'messages', 'posts', 'profile', 'users'];
+    this.routes = ['home', 'donations', 'messages', 'posts', 'users', 'profile'];
     this.$scope.$watch(::this.evalTabIndex, ::this.setState);
     this.$scope.$watch(::this.evalState, ::this.setTabIndex);
   }
@@ -31,10 +31,6 @@ export default class Nav {
 
   close(navId) {
     this.$mdSidenav(navId).close();
-  }
-
-  evalAdmin() {
-    return this.authService.getUser.admin;
   }
 
   evalLoginState() {

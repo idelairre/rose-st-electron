@@ -8,7 +8,7 @@ const Menu = require('menu');
 const qs = require('qs');
 
 const options = {
-	debug: true,
+	debug: (process.env.NODE_ENV === 'production' ? false : true),
 	rootView: 'index.html'
 };
 
@@ -122,6 +122,39 @@ app.on('ready', () => {
 			role: 'selectall'
 		}]
 	}, {
+		label: 'Tabs',
+		submenu: [{
+			label: 'Home',
+			click: () => {
+				mainWindow.webContents.send('goto', 'home');
+			}
+		}, {
+			label: 'Donations',
+			click: () => {
+				mainWindow.webContents.send('goto', 'donations');
+			}
+		}, {
+			label: 'Messages',
+			click: () => {
+				mainWindow.webContents.send('goto', 'messages');
+			}
+		}, {
+			label: 'Posts',
+			click: () => {
+				mainWindow.webContents.send('goto', 'posts');
+			}
+		}, {
+			label: 'Profile',
+			click: () => {
+				mainWindow.webContents.send('goto', 'profile');
+			}
+		}, {
+			label: 'Users',
+			click: () => {
+				mainWindow.webContents.send('goto', 'users');
+			}
+		}]
+	}, {
 		label: 'View',
 		submenu: [{
 			label: 'Reload',
@@ -162,27 +195,17 @@ app.on('ready', () => {
 		label: 'Help',
 		role: 'help',
 		submenu: [{
-			label: 'Learn More',
-			click: () => {
-				shell.openExternal('http://electron.atom.io');
-			}
-		}, {
 			label: 'Documentation',
 			click: () => {
 				shell.openExternal(`https://github.com/atom/electron/tree/v${process.versions.electron}/docs#readme`);
 			}
 		}, {
-			label: 'Community Discussions',
-			click: () => {
-				shell.openExternal('https://discuss.atom.io/c/electron');
-			}
-		}, {
 			label: 'Search Issues',
 			click: () => {
-				shell.openExternal('https://github.com/atom/electron/issues');
+				shell.openExternal('https://github.com/idelairre/rose_st_electron/issues');
 			}
 		}]
-	}, ];
+	}];
 
 	if (process.platform == 'darwin') {
 		template.unshift({

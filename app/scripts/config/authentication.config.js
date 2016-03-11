@@ -21,9 +21,9 @@ class AuthenticationConfig {
     this.authService.logout();
   }
 
-  async validateTempToken() {
+  async validateTempToken(event) {
     try {
-      await this.authService.setTokenAfterPasswordReset(this.$window.authParams);
+      await this.authService.setTokenAfterPasswordReset(event.detail);
       await setTimeout(this.authService.isAuthenticated, 300);
       this.$state.go('home');
       this.modalService.passwordWarn();

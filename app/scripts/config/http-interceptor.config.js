@@ -2,10 +2,11 @@ import axios from 'axios';
 import { Inject } from 'ng-forward';
 import ModalService from '../services/modal.service';
 
-@Inject('$state', ModalService)
+@Inject('$state', '$window', ModalService)
 class HttpInterceptor {
-	constructor($state, ModalService) {
+	constructor($state, $window, ModalService) {
     this.$state = $state;
+		this.$window = $window;
     this.modalService = ModalService;
 
 		axios.interceptors.request.use((config) => {
@@ -27,11 +28,15 @@ class HttpInterceptor {
     	this.modalService.error(error.statusText);
     	return Promise.reject(error);
     });
+
+		$window.addEventListener('loginStarted', ::this.modalService.loadingModal);
+		$window.addEventListener('loginSuccess', ::this.modalService.hide);
+		$window.addEventListener('loginFailed', ::this.modalService.hide);
   }
 
-  @Inject('$state', ModalService)
-  static init($state, ModalService) {
-    HttpInterceptor.instance = new HttpInterceptor($state, ModalService);
+  @Inject('$state', '$window', ModalService)
+  static init($state, $window, ModalService) {
+    HttpInterceptor.instance = new HttpInterceptor($state, $window, ModalService);
     return HttpInterceptor.instance;
   }
 
