@@ -99,20 +99,12 @@ export default class Donations extends TableComponent {
     let today = new Date();
 
     let maxStartDate = new Date(today.getFullYear(), today.getMonth(), today.getDay() - 1);
-<<<<<<< HEAD
-    let maxEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDay() + 1);
-=======
     // let maxEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDay());
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
 
     this.limits = array;
 
     this.maxStartDate = maxStartDate;
-<<<<<<< HEAD
-    this.maxEndDate = maxEndDate;
-=======
     // this.maxEndDate = maxEndDate;
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
 
     this.chartOptions = {
       limit: 100,
@@ -187,10 +179,6 @@ export default class Donations extends TableComponent {
 
   async setTransactions(transactions) {
     this.transactions = transactions;
-<<<<<<< HEAD
-=======
-    this.cachedTransactions = transactions;
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
     this.total = this.parseTotal(transactions);
     let transactionsCopy = Object.assign([], transactions);
 
@@ -214,22 +202,13 @@ export default class Donations extends TableComponent {
 
   initializeDates(transactions, type) {
     let dates = {};
-<<<<<<< HEAD
-
-    if (this.chartOptions.startDate === undefined) {
-=======
     if (typeof this.chartOptions.startDate === 'undefined') {
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
       let startDate = Math.min.apply(Math, transactions.map(transaction => {
         return transaction.created_at * 1000;
       }));
       this.chartOptions.startDate = new Date(startDate);
     }
-<<<<<<< HEAD
-    if (this.chartOptions.endDate === undefined) {
-=======
     if (typeof this.chartOptions.endDate === 'undefined') {
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
       this.chartOptions.endDate = new Date().addDays(1)
     }
 
@@ -254,15 +233,6 @@ export default class Donations extends TableComponent {
     let data = [];
     let { datesArray, dates } = this.initializeDates(customers, 'customers');
 
-<<<<<<< HEAD
-    let parseDates = (customers) => {
-      for (let i = 0; customers.length > i;) {
-        const DATE_KEY = this.parseDate(customers[i]);
-        dates[DATE_KEY] += 1;
-        customers.splice(i, 1);
-        if (customers[i + 1]) {
-          parseDates(customers);
-=======
     let parseCustomerDates = (customers) => {
       for (let i = 0; customers.length > i;) {
         const DATE_KEY = this.parseDate(customers[i]);
@@ -270,26 +240,18 @@ export default class Donations extends TableComponent {
         customers.splice(i, 1);
         if (customers[i + 1]) {
           parseCustomerDates(customers);
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
         } else {
           break;
         }
       }
     }
 
-<<<<<<< HEAD
-    parseDates(customers);
-=======
     parseCustomerDates(customers);
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
 
     for (let key in dates) {
       data.push(dates[key]);
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
     return { datesArray, data };
   }
 
@@ -311,11 +273,7 @@ export default class Donations extends TableComponent {
     let data = [];
     let { datesArray, dates } = this.initializeDates(transactions, 'transactions');
 
-<<<<<<< HEAD
-    let parseDate = (transactions) => { // i hate math and fuck unix time
-=======
     let parseChargeDates = (transactions) => { // i hate math and fuck unix time
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
       for (let i = 0; transactions.length > i;) {
         const DATE_KEY = this.parseDate(transactions[i]);
         if (dates[DATE_KEY]) {
@@ -323,22 +281,14 @@ export default class Donations extends TableComponent {
         }
         transactions.splice(i, 1);
         if (transactions[i + 1]) {
-<<<<<<< HEAD
-          parseDate(dates, transactions);
-=======
           parseChargeDates(transactions);
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
         } else {
           break;
         }
       }
     }
 
-<<<<<<< HEAD
-    parseDate(transactions);
-=======
     parseChargeDates(transactions);
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
     data = this.reduceAmounts(data, dates);
     return { datesArray, data };
   }
@@ -356,14 +306,9 @@ export default class Donations extends TableComponent {
   async setLimit(limit) {
     if (limit > this.transactions.length) {
       this.transactions = Object.assign([], this.cachedTransactions);
-<<<<<<< HEAD
-    }
-    this.transactions.length = limit;
-=======
     } else if (limit <= this.transactions.length) {
       this.transactions.length = limit;
     }
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
     this.setTransactions(this.transactions);
   }
 

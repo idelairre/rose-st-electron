@@ -65,16 +65,6 @@ export default class Users extends TableComponent {
 
   handleSubmit(slug) {
     console.log(slug);
-<<<<<<< HEAD
-    let userSlug = slug.objectSlug;
-    let action = slug.action;
-    try {
-      if (action === 'Update') {
-        let user = this.users.filter(user => { return userSlug.id === user.id })[0];
-        user.save(userSlug);
-      } else if (action === 'Create') {
-        this.AuthService.register(userSlug).then(::this.handleRegister).fail(::this.handleErrors);
-=======
     let user = slug.objectSlug;
     let action = slug.action;
     try {
@@ -82,7 +72,6 @@ export default class Users extends TableComponent {
         user.save();
       } else if (action === 'Create') {
         this.authService.register(userSlug).then(::this.handleRegister).fail(::this.handleErrors);
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
       }
     } catch (error) {
       this.handleErrors(error);

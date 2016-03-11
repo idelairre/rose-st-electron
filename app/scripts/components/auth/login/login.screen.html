@@ -1,30 +1,5 @@
 <div layout="column" flex id="content" role="main">
   <md-content layout="row" layout-align="center center" layout-fill id="content">
-<<<<<<< HEAD
-    <md-whiteframe class="md-whiteframe-z1" flex="30" layout-padding style="min-width: 350px">
-      <md-content layout-align="center center">
-        <h1 class="md-display-2">Rose St. Admin</h1>
-        <md-divider></md-divider>
-        <md-input-container class="md-block">
-          <label>Email</label>
-          <input ng-model="credentials.email">
-        </md-input-container>
-        <md-input-container class="md-block">
-          <label>Password</label>
-          <input ng-model="credentials.password" type="password">
-        </md-input-container>
-        <md-input-container layout="row" layout-align="space-between center">
-          <md-button flex class="md-raised md-primary" (click)="Login.submit(credentials)">Login</md-button>
-        </md-input-container>
-        <md-input-container layout="row" layout-align="space-between center">
-          <md-button flex class="" (click)="Login.resetPassword()">Forgot Password?</md-button>
-        </md-input-container>
-        <md-input-container layout="row" layout-align="space-between center">
-          <md-button flex class="" (click)="Login.register()">Don't have an account?</md-button>
-        </md-input-container>
-      </md-content>
-    </md-whiteframe>
-=======
       <md-whiteframe class="md-whiteframe-z1" flex="30" layout-padding style="min-width: 350px">
         <form name="loginForm">
         <md-content layout-align="center center">
@@ -54,6 +29,5 @@
         </md-content>
       </form>
       </md-whiteframe>
->>>>>>> fb7bfaea9e6a13cabe03521be92e622ad03cf7fb
   </md-content>
 </div>
