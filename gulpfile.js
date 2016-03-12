@@ -42,7 +42,7 @@ var bundler = {
       .on('start', logger.start)
       .on('error', handleErrors)
       .pipe(source('app.js'))
-      .pipe(gulp.dest(BUILDDIR + '/scripts/'))
+      .pipe(gulp.dest(BUILDDIR + '/scripts'))
   },
   watch: function() {
     this.w && this.w.on('update', this.bundle.bind(this));
@@ -53,10 +53,10 @@ var bundler = {
 };
 
 gulp.task('bundle:dependencies', function() {
-	var streams = [],
-		dependencies = [];
-	var defaultModules = ['assert', 'buffer', 'console', 'constants', 'crypto', 'domain', 'events', 'http', 'https', 'os', 'path', 'punycode', 'querystring', 'stream', 'string_decoder', 'timers', 'tty', 'url', 'util', 'vm', 'zlib'],
-		electronModules = ['app', 'auto-updater', 'browser-window', 'content-tracing', 'dialog', 'global-shortcut', 'ipc', 'menu', 'menu-item', 'power-monitor', 'protocol', 'tray', 'remote', 'web-frame', 'clipboard', 'crash-reporter', 'native-image', 'screen', 'shell'];
+	var streams = [];
+	var dependencies = [];
+	var defaultModules = ['assert', 'buffer', 'console', 'constants', 'crypto', 'domain', 'events', 'http', 'https', 'os', 'path', 'punycode', 'querystring', 'stream', 'string_decoder', 'timers', 'tty', 'url', 'util', 'vm', 'zlib'];
+	var electronModules = ['app', 'auto-updater', 'browser-window', 'content-tracing', 'dialog', 'global-shortcut', 'ipc', 'menu', 'menu-item', 'power-monitor', 'protocol', 'tray', 'remote', 'web-frame', 'clipboard', 'crash-reporter', 'native-image', 'screen', 'shell'];
 
 	// Because Electron's node integration, bundle files don't need to include browser-specific shim.
 	var excludeModules = defaultModules.concat(electronModules);
@@ -188,9 +188,19 @@ gulp.task('extras', function() {
 });
 
 gulp.task('electron', function() {
-	return gulp.src(['app/events.js', 'app/menu.js', 'app/index.js'])
-		.pipe(gulp.dest(BUILDDIR))
-		.pipe($.size());
+	var streams = [];
+	var entries = ['app/events.js', 'app/menu.js', 'app/index.js'];
+	for (var i = 0; entries.length > i; i++) {
+
+		streams.push(
+			gulp.src(entries[i])
+			.pipe($.babel(BABEL_PRESET))
+			.pipe($.uglify())
+			.pipe(gulp.dest(BUILDDIR))
+			.pipe($.size())
+		);
+	}
+	return merge(streams);
 });
 
 gulp.task('minify:js', function() {

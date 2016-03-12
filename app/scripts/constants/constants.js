@@ -1,5 +1,3 @@
-// export const SERVER_URL = 'http://localhost:3000';
-
 export const SERVER_URL = 'https://rose-st-api.herokuapp.com';
 
 export const VERSION = require('../../../package.json').version;

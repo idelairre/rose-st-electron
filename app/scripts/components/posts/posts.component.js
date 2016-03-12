@@ -17,16 +17,16 @@ import 'reflect-metadata';
   providers: ['ui.tinymce', AuthenticationService, ModalService]
 })
 
-@Inject('posts', AuthenticationService, ModalService)
+@Inject('$window', 'posts', AuthenticationService, ModalService)
 export default class Posts extends TableComponent {
   @Resolve()
   static posts() {
     return Post.query();
   }
 
-  constructor(posts, AuthenticationService, ModalService) {
+  constructor($window, posts, AuthenticationService, ModalService) {
     super(AuthenticationService, ModalService);
-
+    this.$window = $window;
     this.authService = AuthenticationService;
     this.fields = ['id', 'title', 'subheading', 'user', 'created_at', 'updated_at'];
     this.options.actions = (::this.evalAdmin() ? ['add', 'preview', 'edit', 'delete', 'deleteAll'] : ['preview']);
@@ -60,7 +60,7 @@ export default class Posts extends TableComponent {
   preview() {
     let post = this.getSelected();
     let event = new CustomEvent('openBrowser', { detail: `${CLIENT_URL}/posts/${post.title_url}` });
-    window.dispatchEvent(event);
+    this.$window.dispatchEvent(event);
   }
 
   async handleSubmit(slug) {

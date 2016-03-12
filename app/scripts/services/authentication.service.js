@@ -51,6 +51,11 @@ export default class AuthenticationService {
     return Auth.requestPasswordReset({ email: credentials.email });
   }
 
+  async getOauthTokens(url) {
+    let response = await axios.get(url);
+    return response;
+  }
+
   // NOTE: these have scary names so they will never be used instead of Auth methods
 
   async getTokenAfterPasswordReset(params) {

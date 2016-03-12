@@ -2,7 +2,6 @@ import Auth from 'j-toker';
 import axios from 'axios';
 import { SERVER_URL } from '../constants/constants';
 import 'babel-polyfill';
-import 'reflect-metadata';
 
 const inflect = require('inflected');
 
