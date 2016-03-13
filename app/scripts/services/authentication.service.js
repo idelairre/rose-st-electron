@@ -48,6 +48,7 @@ export default class AuthenticationService {
   }
 
   resetPassword(credentials) {
+    console.log(credentials);
     return Auth.requestPasswordReset({ email: credentials.email });
   }
 
@@ -79,10 +80,6 @@ export default class AuthenticationService {
 
   updateAccount(user) {
     return Auth.updateAccount(user);
-  }
-
-  isAdmin() {
-    return Auth.user.isAdmin;
   }
 
   isAuthenticated() {

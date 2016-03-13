@@ -6,10 +6,10 @@ import Unlock from '../unlock/unlock.component';
 import 'reflect-metadata';
 
 @Component({
-    selector: 'login',
-    controllerAs: 'Login',
-    template: require('./login.screen.html'),
-    providers: ['ngMaterial', 'ngMessages', AuthenticationService]
+  selector: 'login',
+  controllerAs: 'Login',
+  template: require('./login.screen.html'),
+  providers: ['ngMaterial', 'ngMessages', AuthenticationService]
 })
 
 @Inject('$mdDialog', '$state', '$window', AuthenticationService)
@@ -45,7 +45,6 @@ export default class Login extends AuthModal {
       .ok('try again');
     this.$mdDialog.show(errorDialogue).then(::this.openLogin);
   }
-
 
   onEnter(event, loginForm) {
     const ENTER_KEY = 13;
