@@ -1,4 +1,5 @@
 import { Component, StateConfig } from 'ng-forward';
+import Analytics from '../analytics/analytics.component';
 import Donations from '../donations/donations.component';
 import Home from '../home/home.component';
 import Password from '../auth/password/password.component';
@@ -15,6 +16,7 @@ import 'reflect-metadata';
 
 @StateConfig([
   { url: '/', name: 'home', component: Home },
+  { url: '/analytics', name: 'analytics', component: Analytics },
   { url: '/posts', name: 'posts', component: Posts },
   { url: '/profile', name: 'profile', component: Profile },
   { url: '/users', name: 'users', component: Users },
@@ -26,10 +28,10 @@ import 'reflect-metadata';
 ])
 
 @Component({
-    selector: 'rose-st-admin',
-    template: require('./main.html'),
-    providers: [uiRouter],
-    directives: [Nav]
+	selector: 'rose-st-admin',
+	template: require('./main.html'),
+	providers: [uiRouter],
+	directives: [Nav]
 })
 
 export default class MainComponent { }

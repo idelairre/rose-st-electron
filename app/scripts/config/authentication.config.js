@@ -13,12 +13,29 @@ class AuthenticationConfig {
     this.$window.addEventListener('auth', ::this.validateTempToken);
     this.$window.addEventListener('logout', ::this.logout);
     this.$window.addEventListener('loaded', ::this.validateUser);
+
+    this.$window.addEventListener('googleAuth', ::this.validateGoogle);
+    this.$window.addEventListener('googleRedirect', ::this.handleGoogleRedirect);
     return this.validateUser();
+  }
+
+  handleGoogleRedirect(url) {
+    console.log(url);
+    let event = new CustomEvent('openBrowser', { detail: url });
+    this.$window.dispatchEvent(event);
   }
 
   logout() {
     this.redirectToLogin();
     this.authService.logout();
+  }
+
+  async validateGoogle(event) {
+    try {
+      await this.authService.getOauthTokens(event.detail);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async validateTempToken(event) {
@@ -34,7 +51,7 @@ class AuthenticationConfig {
 
   async validateUser() {
     return this.authService.isAuthenticated().then(() => {
-      console.log(this.authService.getUser());
+      // console.log(this.authService.getUser());
     }).fail(::this.redirectToLogin);
   }
 

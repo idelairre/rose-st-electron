@@ -1,3 +1,5 @@
+import 'babel-polyfill';
+
 'use strict';
 
 const electron = require('electron');
@@ -6,6 +8,14 @@ const path = require('path');
 const app = electron.app;
 const Menu = require('menu');
 const qs = require('qs');
+const electronGoogleOauth = require('electron-google-oauth');
+
+const google = require('googleapis');
+const OAuth2 = google.auth.OAuth2;
+
+const CLIENT_ID = '323072685738-k19gtomqj9fp2cqid79lo68rte1q5sco.apps.googleusercontent.com';
+const CLIENT_SECRET = 'nbR00wVF5ZOShEcnbBIz6rWJ';
+const REDIRECT_URL = 'urn:ietf:wg:oauth:2.0:oob:auto';
 
 const options = {
 	debug: (process.env.NODE_ENV === 'production' ? false : true),
@@ -39,23 +49,89 @@ function createMainWindow() {
 	win.webContents.on('did-get-redirect-request', (event, oldUrl, newUrl, isMainFrame) => {
 		event.preventDefault();
 		let params = qs.parse(newUrl);
-		for (let key in params) {
-			if (key.includes('client_id')) {
-				let clientId = params[key];
-				delete params[key];
-				params.client_id = clientId;
+		if (params.hasOwnProperty('client_id') && params.hasOwnProperty('uid')) { // if it has a client id, its a request to heroku. if not, its to google
+			for (let key in params) {
+				if (key.includes('client_id')) {
+					let clientId = params[key];
+					delete params[key];
+					params.client_id = clientId;
+				}
+				if (key.includes('uid')) {
+					let val = params[key];
+					val = val.replace(/#.*/g, ''); // stripout angular shit
+					params[key] = val;
+				}
 			}
-			if (key.includes('uid')) {
-				let val = params[key];
-				val = val.replace(/#.*/g, ''); // stripout angular shit
-				params[key] = val;
-			}
+			win.webContents.send('authUrl', params);
+		} else {
+			win.webContents.send('googleRedirect', newUrl);
 		}
-		win.webContents.send('authUrl', params);
 	});
 
 	win.webContents.on('did-finish-load', () => {
 		win.webContents.send('loaded');
+
+		const oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+
+		const scopes = [
+			'https://www.googleapis.com/auth/analytics'
+		];
+
+		const url = oauth2Client.generateAuthUrl({
+			access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token)
+			scope: scopes // If you only need one scope you can pass it as string
+		});
+
+		const browserWindowParams = {
+			'use-content-size': true,
+			center: true,
+			show: false,
+			resizable: false,
+			'always-on-top': true,
+			'standard-window': true,
+			'auto-hide-menu-bar': true,
+			'node-integration': false
+		};
+
+		const googleOauth = electronGoogleOauth(browserWindowParams);
+
+		(async () => {
+
+			// retrieve  authorization code only
+			const authCode = await googleOauth.getAuthorizationCode(
+				['https://www.google.com/m8/feeds'],
+				CLIENT_ID,
+				CLIENT_SECRET,
+				REDIRECT_URL
+			);
+			console.dir(authCode);
+
+			// retrieve access token and refresh token
+			const result = await googleOauth.getAccessToken(
+				['https://www.google.com/m8/feeds'],
+				CLIENT_ID,
+				CLIENT_SECRET,
+				REDIRECT_URL
+			);
+			console.dir(result);
+
+		})();
+
+		win.webContents.send('googleAuth', url);
+
+		const analytics = google.analytics({ version: 'v3', auth: oauth2Client });
+
+		let params = { ids: 'ga:118196120', 'start-date': '30daysAgo', 'end-date': 'yesterday', metrics: 'ga:pageviews' };
+
+		win.webContents.send('google', analytics);
+
+		analytics.data.ga.get(params, (error, response) => {
+				if (error) {
+					win.webContents.send('google', `${error}`);
+				} else {
+					win.webContents.send('google', response);
+				}
+		});
 	});
 
 	return win;
@@ -78,6 +154,7 @@ app.on('ready', () => {
 	if (options.debug) {
 		mainWindow.openDevTools();
 	}
+
 	const template = [{
 		label: 'File',
 		submenu: [{
@@ -127,6 +204,11 @@ app.on('ready', () => {
 			label: 'Home',
 			click: () => {
 				mainWindow.webContents.send('goto', 'home');
+			}
+		}, {
+			label: 'Analytics',
+			click: () => {
+				mainWindow.webContents.send('goto', 'analytics');
 			}
 		}, {
 			label: 'Donations',

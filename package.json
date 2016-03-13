@@ -11,17 +11,12 @@
     "email": "idelairre@gmail.com",
     "url": "idelairre.github.io"
   },
-  "electronVersion": "0.36.10",
   "main": "build/index.js",
   "scripts": {
     "test": "xo",
     "karma": "karma start karma.conf.js",
     "start": "gulp watch",
-<<<<<<< HEAD
     "build": "gulp package"
-=======
-    "build": "electron-packager . rose-st-admin --out=dist --ignore='^/dist$' --prune --asar --all --version=0.36.0 --overwrite"
->>>>>>> d41809f4ff573fb2084df17a345e1119dce7b2c5
   },
   "files": [
     "index.js",
@@ -51,20 +46,13 @@
     "axios": "^0.9.1",
     "browserify-shim": "^3.8.12",
     "chart.js": "^1.0.2",
-<<<<<<< HEAD
     "filereader": "^0.10.3",
-=======
     "connect-modrewrite": "^0.8.2",
     "electron-debug": "^0.5.0",
-    "i": "^0.3.4",
->>>>>>> d41809f4ff573fb2084df17a345e1119dce7b2c5
     "j-toker": "0.0.10-beta3",
     "node-ipc": "^6.0.0",
-<<<<<<< HEAD
     "inflected": "^1.1.6",
     "ng-forward": "0.0.1-alpha.12",
-=======
->>>>>>> d41809f4ff573fb2084df17a345e1119dce7b2c5
     "qs": "^6.1.0",
     "tc-angular-chartjs": "git+https://github.com/carlcraig/tc-angular-chartjs.git",
     "tinymce": "^4.3.5"
@@ -81,22 +69,15 @@
     "browserify": "^13.0.0",
     "del": "^2.2.0",
     "electron-connect": "^0.3.7",
-<<<<<<< HEAD
     "electron-debug": "^0.5.0",
     "electron-packager": "^5.2.1",
-=======
-    "electron-packager": "^5.0.0",
->>>>>>> d41809f4ff573fb2084df17a345e1119dce7b2c5
     "electron-prebuilt": "^0.36.10",
     "gulp": "^3.9.0",
     "gulp-assetpaths": "^0.1.2",
     "gulp-autoprefixer": "^3.1.0",
     "gulp-babel": "^6.1.2",
     "gulp-concat": "^2.6.0",
-<<<<<<< HEAD
     "gulp-cssnano": "^2.1.1",
-=======
->>>>>>> d41809f4ff573fb2084df17a345e1119dce7b2c5
     "gulp-load-plugins": "^1.2.0",
     "gulp-ng-annotate": "^1.1.0",
     "gulp-notify": "^2.2.0",
@@ -122,11 +103,7 @@
       "app/assets/**/*.js",
       "build",
       "dist",
-<<<<<<< HEAD
       "gulpfile.js"
-=======
-      "gulpfile.babel.js"
->>>>>>> d41809f4ff573fb2084df17a345e1119dce7b2c5
     ]
   }
 }

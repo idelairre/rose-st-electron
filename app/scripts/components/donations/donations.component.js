@@ -11,13 +11,13 @@ Date.prototype.addDays = function(days) {
 }
 
 let getDates = (startDate, stopDate) => {
-    let dateArray = new Array();
-    let currentDate = startDate;
-    while (currentDate <= stopDate) {
-        dateArray.push(new Date(currentDate));
-        currentDate = currentDate.addDays(1);
-    }
-    return dateArray;
+	let dateArray = new Array();
+	let currentDate = startDate;
+	while (currentDate <= stopDate) {
+		dateArray.push(new Date(currentDate));
+		currentDate = currentDate.addDays(1);
+	}
+	return dateArray;
 }
 
 const TRANSACTION_FIELDS = ['id', 'source', 'amount', 'fee', 'net', 'available_on', 'created_at'];
