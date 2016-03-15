@@ -1,49 +1,39 @@
-'use strict';
+import { ipcRenderer, remote, shell } from 'electron';
 
-const eventListener = require('node-ipc');
-const shell = require('electron').shell;
-
-window.addEventListener('contextmenu', function(e) {
+window.addEventListener('contextmenu', e => {
   e.preventDefault();
   menu.popup(remote.getCurrentWindow());
 }, false);
 
-window.addEventListener('openBrowser', function (e) {
-  console.log(e.detail);
-  shell.openExternal(e.detail);
+window.addEventListener('openBrowser', event => {
+  shell.openExternal(event.detail);
 });
 
-eventListener.on('goto', function(params) {
-  let goto = new CustomEvent('goto', { detail: params });
-  window.dispatchEvent(goto);
+ipcRenderer.on('goto', (e, args) => {
+  let event = new CustomEvent('goto', { detail: args });
+  window.dispatchEvent(event);
 });
 
-eventListener.on('logout', function() {
-  let logout = new Event('logout');
-  window.dispatchEvent(logout);
+ipcRenderer.on('logout', () => {
+  let event = new Event('logout');
+  window.dispatchEvent(event);
 });
 
-eventListener.on('authUrl', function(params) {
-  let auth = new CustomEvent('auth', { detail: params });
-  window.dispatchEvent(auth);
+ipcRenderer.on('authUrl', (e, args) => {
+  let event = new CustomEvent('auth', { detail: args });
+  window.dispatchEvent(event);
 });
 
-eventListener.on('loaded', function() {
-  let loaded = new Event('loaded');
-  window.dispatchEvent(loaded);
+ipcRenderer.on('loaded', () => {
+  let event = new Event('loaded');
+  window.dispatchEvent(event);
 });
 
-eventListener.on('googleAuth', function(params) {
-  let googleAuth = new CustomEvent('googleAuth', { detail: params });
-  window.dispatchEvent(googleAuth);
+window.addEventListener('analyticsRequest', (e) => {
+  ipcRenderer.send('analyticsParams', e.detail);
 });
 
-eventListener.on('googleRedirect', function(params) {
-  let googleAuth = new CustomEvent('googleRedirect', { detail: params });
-  window.dispatchEvent(googleAuth);
-});
-
-eventListener.on('google', function(params) {
-  let google = new CustomEvent('google', { detail: params });
-  window.dispatchEvent(google);
+ipcRenderer.on('analyticsReply', (e, args) => {
+  let event = new CustomEvent('analyticsReply', { detail: args });
+  window.dispatchEvent(event);
 });

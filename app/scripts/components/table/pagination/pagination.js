@@ -24,6 +24,7 @@ export default class Pagination {
       of: 'of'
     }, this.$scope.$eval(this.$label) || {});
     this.$scope.$watch(::this.getLimit, ::this.evalLimit);
+    this.$scope.$watch(::this.getItems, ::this.resetQueryPage);
   }
 
 
@@ -47,6 +48,10 @@ export default class Pagination {
 
   getLimit() {
     return this.limit;
+  }
+
+  getItems() {
+    return this.items;
   }
 
   isPositive(number) {
@@ -94,6 +99,12 @@ export default class Pagination {
 
   range(total) {
     return new Array(isFinite(total) && this.isPositive(total) ? total : 1);
+  }
+
+  resetQueryPage(currentVal, oldVal) {
+    if (currentVal !== oldVal) {
+      this.query.page = 1;
+    }
   }
 
   showBoundaryLinks() {

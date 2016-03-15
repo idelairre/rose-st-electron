@@ -14,15 +14,15 @@ const inflect = require('inflected');
 
 @Inject('$compile', '$filter', '$scope')
 export default class TableContainer {
-  @Input fields;
-  @Input items;
-  @Input options;
-  @Input selected;
-  @Input query;
-  @Input model;
-  @Output delete;
-  @Output edit;
-  @Output preview;
+  @Input() fields;
+  @Input() items;
+  @Input() options;
+  @Input() selected;
+  @Input() query;
+  @Input() model;
+  @Output() delete;
+  @Output() edit;
+  @Output() preview;
   constructor($compile, $filter, $scope) {
     this.$compile = $compile;
     this.$filter = $filter;

@@ -1,4 +1,5 @@
 import { Component, Inject } from 'ng-forward';
+import { APP_DIR } from '../../constants/constants';
 import 'reflect-metadata';
 import 'angular-ui-tinymce';
 
@@ -22,8 +23,8 @@ export default class EditModal {
     this.master = angular.copy(object);
     this.users = (typeof users === 'undefined') ? [] : users;
     this.$scope.tinymceOptions = {
-      skin_url: 'app/assets/skins/light/',
-      content_css: 'app/assets/skins/light/content.min.css',
+      skin_url: `assets/skins/light/`,
+      content_css: `assets/skins/light/content.min.css`,
       content_style: 'div { font-size: 12px }',
       inline: false,
       menubar: '',

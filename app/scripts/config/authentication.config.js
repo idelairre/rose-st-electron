@@ -14,15 +14,7 @@ class AuthenticationConfig {
     this.$window.addEventListener('logout', ::this.logout);
     this.$window.addEventListener('loaded', ::this.validateUser);
 
-    this.$window.addEventListener('googleAuth', ::this.validateGoogle);
-    this.$window.addEventListener('googleRedirect', ::this.handleGoogleRedirect);
     return this.validateUser();
-  }
-
-  handleGoogleRedirect(url) {
-    console.log(url);
-    let event = new CustomEvent('openBrowser', { detail: url });
-    this.$window.dispatchEvent(event);
   }
 
   logout() {

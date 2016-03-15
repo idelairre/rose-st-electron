@@ -74,8 +74,6 @@ export default class Donations extends TableComponent {
     this.transactions = transactions;
     this.cachedTransactions = Object.assign([], transactions);
 
-    this.labels = [];
-
     this.selected = [];
 
     this.data = {
@@ -184,7 +182,6 @@ export default class Donations extends TableComponent {
     let transactionsCopy = Object.assign([], transactions);
 
     if (this.state.customers) {
-      console.log(transactions);
       let { datesArray, data } = this.parseCustomers(transactionsCopy);
       this.data.datasets[0].data = data;
       this.data.labels = datesArray.map(date => { return this.$filter('date')(date, 'shortDate')});
@@ -251,10 +248,7 @@ export default class Donations extends TableComponent {
     parseCustomerDates(customers);
 
     for (let key in dates) {
-      console.log(dates[key]);
-      // if (dates[key]) {
-        data.push(dates[key]);
-      // }
+      data.push(dates[key]);
     }
     return { datesArray, data };
   }

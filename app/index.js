@@ -1,32 +1,24 @@
-import 'babel-polyfill';
+import electron, { app, ipcMain, shell } from 'electron';
+import google from 'googleapis';
+import Menu from 'menu';
+import path from 'path';
+import qs from 'qs';
+import 'babel-polyfill'
 
-'use strict';
-
-const electron = require('electron');
-const shell = electron.shell;
-const path = require('path');
-const app = electron.app;
-const Menu = require('menu');
-const qs = require('qs');
-const electronGoogleOauth = require('electron-google-oauth');
-
-const google = require('googleapis');
-const OAuth2 = google.auth.OAuth2;
-
-const CLIENT_ID = '323072685738-k19gtomqj9fp2cqid79lo68rte1q5sco.apps.googleusercontent.com';
-const CLIENT_SECRET = 'nbR00wVF5ZOShEcnbBIz6rWJ';
-const REDIRECT_URL = 'urn:ietf:wg:oauth:2.0:oob:auto';
+process.env.GOOGLE_APPLICATION_CREDENTIALS = `${__dirname}/credentials.json`;
+process.env.NODE_ENV = require('./package.json').environment;
 
 const options = {
 	debug: (process.env.NODE_ENV === 'production' ? false : true),
 	rootView: 'index.html'
 };
 
-// report crashes to the Electron project
-require('crash-reporter').start();
+if (process.env.NODE_ENV !== 'production') {
+	require('electron-debug')();
+	require('crash-reporter').start();
+}
 
-// adds debug features like hotkeys for triggering dev tools and reload
-require('electron-debug')();
+console.log('environment: ', process.env.NODE_ENV);
 
 // prevent window being garbage collected
 let mainWindow;
@@ -35,6 +27,30 @@ function onClosed() {
 	// dereference the window
 	// for multiple windows store them in an array
 	mainWindow = null;
+}
+
+function analyticsRequest(params, callback) {
+	google.auth.getApplicationDefault((err, authClient) => {
+		if (err) {
+			console.error(err);
+			return;
+		}
+
+		if (authClient.createScopedRequired && authClient.createScopedRequired()) {
+			// Scopes can be specified either as an array or as a single, space-delimited string.
+			authClient = authClient.createScoped(['https://www.googleapis.com/auth/analytics']);
+		}
+
+		const analytics = google.analytics({ version: 'v3', auth: authClient });
+
+		analytics.data.ga.get(params, (error, response) => {
+			if (error) {
+				console.error(`${error}`);
+			} else {
+				return callback(response) || response;
+			}
+		});
+	});
 }
 
 function createMainWindow() {
@@ -63,79 +79,21 @@ function createMainWindow() {
 				}
 			}
 			win.webContents.send('authUrl', params);
-		} else {
-			win.webContents.send('googleRedirect', newUrl);
 		}
 	});
 
 	win.webContents.on('did-finish-load', () => {
 		win.webContents.send('loaded');
-
-		const oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
-
-		const scopes = [
-			'https://www.googleapis.com/auth/analytics'
-		];
-
-		const url = oauth2Client.generateAuthUrl({
-			access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token)
-			scope: scopes // If you only need one scope you can pass it as string
-		});
-
-		const browserWindowParams = {
-			'use-content-size': true,
-			center: true,
-			show: false,
-			resizable: false,
-			'always-on-top': true,
-			'standard-window': true,
-			'auto-hide-menu-bar': true,
-			'node-integration': false
-		};
-
-		const googleOauth = electronGoogleOauth(browserWindowParams);
-
-		(async () => {
-
-			// retrieve  authorization code only
-			const authCode = await googleOauth.getAuthorizationCode(
-				['https://www.google.com/m8/feeds'],
-				CLIENT_ID,
-				CLIENT_SECRET,
-				REDIRECT_URL
-			);
-			console.dir(authCode);
-
-			// retrieve access token and refresh token
-			const result = await googleOauth.getAccessToken(
-				['https://www.google.com/m8/feeds'],
-				CLIENT_ID,
-				CLIENT_SECRET,
-				REDIRECT_URL
-			);
-			console.dir(result);
-
-		})();
-
-		win.webContents.send('googleAuth', url);
-
-		const analytics = google.analytics({ version: 'v3', auth: oauth2Client });
-
-		let params = { ids: 'ga:118196120', 'start-date': '30daysAgo', 'end-date': 'yesterday', metrics: 'ga:pageviews' };
-
-		win.webContents.send('google', analytics);
-
-		analytics.data.ga.get(params, (error, response) => {
-				if (error) {
-					win.webContents.send('google', `${error}`);
-				} else {
-					win.webContents.send('google', response);
-				}
-		});
 	});
 
 	return win;
 }
+
+ipcMain.on('analyticsParams', (event, args) => {
+	analyticsRequest(args, response => {
+  	event.sender.send('analyticsReply', response);
+	});
+});
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
@@ -155,169 +113,98 @@ app.on('ready', () => {
 		mainWindow.openDevTools();
 	}
 
+	function goto(location) {
+		console.log(location);
+		mainWindow.webContents.send('goto', location);
+	}
+
+	function fullscreenAcc() {
+		if (process.platform === 'darwin') {
+			return 'Ctrl+Command+F';
+		} else {
+			return 'F11';
+		}
+	}
+
+	function devToolsAcc() {
+		if (process.platform === 'darwin') {
+			return 'Alt+Command+I';
+		} else {
+			return 'Ctrl+Shift+I';
+		}
+	}
+
+	function setFullScreen(focusedWindow) {
+		focusedWindow ? focusedWindow.setFullScreen(!focusedWindow.isFullScreen()) : null
+	}
+
+	function toggleDevTools(focusedWindow) {
+		focusedWindow ? focusedWindow.toggleDevTools() : null;
+	}
+
+	const README_LINK = `https://github.com/atom/electron/tree/v${process.versions.electron}/docs#readme`;
+	const ISSUES_LINK = 'https://github.com/idelairre/rose_st_electron/issues';
+
 	const template = [{
 		label: 'File',
-		submenu: [{
-			label: 'Logout',
-			click: () => {
-				mainWindow.webContents.send('logout');
-			}
-		}, {
-			label: 'Quit',
-			accelerator: 'CmdOrCtrl+Z',
-			click: () => {
-				app.quit();
-			}
-		}]
+		submenu: [
+			{ label: 'Logout', click: () => { mainWindow.webContents.send('logout') } },
+			{ label: 'Quit', accelerator: 'CmdOrCtrl+Z', click: () => { app.quit() } }
+		]
 	}, {
 		label: 'Edit',
-		submenu: [{
-			label: 'Undo',
-			accelerator: 'CmdOrCtrl+Z',
-			role: 'undo'
-		}, {
-			label: 'Redo',
-			accelerator: 'Shift+CmdOrCtrl+Z',
-			role: 'redo'
-		}, {
-			type: 'separator'
-		}, {
-			label: 'Cut',
-			accelerator: 'CmdOrCtrl+X',
-			role: 'cut'
-		}, {
-			label: 'Copy',
-			accelerator: 'CmdOrCtrl+C',
-			role: 'copy'
-		}, {
-			label: 'Paste',
-			accelerator: 'CmdOrCtrl+V',
-			role: 'paste'
-		}, {
-			label: 'Select All',
-			accelerator: 'CmdOrCtrl+A',
-			role: 'selectall'
-		}]
+		submenu: [
+			{ label: 'Undo', accelerator: 'CmdOrCtrl+Z', role: 'undo' },
+			{ label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', role: 'redo' },
+			{ type: 'separator' },
+			{ label: 'Cut', accelerator: 'CmdOrCtrl+X', role: 'cut' },
+			{ label: 'Copy', accelerator: 'CmdOrCtrl+C', role: 'copy' },
+			{ label: 'Paste', accelerator: 'CmdOrCtrl+V', role: 'paste'},
+			{ label: 'Select All', accelerator: 'CmdOrCtrl+A', role: 'selectall'}
+		]
 	}, {
 		label: 'Tabs',
-		submenu: [{
-			label: 'Home',
-			click: () => {
-				mainWindow.webContents.send('goto', 'home');
-			}
-		}, {
-			label: 'Analytics',
-			click: () => {
-				mainWindow.webContents.send('goto', 'analytics');
-			}
-		}, {
-			label: 'Donations',
-			click: () => {
-				mainWindow.webContents.send('goto', 'donations');
-			}
-		}, {
-			label: 'Messages',
-			click: () => {
-				mainWindow.webContents.send('goto', 'messages');
-			}
-		}, {
-			label: 'Posts',
-			click: () => {
-				mainWindow.webContents.send('goto', 'posts');
-			}
-		}, {
-			label: 'Profile',
-			click: () => {
-				mainWindow.webContents.send('goto', 'profile');
-			}
-		}, {
-			label: 'Users',
-			click: () => {
-				mainWindow.webContents.send('goto', 'users');
-			}
-		}]
+		submenu: [
+			{ label: 'Home', click: () => { goto('home') } },
+			{ label: 'Analytics', click: () => { goto('analytics') } },
+			{ label: 'Donations', click: () => { goto('donations') } },
+			{ label: 'Messages', click: () => { goto('messages') } },
+			{ label: 'Posts', click: () => { goto('posts') } },
+			{ label: 'Profile', click: () => { goto('profile') } },
+			{ label: 'Users', click: () => { goto('users') } }
+		]
 	}, {
 		label: 'View',
-		submenu: [{
-			label: 'Reload',
-			accelerator: 'CmdOrCtrl+R',
-			click: (item, focusedWindow) => {
-				focusedWindow ? focusedWindow.reload() : null;
-			}
-		}, {
-			label: 'Toggle Full Screen',
-			accelerator: (() => {
-				if (process.platform === 'darwin') { return 'Ctrl+Command+F' } else {	return 'F11' }
-			})(),
-			click: (item, focusedWindow) => {
-				focusedWindow ? focusedWindow.setFullScreen(!focusedWindow.isFullScreen()) : null ;
-			}
-		}, {
-			label: 'Toggle Developer Tools',
-			accelerator: (() => {
-				if (process.platform === 'darwin') { return 'Alt+Command+I' } else { return 'Ctrl+Shift+I' }
-			})(),
-			click: (item, focusedWindow) => {
-				focusedWindow ? focusedWindow.toggleDevTools() : null;
-			}
-		}]
+		submenu: [
+			{ label: 'Reload', accelerator: 'CmdOrCtrl+R', click: (item, focusedWindow) => { focusedWindow ? focusedWindow.reload() : null } },
+			{ label: 'Toggle Full Screen', accelerator: (() => { return fullscreenAcc() })(), click: (item, focusedWindow) => { setFullScreen(focusedWindow) } },
+			{ label: 'Toggle Developer Tools', accelerator: (() => { return devToolsAcc() })(), click: (item, focusedWindow) => { toggleDevTools(focusedWindow) } }
+		]
 	}, {
 		label: 'Help',
 		role: 'help',
-		submenu: [{
-			label: 'Documentation',
-			click: () => {
-				shell.openExternal(`https://github.com/atom/electron/tree/v${process.versions.electron}/docs#readme`);
-			}
-		}, {
-			label: 'Search Issues',
-			click: () => {
-				shell.openExternal('https://github.com/idelairre/rose_st_electron/issues');
-			}
-		}]
+		submenu: [
+			{ label: 'Documentation', click: () => { shell.openExternal(README_LINK) } },
+			{ label: 'Search Issues', click: () => { shell.openExternal(ISSUES_LINK) } }
+		]
 	}];
 
 	if (process.platform == 'darwin') {
 		template.unshift({
 			label: 'Electron',
-			submenu: [{
-				label: 'About Electron',
-				role: 'about'
-			}, {
-				type: 'separator'
-			}, {
-				label: 'Services',
-				role: 'services',
-				submenu: []
-			}, {
-				type: 'separator'
-			}, {
-				label: 'Hide Electron',
-				accelerator: 'Command+H',
-				role: 'hide'
-			}, {
-				label: 'Hide Others',
-				accelerator: 'Command+Alt+H',
-				role: 'hideothers'
-			}, {
-				label: 'Show All',
-				role: 'unhide'
-			}, {
-				type: 'separator'
-			}, {
-				label: 'Quit',
-				accelerator: 'Command+Q',
-				click: () => {
-					app.quit();
-				}
-			}]
+			submenu: [
+				{ label: 'About Electron', role: 'about' },
+				{ type: 'separator' },
+				{ label: 'Services', role: 'services', submenu: [] },
+				{ type: 'separator' },
+				{ label: 'Hide Electron', accelerator: 'Command+H', role: 'hide' },
+				{ label: 'Hide Others', accelerator: 'Command+Alt+H', role: 'hideothers' },
+				{ label: 'Show All', role: 'unhide' },
+				{ type: 'separator' },
+				{ label: 'Quit', accelerator: 'Command+Q', click: () => { app.quit() } }
+			]
 		});
-		template[3].submenu.push({
-			type: 'separator'
-		}, {
-			label: 'Bring All to Front',
-			role: 'front'
-		});
+		template[3].submenu.push({ type: 'separator' }, { label: 'Bring All to Front', role: 'front' });
 	}
 
 	let menu = Menu.buildFromTemplate(template);

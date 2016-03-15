@@ -1,7 +1,6 @@
-'use strict';
+import { remote } from 'electron';
 
-const BrowserWindow = require('electron').remote.BrowserWindow;
-const remote = require('electron').remote;
+const BrowserWindow = remote.BrowserWindow;
 const Menu = remote.Menu;
 
 const menuTmpl = [{

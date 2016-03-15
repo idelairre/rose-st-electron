@@ -11,25 +11,14 @@
     "email": "idelairre@gmail.com",
     "url": "idelairre.github.io"
   },
+  "environment": "development",
   "main": "build/index.js",
   "scripts": {
     "test": "xo",
     "karma": "karma start karma.conf.js",
     "start": "gulp watch",
-    "build": "gulp package"
+    "build": "gulp build:production && gulp build:package"
   },
-  "files": [
-    "index.js",
-    "index.html",
-    "app/scripts/app.js",
-    "app/events.js",
-    "app/menu.js",
-    "styles/styles.css"
-  ],
-  "keywords": [
-    "electron-app",
-    "electron"
-  ],
   "dependencies": {
     "angular": "^1.5.0",
     "angular-animate": "^1.5.0",
@@ -44,14 +33,10 @@
     "angular-ui-router": "^0.2.18",
     "angular-ui-tinymce": "0.0.14",
     "axios": "^0.9.1",
-    "browserify-shim": "^3.8.12",
     "chart.js": "^1.0.2",
-    "filereader": "^0.10.3",
-    "connect-modrewrite": "^0.8.2",
-    "electron-debug": "^0.5.0",
-    "j-toker": "0.0.10-beta3",
-    "node-ipc": "^6.0.0",
+    "googleapis": "^2.1.7",
     "inflected": "^1.1.6",
+    "j-toker": "0.0.10-beta3",
     "ng-forward": "0.0.1-alpha.12",
     "qs": "^6.1.0",
     "tc-angular-chartjs": "git+https://github.com/carlcraig/tc-angular-chartjs.git",
@@ -71,7 +56,7 @@
     "electron-connect": "^0.3.7",
     "electron-debug": "^0.5.0",
     "electron-packager": "^5.2.1",
-    "electron-prebuilt": "^0.36.10",
+    "electron-prebuilt": "0.36.11",
     "gulp": "^3.9.0",
     "gulp-assetpaths": "^0.1.2",
     "gulp-autoprefixer": "^3.1.0",
@@ -86,8 +71,8 @@
     "gulp-uglify": "^1.5.1",
     "gulp-util": "^3.0.7",
     "gulp-watch": "^4.3.5",
-    "stringify": "^4.0.1",
     "merge2": "^0.3.5",
+    "stringify": "^4.0.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0",

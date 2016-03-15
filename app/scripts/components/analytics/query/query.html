@@ -1,0 +1,56 @@
+<md-card>
+  <md-card-title flex="none">
+    <md-card-title-text>
+      <span class="md-headline">HALLO (Query builder)</span>
+    </md-card-title-text>
+    <md-card-title-media>
+      <md-datepicker ng-model="QueryBuilder.query['start-date']" md-placeholder="Start date"></md-datepicker>
+      <md-datepicker ng-model="QueryBuilder.query['end-date']" md-placeholder="End date"></md-datepicker>
+      <md-menu>
+        <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)">
+          <md-icon md-menu-origin>more_vert</md-icon>
+        </md-button>
+        <md-menu-content width="4">
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.changeState('sessions')">
+              <md-icon md-menu-align-target>pageview</md-icon>
+              <p>Sessions</p>
+            </button>
+          </md-menu-item>
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.changeState('social')">
+              <md-icon md-menu-align-target>share</md-icon>
+              <p>Social Networks</p>
+            </button>
+          </md-menu-item>
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.changeState('traffic')">
+              <md-icon md-menu-align-target>compare_arrows</md-icon>
+              <p>Traffic</p>
+            </button>
+          </md-menu-item>
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.changeState('users')">
+              <md-icon md-menu-align-target>people</md-icon>
+              <p>Users</p>
+            </button>
+          </md-menu-item>
+        </md-menu-content>
+      </md-menu>
+    </md-card-title-media>
+  </md-card-title>
+  <md-card-content>
+    <md-input-container class="md-block">
+      <label>Metrics</label>
+      <md-select placeholder="metrics" ng-model="QueryBuilder.query.metrics" ng-change="QueryBuilder.addParam('metrics', QueryBuilder.query.metrics)" flex>
+        <md-option ng-repeat="param in QueryBuilder.users.metrics" ng-value="param">{{ QueryBuilder.renderUiName(param) }}</md-option>
+      </md-select>
+    </md-input-container>
+    <md-input-container class="md-block">
+      <label>Dimensions</label>
+      <md-select placeholder="dimensions" ng-model="QueryBuilder.query.dimensions" ng-change="QueryBuilder.addParam('dimensions', QueryBuilder.query.metrics)">
+        <md-option ng-repeat="param in QueryBuilder.dimensions" ng-value="param">{{ QueryBuilder.renderUiName(param) }}</md-option>
+      </md-select>
+    </md-input-container>
+  </md-card-content>
+</md-card>

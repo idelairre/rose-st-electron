@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var asar = require('asar');
 var gulp = require('gulp');
 var gulpsync = require('gulp-sync')(gulp);
 var fs = require('fs');
@@ -13,12 +14,13 @@ var del = require('del');
 var electron = require('electron-connect').server.create();
 var packageJson = require('./package.json');
 var packager = require('electron-packager');
-var path = require('path');
 var watchify = require('watchify');
+var exec = require('child_process').exec;
 
 var BUILDDIR = 'build';
 var RELEASEDIR = 'release'; // directory for application packages
-var ELECTRON_VERSION = '0.36.10';
+var RESOURCEDIR = 'resources';
+var ELECTRON_VERSION = packageJson.devDependencies['electron-prebuilt'];
 var BABEL_PRESET = {
 	presets: ['es2015', 'stage-0'],
 	plugins: ['transform-function-bind', 'transform-class-properties', 'transform-decorators-legacy']
@@ -52,179 +54,6 @@ var bundler = {
   }
 };
 
-gulp.task('bundle:dependencies', function() {
-	var streams = [];
-	var dependencies = [];
-	var defaultModules = ['assert', 'buffer', 'console', 'constants', 'crypto', 'domain', 'events', 'http', 'https', 'os', 'path', 'punycode', 'querystring', 'stream', 'string_decoder', 'timers', 'tty', 'url', 'util', 'vm', 'zlib'];
-	var electronModules = ['app', 'auto-updater', 'browser-window', 'content-tracing', 'dialog', 'global-shortcut', 'ipc', 'menu', 'menu-item', 'power-monitor', 'protocol', 'tray', 'remote', 'web-frame', 'clipboard', 'crash-reporter', 'native-image', 'screen', 'shell'];
-
-	// Because Electron's node integration, bundle files don't need to include browser-specific shim.
-	var excludeModules = defaultModules.concat(electronModules);
-
-	for (var name in packageJson.dependencies) {
-		dependencies.push(name);
-	}
-
-	// create a list of dependencies' main files
-	var modules = dependencies.map(function(dep) {
-			var packageJson = require(dep + '/package.json');
-			var main;
-			if (!packageJson.main) {
-				main = ['index.js'];
-			} else if (Array.isArray(packageJson.main)) {
-				main = packageJson.main;
-			} else {
-				main = [packageJson.main];
-			}
-			return {
-				name: dep,
-				main: main
-			};
-		});
-
-  // add babel/polyfill module
-  modules.push({
-  	name: 'babel-polyfill',
-  	main: ['dist/polyfill.js']
-  });
-
-  // create bundle file and minify for each main files
-  modules.forEach(function(it) {
-  	it.main.forEach(function(entry) {
-  		var b = browserify('node_modules/' + it.name + '/' + entry, {
-  			detectGlobal: false,
-  			standalone: it.name
-  		})
-  		excludeModules.forEach(function(moduleName) {
-  			b.exclude(moduleName)
-  		});
-  		streams.push(b.bundle()
-        .pipe($.plumber())
-  			.pipe(source(entry))
-  			.pipe(buffer())
-  			.pipe($.uglify())
-  			.pipe(gulp.dest(BUILDDIR + '/node_modules/' + it.name))
-  		);
-  	});
-  	streams.push(
-  		// copy modules' package.json
-  		gulp.src('node_modules/' + it.name + '/package.json')
-  		.pipe($.plumber())
-  		.on('error', handleErrors)
-  		.pipe(gulp.dest(BUILDDIR + '/node_modules/' + it.name))
-  	);
-  });
-
-  return merge(streams);
-});
-
-// Write a package.json for distribution
-gulp.task('packageJson', ['bundle:dependencies'], function(done) {
-	var json = _.cloneDeep(packageJson);
-	json.main = 'app.js';
-	fs.writeFile(BUILDDIR + '/package.json', JSON.stringify(json), function(err) {
-		done();
-	});
-});
-
-// Package for each platforms
-gulp.task('package', ['win32', 'linux'].map(function(platform) {
-	var taskName = 'package:' + platform;
-	gulp.task(taskName, ['build:production'], function(done) {
-		packager({
-			dir: BUILDDIR,
-			name: packageJson.name,
-			arch: 'x64',
-			platform: platform,
-			out: RELEASEDIR + '/' + platform,
-			version: ELECTRON_VERSION
-		}, function(err) {
-			done();
-		});
-	});
-	return taskName;
-}));
-
-gulp.task('tinymce', function() {
-	return gulp.src('node_modules/tinymce/**/*.*')
-		.pipe(gulp.dest(BUILDDIR + '/assets'))
-		.pipe($.size())
-});
-
-gulp.task('serve', function() {
-	electron.start();
-	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['scripts', electron.restart]);
-	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], electron.reload);
-});
-
-gulp.task('styles', function() {
-	return gulp.src(['app/**/*.css', 'node_modules/angular-chart.js/dist/angular-chart.css', '!app/assets/**/*.css'])
-		.on('error', handleErrors)
-		.pipe($.autoprefixer('last 1 version'))
-		.pipe($.concat('styles.css'))
-		.pipe(gulp.dest(BUILDDIR + '/styles'))
-		.pipe($.size());
-});
-
-gulp.task('scripts', function() {
-	bundler.init();
-	return bundler.bundle();
-});
-
-gulp.task('html', function() {
-	return gulp.src('app/index.html')
-		.pipe(gulp.dest(BUILDDIR))
-		.pipe($.size());
-});
-
-gulp.task('clean', function() {
-	return del.sync([BUILDDIR, RELEASEDIR]);
-});
-
-gulp.task('extras', function() {
-	return gulp.src(['app/*.txt', 'app/*.ico', 'app/**/*.svg'])
-		.pipe(gulp.dest(BUILDDIR))
-		.pipe($.size());
-});
-
-gulp.task('electron', function() {
-	var streams = [];
-	var entries = ['app/events.js', 'app/menu.js', 'app/index.js'];
-	for (var i = 0; entries.length > i; i++) {
-
-		streams.push(
-			gulp.src(entries[i])
-			.pipe($.babel(BABEL_PRESET))
-			.pipe($.uglify())
-			.pipe(gulp.dest(BUILDDIR))
-			.pipe($.size())
-		);
-	}
-	return merge(streams);
-});
-
-gulp.task('minify:js', function() {
-	return gulp.src(BUILDDIR + '/scripts/**/*.js')
-		.pipe($.uglify({
-			mangle: false
-		}))
-		.pipe(gulp.dest(BUILDDIR))
-		.pipe($.size());
-});
-
-gulp.task('minify:css', function() {
-	return gulp.src('dist/styles/**/*.css')
-		.pipe($.uncss({
-			html: ['app/**/*.html', 'app/index.html']
-		}))
-		.pipe($.cssnano())
-		.pipe(gulp.dest(BUILDDIR + '/styles'))
-		.pipe($.size());
-});
-
-gulp.task('set-production', function() {
-	process.env.NODE_ENV = 'production';
-});
 
 var logger = (function() {
 	return {
@@ -261,21 +90,173 @@ var handleErrors = function() {
 	this.emit('end');
 };
 
+gulp.task('set-production', function() {
+	process.env.NODE_ENV = 'production';
+});
+
+gulp.task('build:electron', function() {
+	var streams = [];
+	var entries = ['app/events.js', 'app/menu.js', 'app/index.js'];
+	for (var i = 0; entries.length > i; i++) {
+		streams.push(
+			gulp.src(entries[i])
+			.pipe($.babel(BABEL_PRESET))
+			.pipe(gulp.dest(BUILDDIR))
+			.pipe($.size())
+		);
+	}
+	return merge(streams);
+});
+
+gulp.task('build:runtime', function () {
+	var streams = [];
+	['node_modules/electron-prebuilt', 'node_modules/electron-debug'].map(function(entry) {
+			streams.push(
+				gulp.src(entry + '/**/*')
+				.pipe(gulp.dest(BUILDDIR + '/' + entry))
+				.pipe($.size())
+			);
+		});
+	return merge(streams);
+});
+
+gulp.task('build:install', function (done) {
+	exec('cd build && npm install', function (error) {
+		if (error !== null) {
+			console.log(error);
+			done();
+		}
+		process.exit(0);
+	});
+});
+
+// Write a package.json for distribution
+gulp.task('build:packageJson', function(done) {
+	function replacer(key, value) {
+	  if (key === 'devDependencies') {
+	    return undefined;
+	  }
+		if (key === 'main') {
+			return 'index.js';
+		}
+		if (key === 'environment' && process.env.NODE_ENV === 'production') {
+			return 'production';
+		}
+	  return value;
+	}
+	var json = _.cloneDeep(packageJson);
+	json.dependencies["babel-polyfill"] = "^6.3.14";
+
+	if (!fs.existsSync(BUILDDIR)) {
+    fs.mkdirSync(BUILDDIR);
+	}
+	fs.writeFile(BUILDDIR + '/package.json', JSON.stringify(json, replacer, 3), function (error) {
+		if (error) {
+			done();
+		}
+	});
+});
+
+// Package for each platforms
+gulp.task('build:package', ['win32', 'linux'].map(function(platform) {
+	var taskName = 'package:' + platform;
+	gulp.task(taskName, function(done) {
+		packager({
+			asar: true,
+			dir: BUILDDIR,
+			name: packageJson.name,
+			arch: 'x64',
+			platform: platform,
+			out: RELEASEDIR + '/' + platform,
+			overwrite: true,
+			version: ELECTRON_VERSION
+		}, function done(error) {
+			if (error) {
+				done(error);
+			}
+		});
+	});
+	return taskName;
+}));
+
+gulp.task('build:executable', ['build:runtime', 'build:packageJson', 'build:install', 'build:electron']);
+
+gulp.task('tinymce', function() {
+	return gulp.src('app/assets/**/*.*')
+		.pipe(gulp.dest(BUILDDIR + '/assets'))
+		.pipe($.size())
+});
+
+gulp.task('serve', function() {
+	electron.start();
+	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['scripts', electron.restart]);
+	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build:electron', electron.reload]);
+});
+
+gulp.task('styles', function() {
+	return gulp.src(['app/**/*.css', 'node_modules/angular-chart.js/dist/angular-chart.css', '!app/assets/**/*.css'])
+			.on('error', handleErrors)
+		.pipe($.autoprefixer('last 1 version'))
+		.pipe($.concat('styles.css'))
+		.pipe(gulp.dest(BUILDDIR + '/styles'))
+		.pipe($.size());
+});
+
+gulp.task('scripts', function() {
+	bundler.init();
+	return bundler.bundle();
+});
+
+gulp.task('html', function() {
+	return gulp.src('app/index.html')
+		.pipe(gulp.dest(BUILDDIR))
+		.pipe($.size());
+});
+
+gulp.task('clean', function() {
+	return del.sync([BUILDDIR, RELEASEDIR]);
+});
+
+gulp.task('extras', function() {
+	return gulp.src(['app/*.txt', 'app/*.ico', 'app/**/*.svg', 'app/**/*.json'])
+		.pipe(gulp.dest(BUILDDIR))
+		.pipe($.size());
+});
+
+gulp.task('minify:js', function() {
+	return gulp.src(BUILDDIR + '/scripts/**/*.js')
+		.pipe($.uglify({
+			mangle: false
+		}))
+		.pipe(gulp.dest(BUILDDIR))
+		.pipe($.size());
+});
+
+gulp.task('minify:css', function() {
+	return gulp.src('dist/styles/**/*.css')
+		.pipe($.uncss({
+			html: ['app/**/*.html', 'app/index.html']
+		}))
+		.pipe($.cssnano())
+		.pipe(gulp.dest(BUILDDIR + '/styles'))
+		.pipe($.size());
+});
+
 gulp.task('stop', bundler.stop.bind(bundler));
 
 gulp.task('minify', ['minify:js']);
 
-gulp.task('assets', ['styles', 'tinymce', 'electron']);
+gulp.task('assets', ['styles', 'extras', 'tinymce']);
 
-gulp.task('bundle', ['html', 'assets', 'styles', 'scripts', 'extras']);
+gulp.task('bundle', ['html', 'assets', 'styles', 'scripts', 'stop']);
 
-gulp.task('build:production', gulpsync.sync(['clean', 'html', 'set-production', 'bundle', 'minify', 'packageJson', 'stop']));
+gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'bundle', 'build:executable']));
 
 gulp.task('serve:production', gulpsync.sync(['build:production', 'serve']));
 
 gulp.task('default', ['build']);
 
-gulp.task('watch', gulpsync.async(['clean', 'html', ['bundle', 'serve']])),
+gulp.task('watch', gulpsync.async(['clean', 'html', 'build:packageJson', 'build:electron', ['bundle', 'serve']])),
 	function() {
 		bundler.watch();
 		gulp.watch('app/**/*.js', ['scripts']);

@@ -1,0 +1,10 @@
+#analytics-doughnut {
+  width: 100% !important;
+  margin: 0;
+  border: 0;
+  vertical-align: bottom;
+  max-height: 350px;
+  min-height: 250px;
+  max-width: 650px;
+  min-width: 250px;
+}

@@ -28,10 +28,10 @@ import 'reflect-metadata';
 ])
 
 @Component({
-	selector: 'rose-st-admin',
-	template: require('./main.html'),
-	providers: [uiRouter],
-	directives: [Nav]
+    selector: 'rose-st-admin',
+    template: require('./main.html'),
+    providers: [uiRouter],
+    directives: [Nav]
 })
 
 export default class MainComponent { }
