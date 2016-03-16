@@ -1,21 +1,8 @@
-var _ = require('lodash');
-var asar = require('asar');
 var gulp = require('gulp');
 var gulpsync = require('gulp-sync')(gulp);
-var fs = require('fs');
 var $ = require('gulp-load-plugins')(); // loads other gulp plugins
-var babelify = require('babelify');
 var buffer = require('vinyl-buffer');
-var browserify = require('browserify');
-var merge = require('merge2');
-var source = require('vinyl-source-stream');
-var stringify = require('stringify');
-var del = require('del');
-var electron = require('electron-connect').server.create();
 var packageJson = require('./package.json');
-var packager = require('electron-packager');
-var watchify = require('watchify');
-var exec = require('child_process').exec;
 
 var BUILDDIR = 'build';
 var RELEASEDIR = 'release'; // directory for application packages
@@ -29,6 +16,10 @@ var BABEL_PRESET = {
 var bundler = {
   w: null,
   init: function() {
+		var babelify = require('babelify');
+		var browserify = require('browserify');
+		var watchify = require('watchify');
+		var stringify = require('stringify');
     this.w = watchify(browserify({
       entries: ['./app/scripts/app.js'],
       extensions: ['.js'],
@@ -40,6 +31,7 @@ var bundler = {
     .transform(babelify.configure(BABEL_PRESET)))
   },
   bundle: function() {
+		var source = require('vinyl-source-stream');
     return this.w && this.w.bundle()
       .on('start', logger.start)
       .on('error', handleErrors)
@@ -95,6 +87,7 @@ gulp.task('set-production', function() {
 });
 
 gulp.task('build:electron', function() {
+	var merge = require('merge2');
 	var streams = [];
 	var entries = ['app/events.js', 'app/menu.js', 'app/index.js'];
 	for (var i = 0; entries.length > i; i++) {
@@ -109,6 +102,7 @@ gulp.task('build:electron', function() {
 });
 
 gulp.task('build:runtime', function () {
+	var merge = require('merge2');
 	var streams = [];
 	['node_modules/electron-prebuilt', 'node_modules/electron-debug'].map(function(entry) {
 			streams.push(
@@ -121,6 +115,7 @@ gulp.task('build:runtime', function () {
 });
 
 gulp.task('build:install', function (done) {
+	var exec = require('child_process').exec;
 	exec('cd build && npm install', function (error) {
 		if (error !== null) {
 			console.log(error);
@@ -132,6 +127,8 @@ gulp.task('build:install', function (done) {
 
 // Write a package.json for distribution
 gulp.task('build:packageJson', function(done) {
+	var fs = require('fs');
+	var cloneDeep = require('lodash').cloneDeep;
 	function replacer(key, value) {
 	  if (key === 'devDependencies') {
 	    return undefined;
@@ -144,7 +141,7 @@ gulp.task('build:packageJson', function(done) {
 		}
 	  return value;
 	}
-	var json = _.cloneDeep(packageJson);
+	var json = cloneDeep(packageJson);
 	json.dependencies["babel-polyfill"] = "^6.3.14";
 
 	if (!fs.existsSync(BUILDDIR)) {
@@ -159,6 +156,7 @@ gulp.task('build:packageJson', function(done) {
 
 // Package for each platforms
 gulp.task('build:package', ['win32', 'linux'].map(function(platform) {
+	var packager = require('electron-packager');
 	var taskName = 'package:' + platform;
 	gulp.task(taskName, function(done) {
 		packager({
@@ -188,8 +186,10 @@ gulp.task('tinymce', function() {
 });
 
 gulp.task('serve', function() {
+	var electron = require('electron-connect').server.create();
 	electron.start();
-	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['scripts', electron.restart]);
+	gulp.watch(['app/scripts/**/*.css'], ['styles', electron.restart]);
+	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js' ], ['scripts', electron.restart]);
 	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build:electron', electron.reload]);
 });
 
@@ -214,6 +214,7 @@ gulp.task('html', function() {
 });
 
 gulp.task('clean', function() {
+	var del = require('del');
 	return del.sync([BUILDDIR, RELEASEDIR]);
 });
 
@@ -259,5 +260,4 @@ gulp.task('default', ['build']);
 gulp.task('watch', gulpsync.async(['clean', 'html', 'build:packageJson', 'build:electron', ['bundle', 'serve']])),
 	function() {
 		bundler.watch();
-		gulp.watch('app/**/*.js', ['scripts']);
 	};

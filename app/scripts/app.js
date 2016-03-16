@@ -12,6 +12,7 @@ import 'angular-material';
 import 'angular-messages';
 import 'angular-ui-router';
 import 'babel-polyfill';
+import 'md-chips-select';
 import 'reflect-metadata';
 import 'tc-angular-chartjs/dist/tc-angular-chartjs.min';
 
@@ -21,6 +22,7 @@ bootstrap(MainComponent, [
   'ngAnimate',
   'ngMessages',
   'ngMaterial',
+  'md.chips.select',
   'tc.chartjs',
   'ui.router',
   AuthenticationConfig.name,

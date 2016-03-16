@@ -1,11 +1,12 @@
-<md-card>
+<md-card flex layout="column">
   <md-card-title flex="none">
     <md-card-title-text>
       <span class="md-headline">HALLO (Query builder)</span>
     </md-card-title-text>
-    <md-card-title-media>
-      <md-datepicker ng-model="QueryBuilder.query['start-date']" md-placeholder="Start date"></md-datepicker>
-      <md-datepicker ng-model="QueryBuilder.query['end-date']" md-placeholder="End date"></md-datepicker>
+    <md-card-title-media layout-align="end center" class="md-table-pagination limit">
+      <md-datepicker ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" on-change=""></md-datepicker>
+      <span class="label limit-label">to: </span>
+      <md-datepicker ng-model="QueryBuilder.fields['end-date']" md-placeholder="End date" on-change=""></md-datepicker>
       <md-menu>
         <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)">
           <md-icon md-menu-origin>more_vert</md-icon>
@@ -40,17 +41,22 @@
     </md-card-title-media>
   </md-card-title>
   <md-card-content>
-    <md-input-container class="md-block">
-      <label>Metrics</label>
-      <md-select placeholder="metrics" ng-model="QueryBuilder.query.metrics" ng-change="QueryBuilder.addParam('metrics', QueryBuilder.query.metrics)" flex>
-        <md-option ng-repeat="param in QueryBuilder.users.metrics" ng-value="param">{{ QueryBuilder.renderUiName(param) }}</md-option>
-      </md-select>
-    </md-input-container>
-    <md-input-container class="md-block">
-      <label>Dimensions</label>
-      <md-select placeholder="dimensions" ng-model="QueryBuilder.query.dimensions" ng-change="QueryBuilder.addParam('dimensions', QueryBuilder.query.metrics)">
-        <md-option ng-repeat="param in QueryBuilder.dimensions" ng-value="param">{{ QueryBuilder.renderUiName(param) }}</md-option>
-      </md-select>
-    </md-input-container>
+    <div layout="row">
+      <md-input-container flex="80">
+        <label>Sort</label>
+        <md-select placeholder="Sort" ng-model="QueryBuilder.query.sort" ng-change="QueryBuilder.addParam('sort', QueryBuilder.query.sort)">
+          <md-option ng-repeat="param in QueryBuilder.dimensions" ng-value="param">{{ QueryBuilder.renderUiName(param) }}</md-option>
+        </md-select>
+      </md-input-container>
+      <md-input-container flex="20">
+        <label>Order</label>
+        <md-select placeholder="Order" ng-model="QueryBuilder.query.order">
+          <md-option>Ascending</md-option>
+          <md-option>Descending</md-option>
+        </md-select>
+      </md-input-container>
+    </div>
+    <rs-chips-select [(model)]="QueryBuilder.query.metrics" [select-items]="QueryBuilder.metrics" placeholder="Metrics"></rs-chips-select>
+    <rs-chips-select [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.dimensions" placeholder="Dimensions"></rs-chips-select>
   </md-card-content>
 </md-card>

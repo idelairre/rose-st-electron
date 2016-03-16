@@ -1,0 +1,12 @@
+.md-chip-input-container {
+  line-height: 37px !important;
+  float:none !important;
+}
+
+.md-chips-select-container {
+  cursor: auto !important;
+}
+
+md-chips {
+  padding: 0 0 1px 3px !important;
+}

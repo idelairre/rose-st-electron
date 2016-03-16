@@ -1,13 +1,14 @@
 import { Component, Inject } from 'ng-forward';
 import Chart from './chart/chart.component';
-import Query from './query/query.component';
+import QueryBuilder from './query-builder/query-builder.component';
 import 'reflect-metadata';
 
 @Component({
 	selector: 'analytics',
 	controllerAs: 'Analytics',
 	template: require('./analytics.html'),
-	directives: [Chart, Query]
+	directives: [Chart, QueryBuilder],
+	providers: ['ngMaterial']
 })
 
 @Inject('$window')
@@ -20,6 +21,6 @@ export default class Analytics {
 		this.$window.addEventListener('analyticsReply', event => {
 			console.log(event.detail);
 		});
-		this.query = { ids: 'ga:118196120', 'start-date': '', 'end-date': '', metrics: '', dimensions: '' };
+		this.query = { ids: 'ga:118196120', 'start-date': '', 'end-date': '', metrics: [], dimensions: [], segments: [] };
   }
 }

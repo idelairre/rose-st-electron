@@ -1,19 +1,35 @@
 import { Component, Inject, Input } from 'ng-forward';
+import ChipsSelect from './select/chips-select.component';
 import inflected from 'inflected';
 import 'reflect-metadata';
+
+// NOTE: divide queries between chart/data types (e.g., composition, trends, comparisons)
+// comparison bar charts: make component to make grouped labels
+// compositiom doughnut chart: disable grouped labels
+// trend line graph: disable grouped labels, enable series
+
+// TODO: find a way to move the bottom border up
 
 @Component({
 	selector: 'query-builder',
 	controllerAs: 'QueryBuilder',
-	template: require('./query.html'),
+	template: require('./query-builder.html'),
+	directives: [ChipsSelect],
   inputs: ['query']
 })
 
 @Inject('$scope')
-export default class Query {
+export default class QueryBuilder {
   @Input() query;
 	constructor($scope) {
 		this.$scope = $scope;
+
+		let date = new Date();
+
+		this.fields = {
+			'start-date': new Date(date.getFullYear(), date.getMonth() - 2, date.getDate()),
+			'end-date': new Date()
+		};
 
 		this.state = { users: true, sessions: false, traffic: false, social: false };
 
@@ -40,13 +56,19 @@ export default class Query {
       metrics: ['ga:socialActivities']
     };
 
-		this.dimensions = this.locationDimensions.concat(this.timeDimensions);
-		this.dimensionsCache = angular.copy(this.dimensions);
+		this.metrics = this.users.metrics;
+		this.dimensions = this.timeDimensions.concat(this.locationDimensions);
+
 		this.$scope.$watch(::this.evalState, ::this.setState);
   }
 
+	addParam(field, param) {
+		if (!this.query[field].includes(param)) {
+			this.query[field].push(param);
+		}
+	}
+
 	changeState(state) {
-		console.log(state);
 		this.resetState();
 		this.state[state] = true;
 	}
@@ -55,13 +77,21 @@ export default class Query {
 		return this.state;
 	}
 
+	formatField(entries) {
+		let items = [];
+		for (let i = 0; entries.length > i; i += 1) {
+			items.push({ title: entries[i], id: i});
+		}
+		return items;
+	}
+
 	setState(current, prev) {
 		if (current !== prev) {
 			console.log(this.state);
 			for (let key in this.state) {
 				if (this.state[key]) {
 					this.resetDimensions();
-					this.dimensions.concat(this.state[key].dimensions);
+					this.metrics = this.state[key].metrics;
 				}
 			}
 		}

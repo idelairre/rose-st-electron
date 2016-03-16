@@ -5,8 +5,9 @@
     </md-card-title-text>
   </md-card-title>
   <md-card-content layout="column" layout-align="space-between" layout-wrap>
-    <div layout="row" flex="initial" layout-align="center center" class="widget">
-      <canvas id="analytics-doughnut" tc-chartjs-doughnut chart-data="Chart.data" chart-options="Chart.chartOptions" auto-legend></canvas>
+    <div layout="row" layout-align="center center" class="widget">
+      <canvas id="analytics-chart" class="chart-line" tc-chartjs chart-type="line" chart-data="Chart.data" chart-labels="Chart.labels" chart-options="Chart.chartOptions"></canvas>
+      <!-- <canvas id="analytics-doughnut" tc-chartjs-doughnut chart-data="Chart.data" chart-options="Chart.chartOptions" auto-legend></canvas> -->
     </div>
   </md-card-content>
 </md-card>
