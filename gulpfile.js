@@ -1,5 +1,9 @@
 var gulp = require('gulp');
 var gulpsync = require('gulp-sync')(gulp);
+var babelify = require('babelify');
+var browserify = require('browserify');
+var watchify = require('watchify');
+var stringify = require('stringify');
 var $ = require('gulp-load-plugins')(); // loads other gulp plugins
 var buffer = require('vinyl-buffer');
 var packageJson = require('./package.json');
@@ -16,10 +20,6 @@ var BABEL_PRESET = {
 var bundler = {
   w: null,
   init: function() {
-		var babelify = require('babelify');
-		var browserify = require('browserify');
-		var watchify = require('watchify');
-		var stringify = require('stringify');
     this.w = watchify(browserify({
       entries: ['./app/scripts/app.js'],
       extensions: ['.js'],
