@@ -6,18 +6,15 @@
   "companyName": "Rose St. Community Center",
   "license": "MIT",
   "repository": "idelairre/rose-st-electron",
-  "author": {
-    "name": "idelairre",
-    "email": "idelairre@gmail.com",
-    "url": "idelairre.github.io"
-  },
+  "author": "idelairre@gmail.com",
   "environment": "development",
   "main": "build/index.js",
   "scripts": {
     "test": "xo",
     "karma": "karma start karma.conf.js",
     "start": "gulp watch",
-    "build": "gulp build:production && gulp build:package"
+    "build": "gulp build:production && gulp build:dist",
+    "package": "npm run build && gulp package:debian"
   },
   "dependencies": {
     "angular": "^1.5.0",
@@ -42,6 +39,8 @@
     "tinymce": "^4.3.5"
   },
   "devDependencies": {
+    "asar": "^0.10.0",
+    "async": "^1.5.2",
     "babel-core": "^6.4.5",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-plugin-transform-function-bind": "^6.3.13",
@@ -56,6 +55,8 @@
     "electron-debug": "^0.5.0",
     "electron-packager": "^5.2.1",
     "electron-prebuilt": "^0.37.2",
+    "fs-extra": "^0.26.7",
+    "get-folder-size": "^1.0.0",
     "gulp": "^3.9.0",
     "gulp-assetpaths": "^0.1.2",
     "gulp-autoprefixer": "^3.1.0",

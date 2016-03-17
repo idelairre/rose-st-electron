@@ -10,7 +10,7 @@ var BUILD_DIR = './build';
 var ELECTRON_VERSION = packageJson.devDependencies['electron-prebuilt'].replace(/\^/, '');
 var RELEASE_DIR = './release'; // directory for application packages
 var RESOURCE_DIR = './resources';
-var TEMP_DIR = './tmp'
+var TEMP_DIR = './staging';
 
 module.exports = {
   buildDir: BUILD_DIR,

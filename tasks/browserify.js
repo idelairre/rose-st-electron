@@ -8,6 +8,7 @@ var watchify = require('watchify');
 var prettyHrtime = require('pretty-hrtime');
 
 var constants = require('./constants');
+var handleErrors = require('./utils').handleErrors;
 
 var startTime;
 
@@ -30,19 +31,19 @@ module.exports = function(gulp, $) {
 				.transform(stringify({
 					extensions: ['.html']
 				}))
-			logger.start(OUTPUT);
+			bundleLogger.start(OUTPUT);
 		},
 		bundle: function() {
 			return this.w && this.w.bundle()
 				.on('error', handleErrors)
 				.on('end', function() {
-					logger.end(OUTPUT);
+					bundleLogger.end(OUTPUT);
 				})
 				.pipe(source(OUTPUT))
 				.pipe(gulp.dest(BUILD_DIR + '/scripts'))
 		},
 		watch: function() {
-			logger.watch(OUTPUT);
+			bundleLogger.watch(OUTPUT);
 			this.w && this.w.on('update', this.bundle.bind(this));
 		},
 		stop: function() {
@@ -50,7 +51,7 @@ module.exports = function(gulp, $) {
 		}
 	};
 
-	var logger = {
+	var bundleLogger = {
 		start: function(filepath) {
 			startTime = process.hrtime();
 			$.util.log('Bundling', $.util.colors.green(filepath) + '...');
@@ -66,21 +67,6 @@ module.exports = function(gulp, $) {
 			$.util.log('Bundled', $.util.colors.green(filepath), 'in', $.util.colors.magenta(prettyTime));
 		}
 	}
-
-	var handleErrors = function() {
-		var args = Array.prototype.slice.call(arguments);
-
-		$.notify.logLevel(2);
-
-		// Send error to notification center with gulp-notify
-		$.notify.onError({
-			title: 'Compile Error',
-			message: '<%= error %>'
-		}).apply(this, args);
-
-		// Keep gulp from hanging on this task
-		this.emit('end');
-	};
 
   return bundler;
 }

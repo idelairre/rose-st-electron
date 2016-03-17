@@ -7,7 +7,7 @@ var electron = require('electron-connect').server.create();
 var constants = require('./tasks/constants');
 
 var $ = require('gulp-load-plugins')({
-	DEBUG: true,
+	DEBUG: false,
 	scope: ['devDependencies'],
 	lazy: true
 });
@@ -20,23 +20,23 @@ function getTask(task) {
   return require('./tasks/' + task)(gulp, $);
 }
 
+gulp.task('package:debian', getTask('release/linux'));
+
 gulp.task('assets', assets.bundle);
 
-gulp.task('styles', assets.tasks[0]);
+gulp.task('clean', function() {
+	return del.sync([constants.buildDir, constants.releaseDir, constants.tempDir]);
+});
+
+gulp.task('compress', getTask('compress'));
 
 gulp.task('html', assets.tasks[1]);
 
-gulp.task('build:electron', getTask('build').buildElectron);
+gulp.task('styles', assets.tasks[0]); // this is mad ugly but whatevs
 
-gulp.task('build:package', getTask('build').buildPackage);
+gulp.task('build', getTask('build').build);
 
-gulp.task('build:runtime', getTask('build').buildRuntime);
-
-gulp.task('build:packageJson', getTask('build').packageJson);
-
-gulp.task('build:install', ['build:packageJson'], getTask('build').install);
-
-gulp.task('build:app', ['build:runtime', 'build:install', 'build:electron']);
+gulp.task('build:dist', getTask('build').buildDist);
 
 gulp.task('bundle:scripts', function() {
 	bundler.init();
@@ -49,15 +49,9 @@ gulp.task('bundle', gulpsync.sync(['bundle:scripts', 'bundle:build']));
 
 gulp.task('scripts', ['bundle:scripts']);
 
-gulp.task('clean', function() {
-	return del.sync([constants.buildDir, constants.releaseDir]);
-});
-
 gulp.task('set-production', function() {
 	process.env.NODE_ENV = 'production';
 });
-
-gulp.task('build', ['build:runtime', 'build:packageJson', 'build:install', 'build:electron', 'build:package']);
 
 gulp.task('serve', function() {
 	electron.start();
@@ -66,7 +60,7 @@ gulp.task('serve', function() {
 	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build:electron', electron.reload]);
 });
 
-gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'bundle', 'build']));
+gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'bundle', 'build']));
 
 gulp.task('default', ['build']);
 
