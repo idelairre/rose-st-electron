@@ -77,14 +77,6 @@ export default class QueryBuilder {
 		return this.state;
 	}
 
-	formatField(entries) {
-		let items = [];
-		for (let i = 0; entries.length > i; i += 1) {
-			items.push({ title: entries[i], id: i});
-		}
-		return items;
-	}
-
 	setState(current, prev) {
 		if (current !== prev) {
 			console.log(this.state);

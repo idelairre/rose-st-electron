@@ -60,7 +60,7 @@ gulp.task('serve', function() {
 	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build:electron', electron.reload]);
 });
 
-gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'bundle', 'build']));
+gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'bundle']));
 
 gulp.task('default', ['build']);
 

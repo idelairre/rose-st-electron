@@ -15,9 +15,8 @@ var TEMP_DIR = constants.tempDir;
 var FILE_NAME = APP_NAME + '-linux-x64';
 var DEB_FILE_NAME = APP_NAME + '.deb';
 var DEB_PATH = RELEASE_DIR + '/linux/' + APP_NAME + '-linux-x64';
-
 var tasks = {
-	configureDesktop: function(callback) {
+	configureDesktop: function(callback) { // works
 		// Create .desktop file from the template
 		var path = 'resources/linux/app.desktop';
 		utils.logger.start('Parsing desktop file', path);
@@ -63,7 +62,7 @@ var tasks = {
 		});
 	},
 
-	copyIcon: function(callback) {
+	copyIcon: function(callback) { // works
 		// Copy icon
 		return utils.copyFile('resources/icon.png', DEB_PATH + '/opt/' + FILE_NAME + '/icon.png', callback);
 	},

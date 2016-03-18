@@ -32,6 +32,18 @@ function writeFile(data, filePath, callback) {
 	});
 }
 
+function moveDir(source, dest, callback) {
+	utils.logger.start('Moving directory', dest);
+	fs.move(source, dest, function(error) {
+		if (error) {
+			utils.handleErrors(error);
+			callback ? callback(error) : error;
+			return;
+		}
+		utils.logger.end('Finished moving directory');
+	});
+}
+
 var tasks = {
 	buildElectron: function(callback) {
 		utils.logger.start('Building electron');
@@ -55,7 +67,13 @@ var tasks = {
 	buildRuntime: function(callback) {
 		utils.logger.start('Building runtime');
 		['node_modules/electron-prebuilt', 'node_modules/electron-debug'].map(function(entry) {
-			utils.copyDir(entry, BUILD_DIR + '/' + entry, callback);
+			utils.copyDir(entry, BUILD_DIR + '/' + entry, function(error) {
+				if (error) {
+					utils.handleErrors(error);
+					callback ? callback(error) : error;
+					return;
+				}
+			});
 		});
 		utils.logger.end('Finished building runtime');
 		return callback ? callback(null) : null;
@@ -76,7 +94,6 @@ var tasks = {
 	// Write a package.json for distribution
 	packageJson: function(callback) {
 		utils.logger.start('Copying package.json');
-
 		function replacer(key, value) {
 			if (key === 'devDependencies') {
 				return undefined;
@@ -108,11 +125,10 @@ var tasks = {
 
 	packageDist: function(callback) {
 		utils.logger.start('Packaging distribution');
-		['linux'].map(function(platform) {
+		// var done = 0;
+		var targets = ['win32', 'linux', 'darwin'];
+		targets.map(function(platform) {
 			OUT_DIR = RELEASE_DIR + '/' + platform;
-			// if (platform) {
-			// 	OUT_DIR = OUT_DIR + '/opt/';
-			// }
 			var taskName = 'package:' + platform;
 
 			packager({
@@ -121,7 +137,7 @@ var tasks = {
 				name: APP_NAME,
 				arch: 'x64',
 				platform: platform,
-				out: OUT_DIR + '/' + APP_NAME + '-linux-x64' + '/opt',
+				out: (platform === 'linux' ? OUT_DIR + '/' + APP_NAME + '-linux-x64' + '/opt' : OUT_DIR),
 				overwrite: true,
 				version: ELECTRON_VERSION
 			}, function done(error) {
@@ -130,10 +146,11 @@ var tasks = {
 					callback ? callback(error) : error;
 					return;
 				}
+				// done++;
 				utils.logger.start('Finished packaging distribution');
-				return callback ? callback(null) : null;
 			});
 		});
+		return callback ? callback(null) : null;
 	},
 
 	build: function(callback) {
