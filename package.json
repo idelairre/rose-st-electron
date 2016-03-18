@@ -34,6 +34,7 @@
     "googleapis": "^2.1.7",
     "inflected": "^1.1.6",
     "j-toker": "0.0.10-beta3",
+    "moment": "^2.12.0",
     "ng-forward": "0.0.1-alpha.12",
     "qs": "^6.1.0",
     "tc-angular-chartjs": "git+https://github.com/carlcraig/tc-angular-chartjs.git",

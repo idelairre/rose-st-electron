@@ -1,4 +1,4 @@
-<md-chips ng-model="ChipsSelect.currentSelectItems">
+<md-chips ng-model="ChipsSelect.currentSelectItems" on-change="ChipsSelect.logItems()">
   <md-chip-template>
     <small>{{$chip}}</small>
   </md-chip-template>

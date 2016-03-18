@@ -55,9 +55,9 @@ gulp.task('set-production', function() {
 
 gulp.task('serve', function() {
 	electron.start();
-	gulp.watch(['app/scripts/**/*.css'], ['styles', electron.restart]);
-	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['html', 'scripts', electron.restart]);
-	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build:electron', electron.reload]);
+	gulp.watch(['app/scripts/**/*.css'], ['styles', electron.reload]);
+	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['html', 'scripts', electron.reload]);
+	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build:electron', electron.restard]);
 });
 
 gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'bundle']));

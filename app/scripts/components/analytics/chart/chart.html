@@ -1,13 +1,17 @@
 <md-card>
   <md-card-title flex="none">
     <md-card-title-text>
-      <span class="md-headline">HALLO (Chart)</span>
+      <span class="md-headline" ng-if="Chart.query.metrics"><font ng-repeat="item in Chart.query.metrics">{{ Chart.renderUiName(item) }}</font> <font ng-if="Chart.query['start-date'].length !== 0 && Chart.query['end-date'].length !== 0">({{ Chart.query['start-date']}} to {{ Chart.query['end-date']}})</font></span>
     </md-card-title-text>
+    <md-card-title-media>
+    </md-card-title-media>
   </md-card-title>
-  <md-card-content layout="column" layout-align="space-between" layout-wrap>
+  <md-card-content layout="column" layout-align="space-between" layout-wrap class="chart-container">
     <div layout="row" layout-align="center center" class="widget">
-      <canvas id="analytics-chart" class="chart-line" tc-chartjs chart-type="line" chart-data="Chart.data" chart-labels="Chart.labels" chart-options="Chart.chartOptions"></canvas>
-      <!-- <canvas id="analytics-doughnut" tc-chartjs-doughnut chart-data="Chart.data" chart-options="Chart.chartOptions" auto-legend></canvas> -->
+      <canvas id="analytics-line" class="chart-line" tc-chartjs-line chart-data="Chart.chartData" chart-labels="Chart.labels" chart-options="Chart.chartOptions" ng-if="Chart.state.trends" width="640" height=""></canvas>
+      <canvas id="analytics-doughnut" tc-chartjs-doughnut chart-data="Chart.doughnutData" chart-options="Chart.doughnutOptions" chart-legend="Chart.doughnutOptions.legendTemplate" ng-if="Chart.state.composition" height="" width="640"></canvas>
+      <canvas id="analytics-bar" tc-chartjs-bar chart-data="Chart.chartData" chart-options="Chart.chartOptions" ng-if="Chart.state.comparison" width="640" height=""></canvas>
     </div>
+    <div tc-chart-js-legend="Chart.doughnutOptions.legendTemplate"></div>
   </md-card-content>
 </md-card>

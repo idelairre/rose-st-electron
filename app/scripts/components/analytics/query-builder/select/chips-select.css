@@ -10,3 +10,11 @@
 md-chips {
   padding: 0 0 1px 3px !important;
 }
+
+md-chip {
+   margin: 0 8px 0 0 !important; 
+}
+
+.md-chips {
+  max-height: 30px !important;
+}

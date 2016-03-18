@@ -1,10 +1,47 @@
 #analytics-doughnut {
-  width: 100% !important;
+  height: auto !important;
   margin: 0;
   border: 0;
   vertical-align: bottom;
-  max-height: 350px;
-  min-height: 250px;
-  max-width: 650px;
-  min-width: 250px;
+}
+
+#analytics-line {
+  height: 400px !important;
+  margin: 0;
+  border: 0;
+  vertical-align: bottom;
+  /*width: 100% !important;*/
+  /*max-height: 350px;*/
+}
+
+#analytics-bar {
+  height: 400px !important;
+  margin: 0;
+  border: 0;
+  vertical-align: bottom;
+  /*width: 100% !important;*/
+  /*max-height: 350px;*/
+}
+
+.chart-container {
+  max-height: 572px;
+  width: 100%;
+}
+
+.tc-chart-js-legend {
+  list-style-type: none;
+  padding-left: 0px;
+}
+.tc-chart-js-legend li {
+  display: block;
+  float: left;
+  clear:both;
+  padding:10px;
+}
+.tc-chart-js-legend li span {
+  width:25px;
+  height:25px;
+  display:block;
+  float:left;
+  margin-right:10px;
 }

@@ -1,13 +1,38 @@
 <md-card flex layout="column">
-  <md-card-title flex="none">
+  <md-card-title flex="none" layout-align="space-between end">
     <md-card-title-text>
-      <span class="md-headline">HALLO (Query builder)</span>
+      <span class="md-headline">Query</span>
     </md-card-title-text>
-    <md-card-title-media layout-align="end center" class="md-table-pagination limit">
-      <md-datepicker ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" on-change=""></md-datepicker>
+    <md-card-title-media class="md-table-pagination limit" style="padding: 0">
+      <md-datepicker ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" md-min-date="QueryBuilder.startDate"></md-datepicker>
       <span class="label limit-label">to: </span>
-      <md-datepicker ng-model="QueryBuilder.fields['end-date']" md-placeholder="End date" on-change=""></md-datepicker>
+      <md-datepicker ng-model="QueryBuilder.fields['end-date']" md-placeholder="End date" md-max-date="QueryBuilder.endDate"></md-datepicker>
       <md-menu>
+        <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)" style="padding-left: 15px">
+          <md-icon md-menu-origin>settings</md-icon>
+        </md-button>
+        <md-menu-content width="4">
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.setChartState('comparison')">
+              <md-icon md-menu-align-target>insert_chart</md-icon>
+              <p>Comparison</p>
+            </button>
+          </md-menu-item>
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.setChartState('composition')">
+              <md-icon md-menu-align-target>pie_chart</md-icon>
+              <p>Composition</p>
+            </button>
+          </md-menu-item>
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.setChartState('trends')">
+              <md-icon md-menu-align-target>multiline_chart </md-icon>
+              <p>Trends</p>
+            </button>
+          </md-menu-item>
+        </md-menu-content>
+      </md-menu>
+      <!-- <md-menu>
         <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)">
           <md-icon md-menu-origin>more_vert</md-icon>
         </md-button>
@@ -37,11 +62,11 @@
             </button>
           </md-menu-item>
         </md-menu-content>
-      </md-menu>
+      </md-menu> -->
     </md-card-title-media>
   </md-card-title>
   <md-card-content>
-    <div layout="row">
+    <!-- <div layout="row">
       <md-input-container flex="80">
         <label>Sort</label>
         <md-select placeholder="Sort" ng-model="QueryBuilder.query.sort" ng-change="QueryBuilder.addParam('sort', QueryBuilder.query.sort)">
@@ -55,8 +80,36 @@
           <md-option>Descending</md-option>
         </md-select>
       </md-input-container>
+    </div> -->
+    <div layout="row">
+      <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
+        <rs-chips-select class="metrics" [(model)]="QueryBuilder.query.metrics" [select-items]="QueryBuilder.state.metrics" placeholder="Metrics" flex="80"></rs-chips-select>
+      </md-input-container>
+      <md-input-container flex="20" class="chips-select-row">
+        <label>Category</label>
+        <md-select placeholder="Category" ng-model="QueryBuilder.fields.metrics" ng-change="QueryBuilder.setField('metrics')" ng-selected="users">
+          <md-option value="sessions">Sessions</md-option>
+          <md-option value="social">Social Networks</md-option>
+          <md-option value="traffic">Traffic</md-option>
+          <md-option value="users">Users</md-option>
+        </md-select>
+      </md-input-container>
     </div>
-    <rs-chips-select [(model)]="QueryBuilder.query.metrics" [select-items]="QueryBuilder.metrics" placeholder="Metrics"></rs-chips-select>
-    <rs-chips-select [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.dimensions" placeholder="Dimensions"></rs-chips-select>
+    <div layout="row">
+      <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
+        <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" placeholder="Dimensions" flex="80"></rs-chips-select>
+      </md-input-container>
+      <md-input-container flex="20">
+        <label>Category</label>
+        <md-select placeholder="Category" ng-model="QueryBuilder.fields.dimensions" ng-change="QueryBuilder.setField('dimensions')" ng-selected="time">
+          <md-option value="location">Location</md-option>
+          <md-option value="sessions">Sessions</md-option>
+          <md-option value="social">Social Networks</md-option>
+          <md-option value="traffic">Traffic</md-option>
+          <md-option value="time">Time</md-option>
+          <md-option value="users">Users</md-option>
+        </md-select>
+      </md-input-container>
+    </div>
   </md-card-content>
 </md-card>

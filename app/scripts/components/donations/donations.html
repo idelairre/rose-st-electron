@@ -7,7 +7,7 @@
         <span class="md-headline" ng-show="Donations.state.customers">Customers</span>
         <span class="md-subhead" ng-show="Donations.state.customers">Total {{ Donations.transactions.length }}</span>
       </md-card-title-text>
-      <md-card-title-media layout-align="end center" class="md-table-pagination limit">
+      <md-card-title-media layout-align="end center" class="md-table-pagination limit" style="padding: 0">
         <md-datepicker ng-model="Donations.chartOptions.startDate" ng-change="Donations.setTransactions(Donations.transactions)" md-placeholder="Start date" md-max-date="Donations.maxStartDate"></md-datepicker>
         <span class="label limit-label">to: </span>
         <md-datepicker ng-model="Donations.chartOptions.endDate" ng-change="Donations.setTransactions(Donations.transactions)" md-placeholder="End date" md-min-date="Donations.chartOptions.startDate"></md-datepicker>

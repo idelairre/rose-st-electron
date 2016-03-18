@@ -1,4 +1,4 @@
 <md-content>
-	<query-builder [(query)]="Analytics.query"></query-builder>
-	<chart></chart>
+	<query-builder [(query)]="Analytics.query" (on-query-change)="Analytics.postQuery(Analytics.query)" [(chart-state)]="Analytics.chartState"></query-builder>
+	<chart [data]="Analytics.data" [chart-state]="Analytics.chartState" [query]="Analytics.query"></chart>
 </md-content>
