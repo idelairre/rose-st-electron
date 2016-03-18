@@ -29,15 +29,15 @@ var logger = {
 	start: function(event, filepath) {
 		startTime = process.hrtime();
 		if (filepath) {
-			util.log(util.colors.green(event + ':'), util.colors.white(filepath));
+			util.log(util.colors.white(event + ':'), util.colors.magenta(filepath));
 		} else {
-			util.log(util.colors.green(event + '...'));
+			util.log(util.colors.white(event + '...'));
 		}
 	},
 	end: function(event, filepath) {
 		var taskTime = process.hrtime(startTime);
 		var prettyTime = prettyHrtime(taskTime);
-		util.log(util.colors.green(event), 'in', util.colors.magenta(prettyTime));
+		util.log(util.colors.green(event), 'after', util.colors.magenta(prettyTime));
 	}
 };
 
@@ -46,11 +46,12 @@ var readSizeRecursive = function(dir, callback) {
 	getSize(dir, function(error, size) {
 		if (error) {
 			handleErrors(error);
-			return callback ? callback(error) : error;
+			callback ? callback(error) : error;
+			return;
 		}
-		var total = size / 1024;
+		var total = Math.round(size / 1024);
 		logger.end('Directory size: ' + total);
-	  return callback ? callback(total) : total;
+	  return callback ? callback(null, total) : total;
 	});
 }
 
@@ -59,9 +60,10 @@ module.exports.copyDir = function(source, target, callback) {
 	fs.copy(source, target, function(error) {
 		if (error) {
 			handleErrors(error);
-			return callback ? callback(error) : null;
+			callback ? callback(error) : null;
+			return;
 		}
-		logger.end('Done copying ' + source);
+		logger.end('Finished copying ' + source);
 		return callback ? callback(null) : null;
 	})
 };
@@ -74,9 +76,10 @@ module.exports.copyFile = function(source, target, callback) {
 	fs.copy(source, target, function(error) {
 		if (error) {
 			handleErrors(error)
-			return callback ? callback(error) : error
+			callback ? callback(error) : error;
+			return;
 		}
-		logger.end('Done copying ' + source);
+		logger.end('Finished copying ' + source);
 		return callback ? callback(null) : null;
 	});
 }

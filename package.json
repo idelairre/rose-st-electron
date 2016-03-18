@@ -6,7 +6,8 @@
   "companyName": "Rose St. Community Center",
   "license": "MIT",
   "repository": "idelairre/rose-st-electron",
-  "author": "idelairre@gmail.com",
+  "author": "Ian Delairre",
+  "email": "idelairre@gmail.com",
   "environment": "development",
   "main": "build/index.js",
   "scripts": {

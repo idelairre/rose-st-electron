@@ -25,9 +25,10 @@ function writeFile(data, filePath, callback) {
 	fs.writeFile(filePath, data, function(error) {
 		if (error) {
 			utils.handleErrors(error);
-			return callback ? callback(error) : error;
+			callback ? callback(error) : error;
+			return;
 		}
-		utils.logger.end('Wrote file');
+		utils.logger.end('Finished writing file ' + path.parse(filePath).base);
 	});
 }
 
@@ -36,9 +37,10 @@ function moveDir(source, dest, callback) {
 	fs.move(source, dest, function(error) {
 		if (error) {
 			utils.handleErrors(error);
-			return callback ? callback(error) : error;
+			callback ? callback(error) : error;
+			return;
 		}
-		utils.logger.end('Moved directory');
+		utils.logger.end('Finished moving directory');
 	});
 }
 
@@ -52,13 +54,14 @@ module.exports = function(gulp, $) {
 				fs.readFile(entry, 'utf-8', function(error, data) {
 					if (error) {
 						utils.handleErrors(error);
-						return callback ? callback(error) : error;
+						callback ? callback(error) : error;
+						return;
 					}
 					data = babel.transform(data, BABEL_PRESET);
 					writeFile(data.code, filePath, callback);
 				});
 			});
-			utils.logger.end('Built electron');
+			utils.logger.end('Finished building electron');
 			return callback ? callback(null) : null;
 		},
 
@@ -67,11 +70,13 @@ module.exports = function(gulp, $) {
 			['node_modules/electron-prebuilt', 'node_modules/electron-debug'].map(function(entry) {
 				utils.copyDir(entry, BUILD_DIR + '/' + entry, function(error) {
 					if (error) {
-						return callback ? callback(error) : error;
+						utils.handleErrors(error);
+						callback ? callback(error) : error;
+						return;
 					}
 				});
 			});
-			utils.logger.end('Built runtime');
+			utils.logger.end('Finished building runtime');
 			return callback ? callback(null) : null;
 		},
 
@@ -80,14 +85,16 @@ module.exports = function(gulp, $) {
 			exec('cd build && npm install', function(error, out, code) {
 				if (error) {
 					utils.handleErrors(error);
-					return callback ? callback(error) : null;
+					callback ? callback(error) : null;
+					return;
 				}
-				utils.logger.end('Installed npm modules');
+				utils.logger.end('Finished installing npm modules');
 				return callback ? callback(null) : null;
 			});
 		},
 		// Write a package.json for distribution
 		packageJson: function(callback) {
+			utils.logger.start('Copying package.json');
 			function replacer(key, value) {
 				if (key === 'devDependencies') {
 					return undefined;
@@ -100,6 +107,7 @@ module.exports = function(gulp, $) {
 				}
 				return value;
 			}
+			console.log('environment: ', process.env.NODE_ENV);
 			var json = cloneDeep(require('./constants').packageJson);
 			json.dependencies["babel-polyfill"] = "^6.3.14";
 
@@ -109,13 +117,16 @@ module.exports = function(gulp, $) {
 			fs.writeFile(BUILD_DIR + '/package.json', JSON.stringify(json, replacer, 3), function(error) {
 				if (error) {
 					utils.handleErrors(error);
-					return callback ? callback(error) : error;
+					callback ? callback(error) : error;
+					return;
 				}
+				utils.logger.end('Finished copying package.json');
 				return callback ? callback(null) : null;
 			});
 		},
 
 		packageDist: function(callback) {
+			utils.logger.start('Packaging distribution');
 			['linux'].map(function(platform) {
 				OUT_DIR = RELEASE_DIR + '/' + platform;
 				// if (platform) {
@@ -135,8 +146,10 @@ module.exports = function(gulp, $) {
 				}, function done(error) {
 					if (error) {
 						utils.handleErrors(error);
-						return callback ? callback(error) : error;
+						callback ? callback(error) : error;
+						return;
 					}
+					utils.logger.start('Finished packaging distribution');
 					return callback ? callback(null) : null;
 				});
 			});
@@ -161,11 +174,15 @@ module.exports = function(gulp, $) {
 		// },
 
 		build: function(callback) {
+			utils.logger.start('Building electron files');
 			async.waterfall([tasks.buildElectron, tasks.buildRuntime, tasks.packageJson, tasks.install],
 				function(error, data) {
 					if (error) {
-						return callback ? callback(error) : null;
+						utils.handleErrors(error);
+						callback ? callback(error) : null;
+						return;
 					}
+					utils.logger.end('Finished building electron files');
 					return callback ? callback(data) : data;
 				});
 		}

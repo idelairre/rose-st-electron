@@ -8,25 +8,25 @@ var constants = require('../constants');
 var packageJson = constants.packageJson;
 
 var APP_SIZE;
+var APP_NAME = constants.appName;
 var BUILD_DIR = constants.buildDir;
 var RELEASE_DIR = constants.releaseDir;
-var PACK_NAME = constants.packageJson.name;
 var TEMP_DIR = constants.tempDir;
-var FILE_NAME = PACK_NAME + '-linux-x64';
-var DEB_FILE_NAME = PACK_NAME + '.deb';
-var DEB_PATH = RELEASE_DIR + '/linux/' + PACK_NAME + '-linux-x64';
-var PACK_DIR = RELEASE_DIR + '/' + PACK_NAME;
+var FILE_NAME = APP_NAME + '-linux-x64';
+var DEB_FILE_NAME = APP_NAME + '.deb';
+var DEB_PATH = RELEASE_DIR + '/linux/' + APP_NAME + '-linux-x64';
 
 module.exports = function(gulp, $) {
 	var tasks = {
-		configureDesktop: function(callback) { // works
+		configureDesktop: function(callback) {
 			// Create .desktop file from the template
 			var path = 'resources/linux/app.desktop';
 			utils.logger.start('Parsing desktop file', path);
 			fs.readFile(path, 'utf8', function(error, data) {
 				if (error) {
 					utils.handleErrors(error);
-					return callback ? callback(error) : error;
+					callback ? callback(error) : error;
+					return;
 				}
 				data = utils.replace(data, {
 					name: packageJson.name,
@@ -49,12 +49,14 @@ module.exports = function(gulp, $) {
 			fs.ensureFile(path, function(error) {
 				if (error) {
 					utils.handleErrors(error);
-					return callback ? callback(error) : error;
+					callback ? callback(error) : error;
+					return;
 				}
 				fs.writeFile(path, desktop, function(error, data) {
 					if (error) {
 						utils.handleErrors(error);
-						return callback ? callback(error) : null;
+						callback ? callback(error) : null;
+						return;
 					}
 					utils.logger.end('Wrote desktop file');
 					return callback ? callback(null, data) : data;
@@ -62,9 +64,9 @@ module.exports = function(gulp, $) {
 			});
 		},
 
-		copyIcon: function(callback) { // works
+		copyIcon: function(callback) {
 			// Copy icon
-			return utils.copyFile('resources/icon.png', './release/linux/rose-st-admin-linux-x64/opt/' + FILE_NAME + '/icon.png', callback);
+			return utils.copyFile('resources/icon.png', DEB_PATH + '/opt/' + FILE_NAME + '/icon.png', callback);
 		},
 
 		readDebianControl: function(data, callback) {
@@ -74,7 +76,8 @@ module.exports = function(gulp, $) {
 			fs.readFile(path, 'utf-8', function(error, data) {
 				if (error) {
 					utils.handleErrors(error)
-					return callback ? callback(error) : error;
+					callback ? callback(error) : error;
+					return;
 				}
 				utils.logger.end('Parsed DEB control');
 				return callback ? callback(null, data) : data;
@@ -82,38 +85,40 @@ module.exports = function(gulp, $) {
 		},
 
 		writeDebianControl: function(data, callback) {
-			var releasePath = './release/linux/rose-st-admin-linux-x64';
-			var path = releasePath + '/DEBIAN/control';
-			utils.readSizeRecursive(releasePath, function(error, result) {
-				utils.logger.start('Writing DEB control', path);
+			var path = DEB_PATH + '/DEBIAN/control';
+			utils.logger.start('Writing DEB control', path);
 
+			utils.readSizeRecursive(DEB_PATH, function(error, result) {
 				data = utils.replace(data, {
 					name: constants.packageJson.name,
 					description: constants.packageJson.description,
 					version: constants.packageJson.version,
 					author: constants.packageJson.author,
+					email: constants.packageJson.email,
 					size: result
 				});
 
 				fs.ensureFile(path, function(error) {
 					if (error) {
 						utils.handleErrors(error);
-						return callback ? callback(error) : error;
+						callback ? callback(error) : error;
+						return;
 					}
 					fs.writeFile(path, data, function(error, data) {
 						if (error) {
 							utils.handleErrors(error);
-							return callback ? callback(error) : error;
+							callback ? callback(error) : error;
+							return;
 						}
-						utils.logger.end('Wrote DEB control');
+						utils.logger.end('Finished writing DEB control');
 						return callback ? callback(null, data) : data;
 					});
-				})
+				});
 			});
 		},
 
 		packageDebFile: function(data, callback) {
-			var path = DEB_PATH.replace(/\s/g, '\\ ') + ' ' + DEB_PATH.replace(/\s/g, '\\ ');
+			var path = DEB_PATH.replace(/\s/g, '\\ ') + ' ' + RELEASE_DIR + '/linux/'.replace(/\s/g, '\\ ');
 			utils.logger.start('Creating DEB package', path);
 
 			var buildCmd = 'fakeroot dpkg-deb -Zxz --build ' + path;
@@ -125,7 +130,8 @@ module.exports = function(gulp, $) {
 					console.error(error);
 					console.error(stderr);
 					utils.handleErrors(error)
-					return callback ? callback(error) : null;
+					callback ? callback(error) : null;
+					return;
 				} else {
 					utils.logger.end('DEB package ready!');
 					return callback ? callback(null, data) : data;

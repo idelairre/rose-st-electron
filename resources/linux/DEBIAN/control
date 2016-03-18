@@ -1,6 +1,6 @@
 Package: {{name}}
 Version: {{version}}
-Maintainer: {{author}}
+Maintainer: {{author}}<{{email}}>
 Priority: optional
 Architecture: amd64
 Installed-Size: {{size}}

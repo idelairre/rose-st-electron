@@ -36,7 +36,7 @@ gulp.task('styles', assets.tasks[0]); // this is mad ugly but whatevs
 
 gulp.task('build', getTask('build').build);
 
-gulp.task('build:dist', getTask('build').buildDist);
+gulp.task('build:dist', ['set-production'], getTask('build').buildDist);
 
 gulp.task('bundle:scripts', function() {
 	bundler.init();
@@ -66,7 +66,7 @@ gulp.task('default', ['build']);
 
 gulp.task('serve:production', gulpsync.sync(['build:production', 'serve']));
 
-gulp.task('watch', gulpsync.async(['clean', 'assets', 'build:app', ['bundle', 'serve']])),
+gulp.task('watch', gulpsync.async(['clean', 'assets', 'build', ['bundle', 'serve']])),
 	function() {
 		bundler.watch();
 	};
