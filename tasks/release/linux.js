@@ -16,35 +16,86 @@ var FILE_NAME = APP_NAME + '-linux-x64';
 var DEB_FILE_NAME = APP_NAME + '.deb';
 var DEB_PATH = RELEASE_DIR + '/linux/' + APP_NAME + '-linux-x64';
 
-module.exports = function(gulp, $) {
-	var tasks = {
-		configureDesktop: function(callback) {
-			// Create .desktop file from the template
-			var path = 'resources/linux/app.desktop';
-			utils.logger.start('Parsing desktop file', path);
-			fs.readFile(path, 'utf8', function(error, data) {
+var tasks = {
+	configureDesktop: function(callback) {
+		// Create .desktop file from the template
+		var path = 'resources/linux/app.desktop';
+		utils.logger.start('Parsing desktop file', path);
+		fs.readFile(path, 'utf8', function(error, data) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error) : error;
+				return;
+			}
+			data = utils.replace(data, {
+				name: packageJson.name,
+				productName: packageJson.productName,
+				description: packageJson.description,
+				version: packageJson.version,
+				author: packageJson.author,
+				os: 'linux',
+				arch: 'x64'
+			});
+			utils.logger.end('Parsed desktop file');
+			return callback ? callback(null, data) : data;
+		});
+	},
+
+	writeDesktopFile: function(desktop, callback) {
+		var path = DEB_PATH + '/usr/share/applications/' + FILE_NAME + '.desktop';
+		utils.logger.start('Writing desktop file', path);
+
+		fs.ensureFile(path, function(error) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error) : error;
+				return;
+			}
+			fs.writeFile(path, desktop, function(error, data) {
 				if (error) {
 					utils.handleErrors(error);
-					callback ? callback(error) : error;
+					callback ? callback(error) : null;
 					return;
 				}
-				data = utils.replace(data, {
-					name: packageJson.name,
-					productName: packageJson.productName,
-					description: packageJson.description,
-					version: packageJson.version,
-					author: packageJson.author,
-					os: 'linux',
-					arch: 'x64'
-				});
-				utils.logger.end('Parsed desktop file');
+				utils.logger.end('Wrote desktop file');
 				return callback ? callback(null, data) : data;
 			});
-		},
+		});
+	},
 
-		writeDesktopFile: function(desktop, callback) {
-			var path = DEB_PATH + '/usr/share/applications/' + FILE_NAME + '.desktop';
-			utils.logger.start('Writing desktop file', path);
+	copyIcon: function(callback) {
+		// Copy icon
+		return utils.copyFile('resources/icon.png', DEB_PATH + '/opt/' + FILE_NAME + '/icon.png', callback);
+	},
+
+	readDebianControl: function(data, callback) {
+		var path = './resources/linux/DEBIAN/control';
+		utils.logger.start('Parsing DEB control', path);
+		// Preparing debian control file
+		fs.readFile(path, 'utf-8', function(error, data) {
+			if (error) {
+				utils.handleErrors(error)
+				callback ? callback(error) : error;
+				return;
+			}
+			utils.logger.end('Parsed DEB control');
+			return callback ? callback(null, data) : data;
+		});
+	},
+
+	writeDebianControl: function(data, callback) {
+		var path = DEB_PATH + '/DEBIAN/control';
+		utils.logger.start('Writing DEB control', path);
+
+		utils.readSizeRecursive(DEB_PATH, function(error, result) {
+			data = utils.replace(data, {
+				name: constants.packageJson.name,
+				description: constants.packageJson.description,
+				version: constants.packageJson.version,
+				author: constants.packageJson.author,
+				email: constants.packageJson.email,
+				size: result
+			});
 
 			fs.ensureFile(path, function(error) {
 				if (error) {
@@ -52,94 +103,43 @@ module.exports = function(gulp, $) {
 					callback ? callback(error) : error;
 					return;
 				}
-				fs.writeFile(path, desktop, function(error, data) {
-					if (error) {
-						utils.handleErrors(error);
-						callback ? callback(error) : null;
-						return;
-					}
-					utils.logger.end('Wrote desktop file');
-					return callback ? callback(null, data) : data;
-				});
-			});
-		},
-
-		copyIcon: function(callback) {
-			// Copy icon
-			return utils.copyFile('resources/icon.png', DEB_PATH + '/opt/' + FILE_NAME + '/icon.png', callback);
-		},
-
-		readDebianControl: function(data, callback) {
-			var path = './resources/linux/DEBIAN/control';
-			utils.logger.start('Parsing DEB control', path);
-			// Preparing debian control file
-			fs.readFile(path, 'utf-8', function(error, data) {
-				if (error) {
-					utils.handleErrors(error)
-					callback ? callback(error) : error;
-					return;
-				}
-				utils.logger.end('Parsed DEB control');
-				return callback ? callback(null, data) : data;
-			});
-		},
-
-		writeDebianControl: function(data, callback) {
-			var path = DEB_PATH + '/DEBIAN/control';
-			utils.logger.start('Writing DEB control', path);
-
-			utils.readSizeRecursive(DEB_PATH, function(error, result) {
-				data = utils.replace(data, {
-					name: constants.packageJson.name,
-					description: constants.packageJson.description,
-					version: constants.packageJson.version,
-					author: constants.packageJson.author,
-					email: constants.packageJson.email,
-					size: result
-				});
-
-				fs.ensureFile(path, function(error) {
+				fs.writeFile(path, data, function(error, data) {
 					if (error) {
 						utils.handleErrors(error);
 						callback ? callback(error) : error;
 						return;
 					}
-					fs.writeFile(path, data, function(error, data) {
-						if (error) {
-							utils.handleErrors(error);
-							callback ? callback(error) : error;
-							return;
-						}
-						utils.logger.end('Finished writing DEB control');
-						return callback ? callback(null, data) : data;
-					});
+					utils.logger.end('Finished writing DEB control');
+					return callback ? callback(null, data) : data;
 				});
 			});
-		},
+		});
+	},
 
-		packageDebFile: function(data, callback) {
-			var path = DEB_PATH.replace(/\s/g, '\\ ') + ' ' + RELEASE_DIR + '/linux/'.replace(/\s/g, '\\ ');
-			utils.logger.start('Creating DEB package', path);
+	packageDebFile: function(data, callback) {
+		var path = DEB_PATH.replace(/\s/g, '\\ ') + ' ' + RELEASE_DIR + '/linux/'.replace(/\s/g, '\\ ');
+		utils.logger.start('Creating DEB package', path);
 
-			var buildCmd = 'fakeroot dpkg-deb -Zxz --build ' + path;
+		var buildCmd = 'fakeroot dpkg-deb -Zxz --build ' + path;
 
-			// Build the package...
-			exec(buildCmd, function(error, stdout, stderr) {
-				if (error || stderr) {
-					console.error('ERROR while building DEB package:');
-					console.error(error);
-					console.error(stderr);
-					utils.handleErrors(error)
-					callback ? callback(error) : null;
-					return;
-				} else {
-					utils.logger.end('DEB package ready!');
-					return callback ? callback(null, data) : data;
-				}
-			});
-		}
-	};
+		// Build the package...
+		exec(buildCmd, function(error, stdout, stderr) {
+			if (error || stderr) {
+				console.error('ERROR while building DEB package:');
+				console.error(error);
+				console.error(stderr);
+				utils.handleErrors(error)
+				callback ? callback(error) : null;
+				return;
+			} else {
+				utils.logger.end('DEB package ready!');
+				return callback ? callback(null, data) : data;
+			}
+		});
+	}
+};
 
+module.exports = function() {
 	return function() {
 		async.waterfall([tasks.copyIcon, tasks.configureDesktop, tasks.writeDesktopFile, tasks.readDebianControl, tasks.writeDebianControl, tasks.packageDebFile])
 	};

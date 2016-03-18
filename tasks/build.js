@@ -32,162 +32,126 @@ function writeFile(data, filePath, callback) {
 	});
 }
 
-function moveDir(source, dest, callback) {
-	utils.logger.start('Moving directory', dest);
-	fs.move(source, dest, function(error) {
-		if (error) {
-			utils.handleErrors(error);
-			callback ? callback(error) : error;
-			return;
-		}
-		utils.logger.end('Finished moving directory');
-	});
-}
-
-module.exports = function(gulp, $) {
-	var tasks = {
-		buildElectron: function(callback) {
-			utils.logger.start('Building electron');
-			['app/events.js', 'app/menu.js', 'app/index.js'].map(function(entry) {
-				var file = path.parse(entry).base;
-				var filePath = BUILD_DIR + '/' + file;
-				fs.readFile(entry, 'utf-8', function(error, data) {
-					if (error) {
-						utils.handleErrors(error);
-						callback ? callback(error) : error;
-						return;
-					}
-					data = babel.transform(data, BABEL_PRESET);
-					writeFile(data.code, filePath, callback);
-				});
-			});
-			utils.logger.end('Finished building electron');
-			return callback ? callback(null) : null;
-		},
-
-		buildRuntime: function(callback) {
-			utils.logger.start('Building runtime');
-			['node_modules/electron-prebuilt', 'node_modules/electron-debug'].map(function(entry) {
-				utils.copyDir(entry, BUILD_DIR + '/' + entry, function(error) {
-					if (error) {
-						utils.handleErrors(error);
-						callback ? callback(error) : error;
-						return;
-					}
-				});
-			});
-			utils.logger.end('Finished building runtime');
-			return callback ? callback(null) : null;
-		},
-
-		install: function(callback) {
-			utils.logger.start('Installing npm modules');
-			exec('cd build && npm install', function(error, out, code) {
-				if (error) {
-					utils.handleErrors(error);
-					callback ? callback(error) : null;
-					return;
-				}
-				utils.logger.end('Finished installing npm modules');
-				return callback ? callback(null) : null;
-			});
-		},
-		// Write a package.json for distribution
-		packageJson: function(callback) {
-			utils.logger.start('Copying package.json');
-			function replacer(key, value) {
-				if (key === 'devDependencies') {
-					return undefined;
-				}
-				if (key === 'main') {
-					return 'index.js';
-				}
-				if (key === 'environment' && process.env.NODE_ENV === 'production') {
-					return 'production';
-				}
-				return value;
-			}
-			console.log('environment: ', process.env.NODE_ENV);
-			var json = cloneDeep(require('./constants').packageJson);
-			json.dependencies["babel-polyfill"] = "^6.3.14";
-
-			if (!fs.existsSync(BUILD_DIR)) {
-				fs.mkdirSync(BUILD_DIR);
-			}
-			fs.writeFile(BUILD_DIR + '/package.json', JSON.stringify(json, replacer, 3), function(error) {
+var tasks = {
+	buildElectron: function(callback) {
+		utils.logger.start('Building electron');
+		['app/events.js', 'app/menu.js', 'app/index.js'].map(function(entry) {
+			var file = path.parse(entry).base;
+			var filePath = BUILD_DIR + '/' + file;
+			fs.readFile(entry, 'utf-8', function(error, data) {
 				if (error) {
 					utils.handleErrors(error);
 					callback ? callback(error) : error;
 					return;
 				}
-				utils.logger.end('Finished copying package.json');
+				data = babel.transform(data, BABEL_PRESET);
+				writeFile(data.code, filePath, callback);
+			});
+		});
+		utils.logger.end('Finished building electron');
+		return callback ? callback(null) : null;
+	},
+
+	buildRuntime: function(callback) {
+		utils.logger.start('Building runtime');
+		['node_modules/electron-prebuilt', 'node_modules/electron-debug'].map(function(entry) {
+			utils.copyDir(entry, BUILD_DIR + '/' + entry, callback);
+		});
+		utils.logger.end('Finished building runtime');
+		return callback ? callback(null) : null;
+	},
+
+	install: function(callback) {
+		utils.logger.start('Installing npm modules');
+		exec('cd build && npm install', function(error, out, code) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error) : null;
+				return;
+			}
+			utils.logger.end('Finished installing npm modules');
+			return callback ? callback(null) : null;
+		});
+	},
+	// Write a package.json for distribution
+	packageJson: function(callback) {
+		utils.logger.start('Copying package.json');
+
+		function replacer(key, value) {
+			if (key === 'devDependencies') {
+				return undefined;
+			}
+			if (key === 'main') {
+				return 'index.js';
+			}
+			if (key === 'environment' && process.env.NODE_ENV === 'production') {
+				return 'production';
+			}
+			return value;
+		}
+		var json = cloneDeep(require('./constants').packageJson);
+		json.dependencies["babel-polyfill"] = "^6.3.14";
+
+		if (!fs.existsSync(BUILD_DIR)) {
+			fs.mkdirSync(BUILD_DIR);
+		}
+		fs.writeFile(BUILD_DIR + '/package.json', JSON.stringify(json, replacer, 3), function(error) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error) : error;
+				return;
+			}
+			utils.logger.end('Finished copying package.json');
+			return callback ? callback(null) : null;
+		});
+	},
+
+	packageDist: function(callback) {
+		utils.logger.start('Packaging distribution');
+		['linux'].map(function(platform) {
+			OUT_DIR = RELEASE_DIR + '/' + platform;
+			// if (platform) {
+			// 	OUT_DIR = OUT_DIR + '/opt/';
+			// }
+			var taskName = 'package:' + platform;
+
+			packager({
+				asar: true,
+				dir: BUILD_DIR,
+				name: APP_NAME,
+				arch: 'x64',
+				platform: platform,
+				out: OUT_DIR + '/' + APP_NAME + '-linux-x64' + '/opt',
+				overwrite: true,
+				version: ELECTRON_VERSION
+			}, function done(error) {
+				if (error) {
+					utils.handleErrors(error);
+					callback ? callback(error) : error;
+					return;
+				}
+				utils.logger.start('Finished packaging distribution');
 				return callback ? callback(null) : null;
 			});
-		},
+		});
+	},
 
-		packageDist: function(callback) {
-			utils.logger.start('Packaging distribution');
-			['linux'].map(function(platform) {
-				OUT_DIR = RELEASE_DIR + '/' + platform;
-				// if (platform) {
-				// 	OUT_DIR = OUT_DIR + '/opt/';
-				// }
-				var taskName = 'package:' + platform;
-
-				packager({
-					asar: true,
-					dir: BUILD_DIR,
-					name: APP_NAME,
-					arch: 'x64',
-					platform: platform,
-					out: OUT_DIR + '/' + APP_NAME + '-linux-x64' + '/opt',
-					overwrite: true,
-					version: ELECTRON_VERSION
-				}, function done(error) {
-					if (error) {
-						utils.handleErrors(error);
-						callback ? callback(error) : error;
-						return;
-					}
-					utils.logger.start('Finished packaging distribution');
-					return callback ? callback(null) : null;
-				});
+	build: function(callback) {
+		utils.logger.start('Building electron files');
+		async.waterfall([tasks.buildElectron, tasks.buildRuntime, tasks.packageJson, tasks.install],
+			function(error, data) {
+				if (error) {
+					utils.handleErrors(error);
+					callback ? callback(error) : null;
+					return;
+				}
+				utils.logger.end('Finished building electron files');
+				return callback ? callback(data) : data;
 			});
-		},
+	}
+};
 
-		// move: function(callback) {
-		// 	var DIST_PATH = RELEASE_DIR + '/linux/' + APP_NAME + '-linux-x64';
-		// 	console.log(DIST_PATH);
-		//
-		// 	fs.mkdirs(DIST_PATH + '/opt', function(error) {
-		// 		if (error) {
-		// 			utils.handleErrors(error);
-		// 			return callback ? callback(error) : error;
-		// 		}
-		// 		moveDir(DIST_PATH, DIST_PATH + '/opt', function(error) {
-		// 			if (error) {
-		// 				utils.handleErrors(error);
-		// 				return callback ? callback(error) : error;
-		// 			}
-		// 		});
-		// 	});
-		// },
-
-		build: function(callback) {
-			utils.logger.start('Building electron files');
-			async.waterfall([tasks.buildElectron, tasks.buildRuntime, tasks.packageJson, tasks.install],
-				function(error, data) {
-					if (error) {
-						utils.handleErrors(error);
-						callback ? callback(error) : null;
-						return;
-					}
-					utils.logger.end('Finished building electron files');
-					return callback ? callback(data) : data;
-				});
-		}
-	};
-
+module.exports = function() {
 	return {
 		buildDist: function() {
 			async.waterfall([tasks.buildElectron, tasks.buildRuntime, tasks.packageJson, tasks.install, tasks.packageDist]);

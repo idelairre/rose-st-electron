@@ -64,7 +64,6 @@ module.exports.copyDir = function(source, target, callback) {
 			return;
 		}
 		logger.end('Finished copying ' + source);
-		return callback ? callback(null) : null;
 	})
 };
 
@@ -80,7 +79,6 @@ module.exports.copyFile = function(source, target, callback) {
 			return;
 		}
 		logger.end('Finished copying ' + source);
-		return callback ? callback(null) : null;
 	});
 }
 
