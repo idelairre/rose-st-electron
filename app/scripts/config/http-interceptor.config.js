@@ -32,6 +32,9 @@ class HttpInterceptor {
 		$window.addEventListener('loginStarted', ::this.modalService.loadingModal);
 		$window.addEventListener('loginSuccess', ::this.modalService.hide);
 		$window.addEventListener('loginFailed', ::this.modalService.hide);
+		$window.addEventListener('analyticsRequest', ::this.modalService.loadingModal);
+		$window.addEventListener('analyticsReply', ::this.modalService.hide);
+		$window.addEventListener('analyticsError', ::this.modalService.hide);
   }
 
   @Inject('$state', '$window', ModalService)

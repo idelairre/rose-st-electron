@@ -1,12 +1,26 @@
 <md-card flex layout="column">
   <md-card-title flex="none" layout-align="space-between end">
     <md-card-title-text>
-      <span class="md-headline">Query</span>
+      <span class="md-headline">Query (BETA)</span>
+      <span class="md-subhead">{{ QueryBuilder.chartState | Inflector:'capitalize' }}</span>
     </md-card-title-text>
-    <md-card-title-media class="md-table-pagination limit" style="padding: 0">
-      <md-datepicker ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" md-min-date="QueryBuilder.startDate"></md-datepicker>
-      <span class="label limit-label">to: </span>
-      <md-datepicker ng-model="QueryBuilder.fields['end-date']" md-placeholder="End date" md-max-date="QueryBuilder.endDate"></md-datepicker>
+    <md-card-title-media layout-align="end center" class="md-table-pagination limit" style="padding: 0">
+        <md-datepicker ng-if="QueryBuilder.query.dimensions.includes('ga:month') || QueryBuilder.query.dimensions.includes('ga:hour')" ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.addParam('date', 'start-date')"></md-datepicker>
+        <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:month') && QueryBuilder.query.dimensions.includes('ga:nthMonth')">to: </span>
+        <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:hour') && QueryBuilder.query.dimensions.includes('ga:nthHour') && QueryBuilder.chartState === 'comparison'">vs: </span>
+        <md-datepicker ng-if="QueryBuilder.query.dimensions.includes('ga:month') && QueryBuilder.query.dimensions.includes('ga:nthMonth')" ng-model="QueryBuilder.fields['end-date']" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.addParam('date', 'end-date')"></md-datepicker>
+        <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:hour')"></span>
+        <md-input-container class="time-input-container" ng-if="QueryBuilder.query.dimensions.includes('ga:hour')">
+          <input type="time" class="time-input" ng-model="QueryBuilder.fields['start-date']" ng-blur="QueryBuilder.setQuery('time', 'start-date')" aria-label="start time">
+        </md-input-container>
+        <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:nthHour')">to: </span>
+        <md-input-container class="time-input-container" ng-if="QueryBuilder.query.dimensions.includes('ga:nthHour')">
+          <input type="time" class="time-input" ng-model="QueryBuilder.fields['end-date']" ng-blur="QueryBuilder.addParam('time', 'end-date')" aria-label="end time" min="QueryBuilder.fields['start-date']">
+        </md-input-container>
+        <span class="label limit-label" ng-if="QueryBuilder.chartState === 'comparison'">comparison: </span>
+        <md-input-container ng-show="QueryBuilder.chartState === 'comparison'">
+          <md-switch aria-label="comparison switch" ng-model="QueryBuilder.fields.comparison"></md-switch>
+        </md-input-container>
       <md-menu>
         <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)" style="padding-left: 15px">
           <md-icon md-menu-origin>settings</md-icon>
@@ -32,58 +46,12 @@
           </md-menu-item>
         </md-menu-content>
       </md-menu>
-      <!-- <md-menu>
-        <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)">
-          <md-icon md-menu-origin>more_vert</md-icon>
-        </md-button>
-        <md-menu-content width="4">
-          <md-menu-item>
-            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.changeState('sessions')">
-              <md-icon md-menu-align-target>pageview</md-icon>
-              <p>Sessions</p>
-            </button>
-          </md-menu-item>
-          <md-menu-item>
-            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.changeState('social')">
-              <md-icon md-menu-align-target>share</md-icon>
-              <p>Social Networks</p>
-            </button>
-          </md-menu-item>
-          <md-menu-item>
-            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.changeState('traffic')">
-              <md-icon md-menu-align-target>compare_arrows</md-icon>
-              <p>Traffic</p>
-            </button>
-          </md-menu-item>
-          <md-menu-item>
-            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.changeState('users')">
-              <md-icon md-menu-align-target>people</md-icon>
-              <p>Users</p>
-            </button>
-          </md-menu-item>
-        </md-menu-content>
-      </md-menu> -->
     </md-card-title-media>
   </md-card-title>
   <md-card-content>
-    <!-- <div layout="row">
-      <md-input-container flex="80">
-        <label>Sort</label>
-        <md-select placeholder="Sort" ng-model="QueryBuilder.query.sort" ng-change="QueryBuilder.addParam('sort', QueryBuilder.query.sort)">
-          <md-option ng-repeat="param in QueryBuilder.dimensions" ng-value="param">{{ QueryBuilder.renderUiName(param) }}</md-option>
-        </md-select>
-      </md-input-container>
-      <md-input-container flex="20">
-        <label>Order</label>
-        <md-select placeholder="Order" ng-model="QueryBuilder.query.order">
-          <md-option>Ascending</md-option>
-          <md-option>Descending</md-option>
-        </md-select>
-      </md-input-container>
-    </div> -->
     <div layout="row">
       <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
-        <rs-chips-select class="metrics" [(model)]="QueryBuilder.query.metrics" [select-items]="QueryBuilder.state.metrics" placeholder="Metrics" flex="80"></rs-chips-select>
+        <rs-chips-select class="metrics" [(model)]="QueryBuilder.query.metrics" [select-items]="QueryBuilder.state.metrics" (on-change)="QueryBuilder.onQueryChange.next('dimension', '')" placeholder="Metrics" flex="80"></rs-chips-select>
       </md-input-container>
       <md-input-container flex="20" class="chips-select-row">
         <label>Category</label>
@@ -97,7 +65,7 @@
     </div>
     <div layout="row">
       <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
-        <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" placeholder="Dimensions" flex="80"></rs-chips-select>
+        <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.addParam('dimension', '')" placeholder="Dimensions" flex="80"></rs-chips-select>
       </md-input-container>
       <md-input-container flex="20">
         <label>Category</label>

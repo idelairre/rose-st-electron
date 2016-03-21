@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Inject, Input, Output } from 'ng-forward';
 import ChipsSelect from './select/chips-select.component';
+import Inflector from './inflector.filter';
 import inflected from 'inflected';
 import moment from 'moment';
 import 'reflect-metadata';
@@ -9,22 +10,21 @@ import 'reflect-metadata';
 // compositiom doughnut chart: disable grouped labels
 // trend line graph: disable grouped labels, enable series
 
-// TODO: find a way to move the bottom border up
-
-// this.timeDimensions = ['ga:date', 'ga:year', 'ga:month', 'ga:week', 'ga:day', 'ga:hour', 'ga:minute', 'ga:nthMonth', 'ga:nthWeek', 'ga:nthDay', 'ga:nthMinute', 'ga:dayOfWeek', 'ga:dayOfWeekName', 'ga:dateHour', 'ga:yearMonth', 'ga:yearWeek', 'ga:isoWeek', 'ga:isoYear', 'ga:isoYearIsoWeek', 'ga:nthHour'];
-
+const DATE_FORMAT = 'YYYY-MM-DD';
 
 @Component({
 	selector: 'query-builder',
 	controllerAs: 'QueryBuilder',
 	template: require('./query-builder.html'),
 	directives: [ChipsSelect],
-  inputs: ['query', 'chartState'],
+	pipes: [Inflector],
+  inputs: ['fields', 'query', 'chartState'],
 	outputs: ['onQueryChange']
 })
 
 @Inject('$scope')
 export default class QueryBuilder {
+	@Input() fields;
   @Input() query;
 	@Output() onQueryChange
 	constructor($scope) {
@@ -32,31 +32,12 @@ export default class QueryBuilder {
 
 		this.onQueryChange = new EventEmitter();
 
-		let date = new Date();
-
-		this.startDate = new Date(date.getFullYear(), 0, 1);
-		this.endDate = new Date();
-
-		this.fields = {
-			'start-date': this.startDate,
-			'end-date': this.endDate,
-			dimensions: null,
-			metrics: null
-		};
-
-		this.$scope.$watch(::this.evalStartDate, ::this.setStartDate);
-
-		this.$scope.$watch(::this.evalEndDate, ::this.setEndDate);
-
-		this.$scope.$watchCollection(::this.evalQuery, ::this.setQuery);
-
-
 		this.state = {
 			location: {
 				dimensions: ['ga:continent', 'ga:subContinent', 'ga:country', 'ga:region', 'ga:metro', 'ga:city', 'ga:latitude', 'ga:longitude', 'ga:networkDomain', 'ga:networkLocation']
 			},
 			time: {
-				dimensions: ['ga:month', 'ga:nthMonth']
+				dimensions: ['ga:date', 'ga:year', 'ga:month', 'ga:week', 'ga:day', 'ga:hour', 'ga:minute', 'ga:nthMonth', 'ga:nthWeek', 'ga:nthDay', 'ga:nthHour', 'ga:nthMinute', 'ga:dayOfWeek', 'ga:dayOfWeekName', 'ga:dateHour', 'ga:yearMonth', 'ga:yearWeek']
 			},
 			users: {
 				selected: true,
@@ -81,19 +62,64 @@ export default class QueryBuilder {
 			dimensions: [],
 			metrics: []
 		};
+
 		this.state.dimensions = this.state.time.dimensions;
+
+		this.$scope.$watch(::this.evalComparison, ::this.setDate);
+		this.$scope.$watchCollection(::this.evalQuery, ::this.setQuery);
+
   }
 
 	ngOnInit() {
 		this.setState('users');
+		this.startDate = angular.copy(this.fields['start-date']);
+		this.endDate = angular.copy(new Date());
 		this.fields.dimensions = 'time';
 		this.fields.metrics = 'users';
 		this.state.dimensions = this.state.time.dimensions;
 	}
 
+	ngAfterViewInit() {
+		this.chartState = 'trends';
+	}
+
 	addParam(field, param) {
-		if (!this.query[field].includes(param)) {
-			this.query[field].push(param);
+		// if (!field || !param) {
+		// 	return;
+		// }
+		if (field === 'time' && param === 'start-date' && this.query.dimensions.includes('ga:hour')) {
+			this.startTimeCache = angular.copy(this.fields['start-date']);
+		} else if (field === 'date' && param === 'start-date' && this.startTimeCache && this.query.dimensions.includes('ga:month')) {
+			let date = this.fields['start-date'];
+			let time = this.startTimeCache;
+			this.fields['start-date'] = new Date(date.getFullYear(), date.getDay(), time.getHours());
+		}
+		this.onQueryChange.next();
+	}
+
+	evalComparison() {
+		return this.fields.comparison;
+	}
+
+	evalQuery() {
+		return this.query;
+	}
+
+	setDate(current, prev) {
+		if (current !== prev) {
+			if (current) {
+				let startDate = this.fields['start-date'];
+				let endDate = this.fields['end-date'];
+				this.prevStartDate = startDate;
+				this.prevEndDate = endDate;
+				this.fields['start-date'] = new Date(startDate.getFullYear() - 1, startDate.getMonth(), startDate.getDay(), startDate.getHours());
+				this.fields['end-date'] = new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDay(), endDate.getHours());
+			}
+			if (!current) {
+				this.fields['start-date'] = this.prevStartDate;
+				this.fields['end-date'] = this.prevEndDate;
+			}
+			this.onQueryChange.next();
 		}
 	}
 
@@ -103,27 +129,14 @@ export default class QueryBuilder {
 		this.state[state].selected = true;
 		this.state.metrics = this.state[state].metrics;
 		this.state.dimensions = this.state[state].dimensions;
-		console.log('current state: ', this.state.current);
-	}
-
-	evalEndDate() {
-		return this.fields['end-date'];
-	}
-
-	evalStartDate() {
-		return this.fields['start-date'];
-	}
-
-	evalQuery() {
-		return this.query;
 	}
 
 	resetState() {
-		Object.keys(this.state).map((value, index) => { this.state[value].selected = false });
-	}
-
-	renderUiName(item) {
-		return inflected.humanize(inflected.underscore(item.replace(/(\d+)/, '$1 ').replace(/ga:/, '')));
+		Object.keys(this.state).map((value, index) => {
+			if (typeof this.state[value].selected !== 'undefined') {
+				this.state[value].selected = false;
+			}
+		});
 	}
 
 	setChartState(state) {
@@ -132,26 +145,7 @@ export default class QueryBuilder {
 
 	setField(field) {
 		let category = this.fields[field];
-		// let buffer = category.split(' ')[0].toLowerCase();
 		this.state[field] = this.state[category][field];
-	}
-
-	setEndDate(current, prev) {
-		if (current !== prev) {
-			this.query['end-date'] = moment(current).format('YYYY-MM-DD');
-			if (!this.query.dimensions.includes('ga:nthMonth')) {
-				this.query.dimensions.push('ga:nthMonth');
-			}
-		}
-	}
-
-	setStartDate(current, prev) {
-		if (current !== prev) {
-			this.query['start-date'] = moment(current).subtract(0, 'day').day(0).format('YYYY-MM-DD');
-			if (!this.query.dimensions.includes('ga:month')) {
-				this.query.dimensions.push('ga:month');
-			}
-		}
 	}
 
 	setQuery(current, prev) {

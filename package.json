@@ -34,6 +34,7 @@
     "googleapis": "^2.1.7",
     "inflected": "^1.1.6",
     "j-toker": "0.0.10-beta3",
+    "mdPickers": "git+https://github.com/alenaksu/mdPickers.git",
     "moment": "^2.12.0",
     "ng-forward": "0.0.1-alpha.12",
     "qs": "^6.1.0",

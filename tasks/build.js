@@ -125,7 +125,6 @@ var tasks = {
 
 	packageDist: function(callback) {
 		utils.logger.start('Packaging distribution');
-		// var done = 0;
 		var targets = ['win32', 'linux', 'darwin'];
 		targets.map(function(platform) {
 			OUT_DIR = RELEASE_DIR + '/' + platform;
@@ -146,7 +145,6 @@ var tasks = {
 					callback ? callback(error) : error;
 					return;
 				}
-				// done++;
 				utils.logger.start('Finished packaging distribution');
 			});
 		});

@@ -46,8 +46,10 @@ function analyticsRequest(params, callback) {
 		analytics.data.ga.get(params, (error, response) => {
 			if (error) {
 				console.error(`${error}`);
+				return callback ? callback(error) : error;
 			} else {
-				return callback(response) || response;
+				console.log(response);
+				return callback(null, response) || response;
 			}
 		});
 	});
@@ -90,8 +92,14 @@ function createMainWindow() {
 }
 
 ipcMain.on('analyticsParams', (event, args) => {
-	analyticsRequest(args, response => {
-  	event.sender.send('analyticsReply', response);
+	console.log(args);
+	analyticsRequest(args, (error, response) => {
+		if (error !== null) {
+			event.sender.send('ipcAnalyticsError', error);
+			return;
+		}
+		console.log(response);
+  	event.sender.send('ipcAnalyticsReply', response);
 	});
 });
 

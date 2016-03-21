@@ -1,3 +1,7 @@
-.chips-select-row {
-  /*margin: 35px 0;*/
+.time-input {
+  min-width: 120px;
+}
+
+.time-input-container {
+  margin: 0 0 -24px 11px;
 }

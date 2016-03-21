@@ -28,11 +28,6 @@ module.exports = function(gulp, $) {
 		}
   ];
   return {
-    bundle: function () {
-      tasks.map(function (task) {
-        task();
-      });
-    },
     tasks: tasks
   }
 }

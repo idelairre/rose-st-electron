@@ -22,17 +22,19 @@ function getTask(task) {
 
 gulp.task('package:debian', getTask('release/linux'));
 
-gulp.task('assets', assets.bundle);
-
 gulp.task('clean', function() {
 	return del.sync([constants.buildDir, constants.releaseDir, constants.tempDir]);
 });
 
 gulp.task('compress', getTask('compress'));
 
+gulp.task('styles', assets.tasks[0]); // this is mad ugly but whatevs
+
 gulp.task('html', assets.tasks[1]);
 
-gulp.task('styles', assets.tasks[0]); // this is mad ugly but whatevs
+gulp.task('extras', assets.tasks[2]); // this is mad ugly but whatevs
+
+gulp.task('assets', ['styles', 'html', 'extras'], assets.tasks[3]);
 
 gulp.task('build', getTask('build').build);
 
@@ -56,8 +58,8 @@ gulp.task('set-production', function() {
 gulp.task('serve', function() {
 	electron.start();
 	gulp.watch(['app/scripts/**/*.css'], ['styles', electron.reload]);
-	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['html', 'scripts', electron.reload]);
-	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build:electron', electron.restard]);
+	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['scripts', electron.reload]);
+	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build', electron.restart]);
 });
 
 gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'bundle']));

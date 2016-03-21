@@ -1,7 +1,7 @@
 <md-card>
   <md-card-title flex="none">
     <md-card-title-text>
-      <span class="md-headline" ng-if="Chart.query.metrics"><font ng-repeat="item in Chart.query.metrics">{{ Chart.renderUiName(item) }}</font> <font ng-if="Chart.query['start-date'].length !== 0 && Chart.query['end-date'].length !== 0">({{ Chart.query['start-date']}} to {{ Chart.query['end-date']}})</font></span>
+      <rs-chart-title [fields]="Chart.fields" [query]="Chart.query"></rs-chart-title>
     </md-card-title-text>
     <md-card-title-media>
     </md-card-title-media>

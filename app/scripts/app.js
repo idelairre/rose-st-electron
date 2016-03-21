@@ -10,7 +10,9 @@ import Chart from 'chart.js/Chart.min';
 import 'angular-animate';
 import 'angular-material';
 import 'angular-messages';
+import 'angular-sanitize';
 import 'angular-ui-router';
+import 'mdPickers/dist/mdPickers.min';
 import 'babel-polyfill';
 import 'reflect-metadata';
 import 'tc-angular-chartjs/dist/tc-angular-chartjs.min';
@@ -21,6 +23,8 @@ bootstrap(MainComponent, [
   'ngAnimate',
   'ngMessages',
   'ngMaterial',
+  'ngSanitize',
+  'mdPickers',
   'tc.chartjs',
   'ui.router',
   AuthenticationConfig.name,
