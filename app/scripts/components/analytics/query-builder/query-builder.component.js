@@ -84,9 +84,6 @@ export default class QueryBuilder {
 	}
 
 	addParam(field, param) {
-		// if (!field || !param) {
-		// 	return;
-		// }
 		if (field === 'time' && param === 'start-date' && this.query.dimensions.includes('ga:hour')) {
 			this.startTimeCache = angular.copy(this.fields['start-date']);
 		} else if (field === 'date' && param === 'start-date' && this.startTimeCache && this.query.dimensions.includes('ga:month')) {
@@ -152,6 +149,19 @@ export default class QueryBuilder {
 		if (current !== prev) {
 			this.onQueryChange.next();
 		}
+	}
+
+	showDatePicker1() {
+		return this.query.dimensions.includes('ga:month') ||
+		this.query.dimensions.includes('ga:week') ||
+		this.query.dimensions.includes('ga:day') ||
+		this.query.dimensions.includes('ga:hour');
+	}
+
+	showDatePicker2() {
+		return this.query.dimensions.includes('ga:month') && this.query.dimensions.includes('ga:nthMonth') ||
+		this.query.dimensions.includes('ga:week') && this.query.dimensions.includes('ga:nthWeek') ||
+		this.query.dimensions.includes('ga:day') && this.query.dimensions.includes('ga:nthDay')
 	}
 
 	openMenu($mdOpenMenu, event	) {

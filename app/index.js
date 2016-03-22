@@ -3,7 +3,9 @@ import google from 'googleapis';
 import Menu from 'menu';
 import path from 'path';
 import qs from 'qs';
-import 'babel-polyfill'
+import 'babel-polyfill';
+
+let authenticated = false;
 
 process.env.GOOGLE_APPLICATION_CREDENTIALS = `${__dirname}/credentials.json`;
 process.env.NODE_ENV = require('./package.json').environment;
@@ -58,8 +60,11 @@ function analyticsRequest(params, callback) {
 function createMainWindow() {
 	const win = new electron.BrowserWindow({
 		width: 800,
-		height: 640
+		height: 640,
+		frame: true
 	});
+
+	// win.setMenu(null);
 
 	win.loadURL(path.join('file://', __dirname, options.rootView));
 	win.on('closed', onClosed);
@@ -92,15 +97,18 @@ function createMainWindow() {
 }
 
 ipcMain.on('analyticsParams', (event, args) => {
-	console.log(args);
 	analyticsRequest(args, (error, response) => {
 		if (error !== null) {
 			event.sender.send('ipcAnalyticsError', error);
 			return;
 		}
-		console.log(response);
   	event.sender.send('ipcAnalyticsReply', response);
 	});
+});
+
+ipcMain.on('authenticated', () => {
+	authenticated = true;
+	console.log('authenticated: ', authenticated);
 });
 
 app.on('window-all-closed', () => {
@@ -153,67 +161,71 @@ app.on('ready', () => {
 	const README_LINK = `https://github.com/atom/electron/tree/v${process.versions.electron}/docs#readme`;
 	const ISSUES_LINK = 'https://github.com/idelairre/rose_st_electron/issues';
 
-	const template = [{
-		label: 'File',
-		submenu: [
-			{ label: 'Logout', click: () => { mainWindow.webContents.send('logout') } },
-			{ label: 'Quit', accelerator: 'CmdOrCtrl+Z', click: () => { app.quit() } }
-		]
-	}, {
-		label: 'Edit',
-		submenu: [
-			{ label: 'Undo', accelerator: 'CmdOrCtrl+Z', role: 'undo' },
-			{ label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', role: 'redo' },
-			{ type: 'separator' },
-			{ label: 'Cut', accelerator: 'CmdOrCtrl+X', role: 'cut' },
-			{ label: 'Copy', accelerator: 'CmdOrCtrl+C', role: 'copy' },
-			{ label: 'Paste', accelerator: 'CmdOrCtrl+V', role: 'paste'},
-			{ label: 'Select All', accelerator: 'CmdOrCtrl+A', role: 'selectall'}
-		]
-	}, {
-		label: 'Tabs',
-		submenu: [
-			{ label: 'Home', click: () => { goto('home') } },
-			{ label: 'Analytics', click: () => { goto('analytics') } },
-			{ label: 'Donations', click: () => { goto('donations') } },
-			{ label: 'Messages', click: () => { goto('messages') } },
-			{ label: 'Posts', click: () => { goto('posts') } },
-			{ label: 'Profile', click: () => { goto('profile') } },
-			{ label: 'Users', click: () => { goto('users') } }
-		]
-	}, {
-		label: 'View',
-		submenu: [
-			{ label: 'Reload', accelerator: 'CmdOrCtrl+R', click: (item, focusedWindow) => { focusedWindow ? focusedWindow.reload() : null } },
-			{ label: 'Toggle Full Screen', accelerator: (() => { return fullscreenAcc() })(), click: (item, focusedWindow) => { setFullScreen(focusedWindow) } },
-			{ label: 'Toggle Developer Tools', accelerator: (() => { return devToolsAcc() })(), click: (item, focusedWindow) => { toggleDevTools(focusedWindow) } }
-		]
-	}, {
-		label: 'Help',
-		role: 'help',
-		submenu: [
-			{ label: 'Documentation', click: () => { shell.openExternal(README_LINK) } },
-			{ label: 'Search Issues', click: () => { shell.openExternal(ISSUES_LINK) } }
-		]
-	}];
-
-	if (process.platform == 'darwin') {
-		template.unshift({
-			label: 'Electron',
+	let template = [{
+			label: 'File',
 			submenu: [
-				{ label: 'About Electron', role: 'about' },
-				{ type: 'separator' },
-				{ label: 'Services', role: 'services', submenu: [] },
-				{ type: 'separator' },
-				{ label: 'Hide Electron', accelerator: 'Command+H', role: 'hide' },
-				{ label: 'Hide Others', accelerator: 'Command+Alt+H', role: 'hideothers' },
-				{ label: 'Show All', role: 'unhide' },
-				{ type: 'separator' },
-				{ label: 'Quit', accelerator: 'Command+Q', click: () => { app.quit() } }
+				{ label: 'Logout', click: () => { mainWindow.webContents.send('logout') } },
+				{ label: 'Quit', accelerator: 'CmdOrCtrl+Q', click: () => { app.quit() } }
 			]
-		});
-		template[3].submenu.push({ type: 'separator' }, { label: 'Bring All to Front', role: 'front' });
-	}
+		}, {
+			label: 'Edit',
+			submenu: [
+				{ label: 'Undo', accelerator: 'CmdOrCtrl+Z', role: 'undo' },
+				{ label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', role: 'redo' },
+				{ type: 'separator' },
+				{ label: 'Cut', accelerator: 'CmdOrCtrl+X', role: 'cut' },
+				{ label: 'Copy', accelerator: 'CmdOrCtrl+C', role: 'copy' },
+				{ label: 'Paste', accelerator: 'CmdOrCtrl+V', role: 'paste'},
+				{ label: 'Select All', accelerator: 'CmdOrCtrl+A', role: 'selectall'}
+			]
+		}, {
+			label: 'View',
+			submenu: [
+				{ label: 'Reload', accelerator: 'CmdOrCtrl+R', click: (item, focusedWindow) => { focusedWindow ? focusedWindow.reload() : null } },
+				{ label: 'Toggle Full Screen', accelerator: (() => { return fullscreenAcc() })(), click: (item, focusedWindow) => { setFullScreen(focusedWindow) } },
+				{ label: 'Toggle Developer Tools', accelerator: (() => { return devToolsAcc() })(), click: (item, focusedWindow) => { toggleDevTools(focusedWindow) } }
+			]
+		}, {
+			label: 'Help',
+			role: 'help',
+			submenu: [
+				{ label: 'Documentation', click: () => { shell.openExternal(README_LINK) } },
+				{ label: 'Search Issues', click: () => { shell.openExternal(ISSUES_LINK) } }
+			]
+		}];
+
+		if (authenticated) {
+			template.splice(3, 0, {
+				label: 'Tabs',
+				submenu: [
+					{ label: 'Home', click: () => { goto('home') } },
+					{ label: 'Analytics', click: () => { goto('analytics') } },
+					{ label: 'Donations', click: () => { goto('donations') } },
+					{ label: 'Messages', click: () => { goto('messages') } },
+					{ label: 'Posts', click: () => { goto('posts') } },
+					{ label: 'Profile', click: () => { goto('profile') } },
+					{ label: 'Users', click: () => { goto('users') } }
+				]
+			});
+		}
+
+		if (process.platform == 'darwin') {
+			template.unshift({
+				label: 'Electron',
+				submenu: [
+					{ label: 'About Electron', role: 'about' },
+					{ type: 'separator' },
+					{ label: 'Services', role: 'services', submenu: [] },
+					{ type: 'separator' },
+					{ label: 'Hide Electron', accelerator: 'Command+H', role: 'hide' },
+					{ label: 'Hide Others', accelerator: 'Command+Alt+H', role: 'hideothers' },
+					{ label: 'Show All', role: 'unhide' },
+					{ type: 'separator' },
+					{ label: 'Quit', accelerator: 'Command+Q', click: () => { app.quit() } }
+				]
+			});
+			template[3].submenu.push({ type: 'separator' }, { label: 'Bring All to Front', role: 'front' });
+		}
 
 	let menu = Menu.buildFromTemplate(template);
 	Menu.setApplicationMenu(menu);

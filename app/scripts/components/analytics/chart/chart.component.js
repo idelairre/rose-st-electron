@@ -1,9 +1,26 @@
 import { Component, Input, Inject } from 'ng-forward';
 import ChartTitle from './chart-title/chart-title.component';
+import RenderUiName from '../render-ui-name.filter';
 import inflected from 'inflected';
 import 'reflect-metadata';
 
 // NOTE: this is arguably the worst code I've ever written but I was dealing with a bitter depression.
+
+Date.prototype.addDays = function(days) {
+    let date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+}
+
+let getDates = (startDate, stopDate) => {
+	let dateArray = [];
+	let currentDate = startDate;
+	while (currentDate <= stopDate) {
+		dateArray.push(new Date(currentDate));
+		currentDate = currentDate.addDays(1);
+	}
+	return dateArray;
+}
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -11,10 +28,14 @@ const HOURS = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '0
 
 const HOURS_APM = ['1:00am', '2:00am', '3:00am', '4:00am', '5:00am', '6:00am', '7:00am', '8:00am', '9:00am', '10:00am', '11:00am', '12:00am', '1:00pm', '2:00pm', '3:00pm','4:00pm','5:00pm','6:00pm','7:00pm','8:00pm','9:00pm','10:00pm','11:00pm','12:00pm'];
 
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+
 @Component({
 	selector: 'chart',
 	controllerAs: 'Chart',
 	template: require('./chart.html'),
+	pipes: [RenderUiName],
 	directives: [ChartTitle],
 	providers: ['tc.chartjs'],
   inputs: ['chartState', 'data', 'fields', 'query']
@@ -117,6 +138,16 @@ export default class Chart {
 		return `rgb(${r},${g},${b})`;
 	}
 
+	generateLabels() {
+		if (this.query.dimensions.includes('ga:hour')) {
+			return this.generateHourLabels();
+		} else if (this.query.dimensions.includes('ga:day')) {
+			return this.generateDaysLabels();
+		} else if (this.query.dimensions.includes('ga:month')) {
+			return this.generateMonthsLabels();
+		}
+	}
+
 	generateHourLabels() {
 		let startTime = this.$filter('date')(this.fields['start-date'], 'h:mma');
 		let endTime = this.$filter('date')(this.fields['end-date'], 'h:mma');
@@ -124,6 +155,15 @@ export default class Chart {
 		endTime = endTime.toLowerCase();
 		let labels = HOURS_APM.slice(HOURS_APM.indexOf(startTime), HOURS_APM.indexOf(endTime) + 1);
 		return labels;
+	}
+
+	generateDaysLabels() {
+		let datesArray = getDates(this.fields['start-date'], this.fields['end-date']);
+		return datesArray;
+	}
+
+	generateWeekLabels() {
+
 	}
 
 	generateMonthsLabels() {
@@ -159,10 +199,26 @@ export default class Chart {
 		});
 	}
 
+	parseDoughnutLabels(label) {
+		// let uiName = this.$filter('RenderUiName')(this.query.metrics[0]).toLowerCase();
+		if (this.query.dimensions.includes('ga:month')) {
+			return `${MONTHS[parseInt(label)]}`;
+		} else if (this.query.dimensions.includes('ga:week')) {
+			return `Week ${parseInt(label)}`;
+		} else if (this.query.dimensions.includes('ga:day')) {
+			return `${DAYS[parseInt(label)]}`;
+		}
+	}
+
 	parseDoughnutData(data) {
 		let chartData = [];
 		for (let i = 0; data.rows.length > i; i += 1) {
-			chartData.push({ label: data.rows[i][0], value: data.rows[i][1], color: this.generateColor(), highlight: this.generateColor() });
+			chartData.push({
+				label: this.parseDoughnutLabels(data.rows[i][1]),
+				value: `${parseInt(data.rows[i][2])}`,
+				color: this.generateColor(),
+				highlight: this.generateColor()
+			});
 		}
 		return chartData;
 	}
@@ -205,19 +261,13 @@ export default class Chart {
 						data: []
 					}]
 				};
-				if (this.query.dimensions.includes('ga:hour')) {
-					this.chartData.labels = this.generateHourLabels();
-				} else if (this.query.dimensions.includes('ga:month')) {
-					this.chartData.labels = this.generateMonthsLabels();
-				}
-				this.chartData.datasets[1].data = this.normalizeLabels(data);
+				this.chartData.labels = this.generateLabels();
 				this.chartData.datasets[0].data = this.normalizeLabels(data2);
+				this.chartData.datasets[1].data = this.normalizeLabels(data);
 			} else if (this.chartState === 'composition') {
-				console.log(current);
 				this.doughnutData = this.parseDoughnutData(current);
 				console.log(this.doughnutData);
 			} else {
-				// this.comparisonInitialized = true;
 				this.chartData.datasets[0].data = this.normalizeLabels(data);
 			}
 		}
@@ -232,7 +282,6 @@ export default class Chart {
 				this.chartData.labels = this.generateMonthsLabels();
 			}
 			if (!current.comparison && prev.comparison) {
-				// this.comparisonInitialized = false;
 				this.chartData.datasets.length = 1;
 			}
 		}

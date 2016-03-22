@@ -5,10 +5,10 @@
       <span class="md-subhead">{{ QueryBuilder.chartState | Inflector:'capitalize' }}</span>
     </md-card-title-text>
     <md-card-title-media layout-align="end center" class="md-table-pagination limit" style="padding: 0">
-        <md-datepicker ng-if="QueryBuilder.query.dimensions.includes('ga:month') || QueryBuilder.query.dimensions.includes('ga:hour')" ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.addParam('date', 'start-date')"></md-datepicker>
+        <md-datepicker ng-if="QueryBuilder.showDatePicker1()" ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.addParam('date', 'start-date')"></md-datepicker>
         <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:month') && QueryBuilder.query.dimensions.includes('ga:nthMonth')">to: </span>
         <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:hour') && QueryBuilder.query.dimensions.includes('ga:nthHour') && QueryBuilder.chartState === 'comparison'">vs: </span>
-        <md-datepicker ng-if="QueryBuilder.query.dimensions.includes('ga:month') && QueryBuilder.query.dimensions.includes('ga:nthMonth')" ng-model="QueryBuilder.fields['end-date']" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.addParam('date', 'end-date')"></md-datepicker>
+        <md-datepicker ng-if="QueryBuilder.showDatePicker2()" ng-model="QueryBuilder.fields['end-date']" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.addParam('date', 'end-date')"></md-datepicker>
         <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:hour')"></span>
         <md-input-container class="time-input-container" ng-if="QueryBuilder.query.dimensions.includes('ga:hour')">
           <input type="time" class="time-input" ng-model="QueryBuilder.fields['start-date']" ng-blur="QueryBuilder.setQuery('time', 'start-date')" aria-label="start time">
@@ -23,7 +23,7 @@
         </md-input-container>
       <md-menu>
         <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)" style="padding-left: 15px">
-          <md-icon md-menu-origin>settings</md-icon>
+          <md-icon md-menu-origin>more_vert</md-icon>
         </md-button>
         <md-menu-content width="4">
           <md-menu-item>

@@ -76,7 +76,7 @@ export default class Login extends AuthModal {
 
   handleLogin(response) {
     if (this.$state.current.name === 'login') {
-      this.$window.dispatchEvent(new Event('loginSuccess'));
+      this.$window.dispatchEvent(new Event('authenticated'));
       this.$state.go('home');
     } else {
       let loginSuccess = this.$mdDialog.alert()
@@ -96,12 +96,12 @@ export default class Login extends AuthModal {
 
   async submit(credentials) {
     try {
-      this.$window.dispatchEvent(new Event('loginStarted'));
+      // this.$window.dispatchEvent(new Event('loginStarted'));
       let response = await this.authService.login(credentials);
       this.handleLogin(response.data);
     } catch (error) {
       this.handleErrors(error);
-      this.$window.dispatchEvent(new Event('loginFailed'));
+      // this.$window.dispatchEvent(new Event('loginFailed'));
     }
   }
 }

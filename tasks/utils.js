@@ -84,6 +84,26 @@ module.exports.copyFile = function(source, target, callback) {
 	});
 }
 
+module.exports.writeFile = function(path, data, callback) {
+	logger.start('Writing file', path);
+	fs.ensureFile(path, function(error) {
+		if (error) {
+			handleErrors(error);
+			callback ? callback(error) : error;
+			return;
+		}
+		fs.writeFile(path, data, function(error, data) {
+			if (error) {
+				handleErrors(error);
+				callback ? callback(error) : error;
+				return;
+			}
+			logger.end('Finished writing file');
+			return callback ? callback(null, data) : data;
+		});
+	});
+}
+
 module.exports.os = function() {
 	switch (os.platform()) {
 		case 'darwin':

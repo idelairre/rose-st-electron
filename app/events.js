@@ -24,6 +24,10 @@ ipcRenderer.on('authUrl', (e, args) => {
   window.dispatchEvent(event);
 });
 
+window.addEventListener('authenticated', (e) => {
+  ipcRenderer.send('authenticated', e.detail);
+});
+
 ipcRenderer.on('loaded', () => {
   let event = new Event('loaded');
   window.dispatchEvent(event);

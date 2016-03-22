@@ -169,6 +169,7 @@ export default class Donations extends TableComponent {
     this.resetState();
     this.state[state] = true;
     this.evalState(this.state);
+    this.query.page = 1;
   }
 
   ngOnInit() {

@@ -14,7 +14,6 @@ class Test {}
 describe('MainComponent', () => {
   let component, tcb, html;
   tcb = new TestComponentBuilder();
-  }));
 
   it('successfully compiles', (done) => {
     html = '<rose-st-admin></rose-st-admin>';

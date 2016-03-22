@@ -22,6 +22,8 @@ function getTask(task) {
 
 gulp.task('package:debian', getTask('release/linux'));
 
+gulp.task('package:win', getTask('release/windows'));
+
 gulp.task('clean', function() {
 	return del.sync([constants.buildDir, constants.releaseDir, constants.tempDir]);
 });

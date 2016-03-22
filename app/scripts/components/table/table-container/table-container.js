@@ -81,6 +81,13 @@ export default class TableContainer {
     }
   }
 
+  itemFilter(items) {
+    items = this.$filter('filter')(items, this.query.filter);
+    items = this.$filter('orderBy')(items, this.query.order);
+    items = this.$filter('limitTo')(items, this.query.limit, this.query.page - 1 * this.query.limit);
+    return items;
+  }
+
   previewAction(event, item) {
     this.setSelected(item);
     this.preview.next(event, item);

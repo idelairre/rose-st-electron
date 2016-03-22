@@ -35,6 +35,7 @@ var tasks = {
 				os: 'linux',
 				arch: 'x64'
 			});
+
 			utils.logger.end('Parsed desktop file');
 			return callback ? callback(null, data) : data;
 		});
@@ -44,25 +45,12 @@ var tasks = {
 		var path = DEB_PATH + '/usr/share/applications/' + FILE_NAME + '.desktop';
 		utils.logger.start('Writing desktop file', path);
 
-		fs.ensureFile(path, function(error) {
-			if (error) {
-				utils.handleErrors(error);
-				callback ? callback(error) : error;
-				return;
-			}
-			fs.writeFile(path, desktop, function(error, data) {
-				if (error) {
-					utils.handleErrors(error);
-					callback ? callback(error) : null;
-					return;
-				}
-				utils.logger.end('Wrote desktop file');
-				return callback ? callback(null, data) : data;
-			});
-		});
+		utils.writeFile(path, desktop);
+
+		utils.logger.end('Finished writing desktop file');
 	},
 
-	copyIcon: function(callback) { // works
+	copyIcon: function(callback) {
 		// Copy icon
 		return utils.copyFile('resources/icon.png', DEB_PATH + '/opt/' + FILE_NAME + '/icon.png', callback);
 	},
@@ -96,22 +84,8 @@ var tasks = {
 				size: result
 			});
 
-			fs.ensureFile(path, function(error) {
-				if (error) {
-					utils.handleErrors(error);
-					callback ? callback(error) : error;
-					return;
-				}
-				fs.writeFile(path, data, function(error, data) {
-					if (error) {
-						utils.handleErrors(error);
-						callback ? callback(error) : error;
-						return;
-					}
-					utils.logger.end('Finished writing DEB control');
-					return callback ? callback(null, data) : data;
-				});
-			});
+			utils.writeFile(path, data);
+			utils.logger.end('Finished writing DEB control');
 		});
 	},
 

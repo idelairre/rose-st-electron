@@ -1,11 +1,13 @@
 import { Component, Inject } from 'ng-forward';
 import AuthenticationService from '../../services/authentication.service';
+import KeyboardShortcut from './keyboard-shortcut.filter';
 import 'babel-polyfill';
 import 'reflect-metadata';
 
 @Component({
   selector: 'rose-st-nav',
   controllerAs: 'Nav',
+  pipes: [KeyboardShortcut],
   template: require('./nav.html'),
   providers: [AuthenticationService]
 })

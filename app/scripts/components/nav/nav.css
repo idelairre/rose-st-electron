@@ -1,3 +1,7 @@
+md-menu-bar {
+  padding: 0 9px !important;
+}
+
 md-tabs.noTabPanel md-tabs-wrapper {
   display: none !important;
 }
