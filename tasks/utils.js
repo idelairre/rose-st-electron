@@ -12,6 +12,7 @@ var startTime;
 
 var handleErrors = function() {
 	var args = Array.prototype.slice.call(arguments);
+	console.log(args);
 
 	notify.logLevel(2);
 
@@ -57,15 +58,20 @@ var readSizeRecursive = function(dir, callback) {
 
 module.exports.copyDir = function(source, target, callback) {
 	logger.start('Copying ' + source + ' to ' + target);
+	if (!fs.existsSync(path.parse(target).dir)) {
+		fs.mkdirSync(path.parse(target).dir);
+	}
 	fs.copy(source, target, function(error) {
+		console.error(error);
 		if (error) {
 			handleErrors(error);
-			callback ? callback(error) : null;
+			callback ? callback(error, null) : null;
 			return;
+		} else {
+			logger.end('Finished copying ' + source);
+			return callback ? callback(null) : null;
 		}
-		logger.end('Finished copying ' + source);
-		return callback ? callback(null) : null;
-	})
+	});
 };
 
 module.exports.copyFile = function(source, target, callback) {
@@ -76,7 +82,7 @@ module.exports.copyFile = function(source, target, callback) {
 	fs.copy(source, target, function(error) {
 		if (error) {
 			handleErrors(error)
-			callback ? callback(error) : error;
+			callback ? callback(error, null) : error;
 			return;
 		}
 		logger.end('Finished copying ' + source);
@@ -89,13 +95,13 @@ module.exports.writeFile = function(path, data, callback) {
 	fs.ensureFile(path, function(error) {
 		if (error) {
 			handleErrors(error);
-			callback ? callback(error) : error;
+			callback ? callback(error, null) : error;
 			return;
 		}
 		fs.writeFile(path, data, function(error, data) {
 			if (error) {
 				handleErrors(error);
-				callback ? callback(error) : error;
+				callback ? callback(error, null) : error;
 				return;
 			}
 			logger.end('Finished writing file');

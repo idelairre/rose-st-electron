@@ -18,7 +18,6 @@ export default class User extends Model {
   constructor() {
     super();
     super.initialize(arguments, USER_FIELDS);
-    console.log(USER_FIELDS);
   }
 
   static getInstance() {

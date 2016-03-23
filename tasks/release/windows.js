@@ -8,6 +8,8 @@ var constants = require('../constants');
 var packageJson = constants.packageJson;
 var rcedit = require('rcedit');
 var squirrelBuilder = require('electron-installer-squirrel-windows');
+var path = require('path');
+var inflected = require('inflected');
 
 var APP_NAME = constants.appName;
 var BUILD_DIR = constants.buildDir;
@@ -26,55 +28,73 @@ var tasks = {
 		utils.logger.start('Writing .exe properties');
 		var path = APP_DIR + '/' + APP_NAME + '.exe';
 		rcedit(path, {
-				'icon': 'resources/windows/icon.ico',
-				'version-string': {
-					'ProductName': packageJson.productName,
-					'FileDescription': packageJson.description,
-					'ProductVersion': packageJson.version,
-					'CompanyName': packageJson.author,
-					'LegalCopyright': packageJson.copyright,
-					'OriginalFilename': packageJson.productName + '.exe'
-				}
-			},
-			function(error) {
-				if (!error) {
-					utils.logger.error(error);
-					callback ? callback(error) : error;
-					return;
-				}
-			});
-		utils.logger.end('Finished writing .exe properties');
-		return callback ? callback(null) : null;
+			'icon': 'resources/windows/icon.ico',
+			'version-string': {
+				'ProductName': packageJson.productName,
+				'FileDescription': packageJson.description,
+				'ProductVersion': packageJson.version,
+				'CompanyName': packageJson.author,
+				'LegalCopyright': packageJson.copyright,
+				'OriginalFilename': packageJson.name + '.exe'
+			}
+		}, function(error) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error, null) : error;
+				return;
+			} else {
+				utils.logger.end('Finished writing .exe properties');
+				return callback ? callback(null) : null;
+			}
+		});
 	},
 
-	createInstaller: function(installScript, callback) {
+	packageInstaller: function(callback) {
 		utils.logger.start('Creating installer');
-		var finalPackageName = 'setup.exe';
+		var opts = {
+			name: packageJson.productName,
+			exe: packageJson.name + '.exe',
+			path: path.normalize(APP_DIR),
+			product_name: packageJson.productName,
+			// loading_gif: path.resolve(process.cwd(), 'resources', 'install-spinner.gif'),
+			authors: packageJson.author,
+			version: packageJson.version,
+			out: path.normalize(WIN_DIR),
+			setup_icon: path.resolve(process.cwd(), 'resources/windows', 'setup-icon.ico'),
+			overwrite: true,
+			debug: true
+		};
 
-		squirrelBuilder({
-				exe: 'Setup.exe',
-				path: APP_DIR,
-				product_name: packageJson.productName,
-				authors: packageJson.author,
-				version: packageJson.version,
-				out: WIN_DIR,
-				setup_icon: '../../../resources/windows/setup-icon.ico',
-				debug: true
-			}, function(error) {
-				if (error) {
-					utils.handleErrors(error);
-					return;
-				}
-
+		squirrelBuilder(opts, function done(error) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error, null) : error;
+				return;
+			} else {
 				utils.logger.end('Finished creating installer');
+				return callback ? callback(null) : null;
+			}
+		});
+	},
 
-				return callback ? callback(null) : installScript;
-			});
+	clearReleaseFolder(callback) {
+		var dirPath = APP_DIR;
+		utils.logger.start('Clearing release folder', dirPath);
+		fs.remove(dirPath, function(error) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error, null) : error;
+				return;
+			} else {
+				utils.logger.end('Finished clearing release folder');
+				return callback(null);
+			}
+		});
 	}
 }
 
 module.exports = function() {
 	return function() {
-		async.waterfall([tasks.copyIcon, tasks.setExeProperties, tasks.createInstaller])
-	};
-};
+		async.waterfall([tasks.copyIcon, tasks.packageInstaller, tasks.clearReleaseFolder]);
+	}
+}

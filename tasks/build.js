@@ -9,6 +9,7 @@ var packager = require('electron-packager');
 var path = require('path');
 var utils = require('./utils');
 var babel = require('babel-core');
+var os = require('os');
 
 var constants = require('./constants');
 
@@ -20,77 +21,52 @@ var TEMP_DIR = constants.tempDir;
 var APP_NAME = constants.packageJson.name;
 var OUT_DIR;
 
-function writeFile(data, filePath, callback) {
-	utils.logger.start('Writing file', filePath);
-	fs.writeFile(filePath, data, function(error) {
-		if (error) {
-			utils.handleErrors(error);
-			callback ? callback(error) : error;
-			return;
-		}
-		utils.logger.end('Finished writing file ' + path.parse(filePath).base);
-	});
-}
-
-function moveDir(source, dest, callback) {
-	utils.logger.start('Moving directory', dest);
-	fs.move(source, dest, function(error) {
-		if (error) {
-			utils.handleErrors(error);
-			callback ? callback(error) : error;
-			return;
-		}
-		utils.logger.end('Finished moving directory');
-	});
-}
-
 var tasks = {
 	buildElectron: function(callback) {
-		utils.logger.start('Building electron');
-		['app/events.js', 'app/menu.js', 'app/index.js'].map(function(entry) {
+		utils.logger.start('Parsing electron files');
+		async.each(['app/events.js', 'app/menu.js', 'app/index.js'], function(entry, callback) {
 			var file = path.parse(entry).base;
 			var filePath = BUILD_DIR + '/' + file;
+			utils.logger.start('Parsing file', file);
 			fs.readFile(entry, 'utf-8', function(error, data) {
 				if (error) {
 					utils.handleErrors(error);
-					callback ? callback(error) : error;
+					callback ? callback(error, null) : error;
 					return;
+				} else {
+					data = babel.transform(data, BABEL_PRESET);
+					utils.writeFile(filePath, data.code, callback);
 				}
-				data = babel.transform(data, BABEL_PRESET);
-				writeFile(data.code, filePath, callback);
 			});
+		}, function (error) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error, null) : error;
+				return;
+			} else {
+				utils.logger.end('Finished parsing electron files');
+				callback ? callback(null) : null;
+			}
 		});
-		utils.logger.end('Finished building electron');
-		return callback ? callback(null) : null;
 	},
 
 	buildRuntime: function(callback) {
 		utils.logger.start('Building runtime');
-		['node_modules/electron-prebuilt', 'node_modules/electron-debug'].map(function(entry) {
-			utils.copyDir(entry, BUILD_DIR + '/' + entry, function(error) {
-				if (error) {
-					utils.handleErrors(error);
-					callback ? callback(error) : error;
-					return;
-				}
-			});
-		});
-		utils.logger.end('Finished building runtime');
-		return callback ? callback(null) : null;
-	},
-
-	install: function(callback) {
-		utils.logger.start('Installing npm modules');
-		exec('cd build && npm install', function(error, out, code) {
+		async.each(['node_modules/electron-prebuilt', 'node_modules/electron-debug'], function(entry, callback) {
+			var filePath = BUILD_DIR + '/' + entry;
+			utils.copyDir(entry, filePath, callback);
+		}, function (error) {
 			if (error) {
 				utils.handleErrors(error);
-				callback ? callback(error) : null;
+				callback ? callback(error, null) : error;
 				return;
+			} else {
+				utils.logger.end('Finished building runtime');
+				callback ? callback(null) : null;
 			}
-			utils.logger.end('Finished installing npm modules');
-			return callback ? callback(null) : null;
 		});
 	},
+
 	// Write a package.json for distribution
 	packageJson: function(callback) {
 		utils.logger.start('Copying package.json');
@@ -107,25 +83,40 @@ var tasks = {
 			return value;
 		}
 		var json = cloneDeep(require('./constants').packageJson);
+		var filePath = BUILD_DIR + '/package.json';
 		json.dependencies["babel-polyfill"] = "^6.3.14";
 
-		if (!fs.existsSync(BUILD_DIR)) {
-			fs.mkdirSync(BUILD_DIR);
-		}
-		fs.writeFile(BUILD_DIR + '/package.json', JSON.stringify(json, replacer, 3), function(error) {
+		utils.writeFile(filePath, JSON.stringify(json, replacer, 3), function (error) {
 			if (error) {
-				utils.handleErrors(error);
-				callback ? callback(error) : error;
+				callback ? callback(error, null) : null;
 				return;
+			} else {
+				return callback ? callback(null) : null;
 			}
-			utils.logger.end('Finished copying package.json');
-			return callback ? callback(null) : null;
+		});
+	},
+
+	install: function(callback) {
+		utils.logger.start('Installing npm modules');
+		exec('cd build && npm install', function(error, stdout, stderr) {
+			if (error || stderr) {
+				console.error('ERROR while installing npm modules:');
+				console.error(error);
+				console.error(stderr);
+				utils.handleErrors(error)
+				callback ? callback(error, null) : null;
+				return;
+			} else {
+				utils.logger.end('Finished installing npm modules');
+				return callback ? callback(null) : null;
+			}
 		});
 	},
 
 	packageDist: function(callback) {
 		utils.logger.start('Packaging distribution');
 		var targets = ['win32', 'linux', 'darwin'];
+		os.platform() === 'win32' ? targets = ['win32'] : null;
 		targets.map(function(platform) {
 			OUT_DIR = RELEASE_DIR + '/' + platform;
 			var taskName = 'package:' + platform;
@@ -142,7 +133,7 @@ var tasks = {
 			}, function done(error) {
 				if (error) {
 					utils.handleErrors(error);
-					callback ? callback(error) : error;
+					callback ? callback(error, null) : error;
 					return;
 				}
 				utils.logger.start('Finished packaging distribution');
@@ -151,17 +142,18 @@ var tasks = {
 		return callback ? callback(null) : null;
 	},
 
-	build: function(callback) {
+	build: function(data, callback) {
 		utils.logger.start('Building electron files');
 		async.waterfall([tasks.buildElectron, tasks.buildRuntime, tasks.packageJson, tasks.install],
 			function(error, data) {
 				if (error) {
 					utils.handleErrors(error);
-					callback ? callback(error) : null;
+					callback ? callback(error, null) : null;
 					return;
+				} else {
+					utils.logger.end('Finished building electron files');
+					return callback ? callback(null, data) : data;
 				}
-				utils.logger.end('Finished building electron files');
-				return callback ? callback(data) : data;
 			});
 	}
 };

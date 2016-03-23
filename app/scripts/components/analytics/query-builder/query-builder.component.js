@@ -70,11 +70,13 @@ export default class QueryBuilder {
   }
 
 	ngOnInit() {
-		this.setState('users');
+		this.state.users.selected = true;
 		this.startDate = angular.copy(this.fields['start-date']);
 		this.endDate = angular.copy(new Date());
 		this.fields.dimensions = 'time';
 		this.fields.metrics = 'users';
+		this.setField('dimensions');
+		this.setField('metrics');
 	}
 
 	evalQuery() {
@@ -105,14 +107,6 @@ export default class QueryBuilder {
 			this.fields['start-date'] = new Date(date.getFullYear(), date.getDay(), time.getHours());
 		}
 		this.onQueryChange.next();
-	}
-
-	setState(state) {
-		this.resetState();
-		this.state.current = state;
-		this.state[state].selected = true;
-		this.state.metrics = this.state[state].metrics;
-		this.state.dimensions = this.state[state].dimensions;
 	}
 
 	renderUiName(item) {

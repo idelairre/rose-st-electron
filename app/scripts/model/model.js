@@ -38,6 +38,10 @@ export default class Model {
   }
 
   initialized(fields) {
+    if (!fields) {
+      console.error('no argument was provided');
+      return;
+    }
     let undefinedCount = 0;
     fields = Object.keys(fields);
     fields.map(field => {

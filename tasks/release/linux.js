@@ -3,6 +3,7 @@
 var async = require('async');
 var exec = require('child_process').exec;
 var fs = require('fs-extra');
+var os = require('os');
 var utils = require('../utils');
 var constants = require('../constants');
 var packageJson = constants.packageJson;
@@ -15,6 +16,7 @@ var TEMP_DIR = constants.tempDir;
 var FILE_NAME = APP_NAME + '-linux-x64';
 var DEB_FILE_NAME = APP_NAME + '.deb';
 var DEB_PATH = RELEASE_DIR + '/linux/' + APP_NAME + '-linux-x64';
+
 var tasks = {
 	configureDesktop: function(callback) { // works
 		// Create .desktop file from the template
@@ -114,6 +116,10 @@ var tasks = {
 
 module.exports = function() {
 	return function() {
+		if (os.platform() === 'win32' || os.platform() === 'darwin') {
+			utils.handleErrors(new Error('Incompatable archicture: ' + os.platform()));
+			return;
+		}
 		async.waterfall([tasks.copyIcon, tasks.configureDesktop, tasks.writeDesktopFile, tasks.readDebianControl, tasks.writeDebianControl, tasks.packageDebFile])
 	};
 }

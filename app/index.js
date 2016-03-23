@@ -1,27 +1,46 @@
-import electron, { app, ipcMain, shell } from 'electron';
+import electron, { app, dialog, ipcMain, shell } from 'electron';
+import GhReleases from 'electron-gh-releases';
 import google from 'googleapis';
 import Menu from 'menu';
 import path from 'path';
 import qs from 'qs';
 import 'babel-polyfill';
-import 'electron-squirrel-startup';
-
-let authenticated = false;
 
 process.env.GOOGLE_APPLICATION_CREDENTIALS = `${__dirname}/credentials.json`;
 process.env.NODE_ENV = require('./package.json').environment;
 
 const options = {
 	debug: (process.env.NODE_ENV === 'production' ? false : true),
-	rootView: 'index.html'
+	rootView: 'index.html',
 };
+
+const updater = new GhReleases({
+  repo: 'idelairre/rose_st_electron',
+  currentVersion: app.getVersion()
+});
+
+// Check for updates
+// `status` returns true if there is a new update available
+updater.check((err, status) => {
+  if (!err && status) {
+    // Download the update
+    updater.download();
+  }
+});
+
+// When an update has been downloaded
+updater.on('update-downloaded', (info) => {
+  // Restart the app and install the update
+  updater.install()
+});
+
+// Access electrons autoUpdater
+updater.autoUpdater;
 
 if (process.env.NODE_ENV !== 'production') {
 	require('electron-debug')();
 	require('crash-reporter').start();
 }
-
-console.log('environment: ', process.env.NODE_ENV);
 
 // prevent window being garbage collected
 let mainWindow;
@@ -33,7 +52,6 @@ function onClosed() {
 }
 
 // TODO: turn this into a service to get rid of all those ridiculous window events
-
 function analyticsRequest(params, callback) {
 	google.auth.getApplicationDefault((err, authClient) => {
 		if (err) {
@@ -108,11 +126,6 @@ ipcMain.on('analyticsParams', (event, args) => {
 		}
   	event.sender.send('ipcAnalyticsReply', response);
 	});
-});
-
-ipcMain.on('authenticated', () => {
-	authenticated = true;
-	console.log('authenticated: ', authenticated);
 });
 
 app.on('window-all-closed', () => {
@@ -197,21 +210,6 @@ app.on('ready', () => {
 				{ label: 'Search Issues', click: () => { shell.openExternal(ISSUES_LINK) } }
 			]
 		}];
-
-		if (authenticated) {
-			template.splice(3, 0, {
-				label: 'Tabs',
-				submenu: [
-					{ label: 'Home', click: () => { goto('home') } },
-					{ label: 'Analytics', click: () => { goto('analytics') } },
-					{ label: 'Donations', click: () => { goto('donations') } },
-					{ label: 'Messages', click: () => { goto('messages') } },
-					{ label: 'Posts', click: () => { goto('posts') } },
-					{ label: 'Profile', click: () => { goto('profile') } },
-					{ label: 'Users', click: () => { goto('users') } }
-				]
-			});
-		}
 
 		if (process.platform == 'darwin') {
 			template.unshift({

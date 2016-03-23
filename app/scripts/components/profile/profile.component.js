@@ -19,8 +19,8 @@ export default class Profile {
   @Resolve()
   @Inject(AuthenticationService)
   static profile(AuthenticationService) {
-    let user = AuthenticationService.getUser();
-    return User.get(user.id);
+    let user = new User(AuthenticationService.getUser());
+    return user;
   }
 
   constructor(profile, AuthenticationService, ModalService) {
@@ -87,7 +87,7 @@ export default class Profile {
   }
 
   openPostModal(slug) {
-    slug.post = (typeof slug.post !== 'undefined' ? new Post(slug.post) : new Post() )
+    slug.post = (typeof slug.post !== 'undefined' ? new Post(slug.post) : new Post());
     slug.post._meta_.user = 'hidden';
     let locals = {
       action: slug.action,

@@ -44,6 +44,8 @@ gulp.task('build', getTask('build').build);
 
 gulp.task('build:dist', ['set-production'], getTask('build').buildDist);
 
+gulp.task('release', getTask('release/release'));
+
 gulp.task('bundle:scripts', function() {
 	bundler.init();
 	return bundler.bundle();
@@ -72,7 +74,7 @@ gulp.task('default', ['build']);
 
 gulp.task('serve:production', gulpsync.sync(['build:production', 'serve']));
 
-gulp.task('watch', gulpsync.async(['clean', 'assets', 'build', ['bundle', 'serve']])),
+gulp.task('watch', gulpsync.async(['clean', 'assets', ['build', 'bundle', 'serve']])),
 	function() {
 		bundler.watch();
 	};

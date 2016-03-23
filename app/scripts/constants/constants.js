@@ -16,9 +16,9 @@ export const HOURS_APM = ['1:00am', '2:00am', '3:00am', '4:00am', '5:00am', '6:0
 export const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 export const DATE = new Date();
+
 export const TODAY = [DATE.getFullYear(), DATE.getMonth(), DATE.getDate(), 12];
+
 export const YEAR_START = [DATE.getFullYear(), 0, 1, 1];
 
-let appPath = path.normalize(path.resolve(__dirname, '../..')).replace(/file:\//g, '');
-
-export const APP_DIR = appPath;
+export const APP_DIR = path.normalize(path.resolve(__dirname, '../..')).replace(/file:\//g, '');

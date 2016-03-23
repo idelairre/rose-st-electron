@@ -26,8 +26,6 @@ export default class Analytics {
 		let startDate = new Date(...YEAR_START);
 		let endDate = new Date(...TODAY);
 
-		console.log('day: ', DATE.getDay());
-
 		this.fields = {
 			'start-date': startDate,
 			'end-date': endDate,
@@ -35,8 +33,6 @@ export default class Analytics {
 			metrics: null,
 			comparison: false
 		};
-
-		console.log(this.fields['end-date']);
 
 		this.resolved = true;
 

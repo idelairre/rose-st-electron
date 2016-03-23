@@ -8,97 +8,106 @@ import 'babel-polyfill';
 @Injectable()
 @Inject('$window')
 export default class AuthenticationService {
-  constructor($window) {
-    this.$window = $window;
-  	this.auth = Auth.configure({
-  		apiUrl: SERVER_URL,
-  		storage: 'localStorage',
-  		cookieExpiry: 14,
-  		cookiePath: '/',
-  		passwordResetSuccessUrl: () => {
-  			return window.location.href.replace(/#.*/g, '');
-  		}
-  	});
-    this.user = Auth.user;
-  }
+	constructor($window) {
+		this.$window = $window;
+		this.auth = Auth.configure({
+			apiUrl: SERVER_URL,
+			storage: 'localStorage',
+			cookieExpiry: 14,
+			cookiePath: '/',
+			passwordResetSuccessUrl: () => {
+				return window.location.href.replace(/#.*/g, '');
+			}
+		});
+		this.user = Auth.user;
+	}
 
-  evalAdmin() {
-    return Auth.user.admin;
-  }
+	evalAdmin() {
+		return Auth.user.admin;
+	}
 
-  getHeaders() {
-    return Auth.retrieveData('authHeaders');
-  }
+	getHeaders() {
+		return Auth.retrieveData('authHeaders');
+	}
 
-  async login(credentials, config) {
-    try {
-      let response = await Auth.emailSignIn(credentials, config);
-      return Promise.resolve(response);
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  }
+	async login(credentials, config) {
+		try {
+			let response = await Auth.emailSignIn(credentials, config);
+			return Promise.resolve(response);
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	}
 
-  async logout() {
-    try {
-      let response = await Auth.signOut();
-      console.log('logged out: ', response);
-      return response;
-    } catch (error) {
-      console.error(error);
-    }
-  }
+	async logout() {
+		try {
+			let response = await Auth.signOut();
+			console.log('logged out: ', response);
+			return response;
+		} catch (error) {
+			console.error(error);
+		}
+	}
 
-  register(credentials) {
-    console.log(credentials);
-    return Auth.emailSignUp(credentials);
-  }
+	register(credentials) {
+		console.log(credentials);
+		return Auth.emailSignUp(credentials);
+	}
 
-  resetPassword(credentials) {
-    console.log(credentials);
-    return Auth.requestPasswordReset({ email: credentials.email });
-  }
+	resetPassword(credentials) {
+		console.log(credentials);
+		return Auth.requestPasswordReset({
+			email: credentials.email
+		});
+	}
 
-  async getOauthTokens(url) {
-    let response = await axios.get(url);
-    return response;
-  }
+	async getOauthTokens(url) {
+		let response = await axios.get(url);
+		return response;
+	}
 
-  // NOTE: these have scary names so they will never be used instead of Auth methods
+	// NOTE: these have scary names so they will never be used instead of Auth methods
 
-  async getTokenAfterPasswordReset(params) {
-    let serializedParams = qs.stringify(params, {
-      arrayFormat: 'brackets'
-    });
-  	try {
-  		let response = await axios.get(`${SERVER_URL}/auth/password/edit?${serializedParams}`);
-  		return response;
-  	} catch (error) {
-  		console.error(error);
-  	}
-  }
+	async getTokenAfterPasswordReset(params) {
+		let serializedParams = qs.stringify(params, {
+			arrayFormat: 'brackets'
+		});
+		try {
+			let response = await axios.get(`${SERVER_URL}/auth/password/edit?${serializedParams}`);
+			return response;
+		} catch (error) {
+			console.error(error);
+		}
+	}
 
-  setTokenAfterPasswordReset(params) {
-    params = Auth.normalizeTokenKeys(params);
-    let headers = Auth.buildAuthHeaders(params);
-    Auth.persistData('authHeaders', headers);
-    Auth.persistData('mustResetPassword', true);
-    return Promise.resolve();
-  }
+	setTokenAfterPasswordReset(params) {
+		params = Auth.normalizeTokenKeys(params);
+		let headers = Auth.buildAuthHeaders(params);
+		Auth.persistData('authHeaders', headers);
+		Auth.persistData('mustResetPassword', true);
+		return Promise.resolve();
+	}
 
-  updatePassword(credentials) {
-    return Auth.updatePassword(credentials);
-  }
+	updatePassword(credentials) {
+		return Auth.updatePassword(credentials);
+	}
 
-  updateAccount(user) {
-    return Auth.updateAccount(user);
-  }
+	updateAccount(user) {
+		return Auth.updateAccount(user);
+	}
 
-  isAuthenticated() {
-    return Auth.validateToken();
-  }
+	isAuthenticated() {
+		return Auth.validateToken();
+	}
 
-  getUser() {
-    return Auth.user;
-  }
+	getUser() {
+		if (Auth.user.id) {
+      let user = Auth.user;
+      localStorage.setItem('user', JSON.stringify(user));
+      return user;
+		} else {
+      let user = JSON.parse(localStorage.getItem('user'));
+      return user;
+		}
+	}
 }

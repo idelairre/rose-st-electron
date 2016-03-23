@@ -1,9 +1,10 @@
 node_modules
 /dist
 /build
-/release
 .babelrc
 Thumbs.db
 .gitattributes
 .editorconfig
 credentials.json
+token.json
+/release

@@ -9,10 +9,18 @@ window.addEventListener('openBrowser', event => {
   shell.openExternal(event.detail);
 });
 
+ipcRenderer.on('loaded', () => {
+  let event = new Event('loaded');
+  window.dispatchEvent(event);
+});
+
+
 ipcRenderer.on('goto', (e, args) => {
   let event = new CustomEvent('goto', { detail: args });
   window.dispatchEvent(event);
 });
+
+// authentication events
 
 ipcRenderer.on('logout', () => {
   let event = new Event('logout');
@@ -28,10 +36,8 @@ window.addEventListener('authenticated', (e) => {
   ipcRenderer.send('authenticated', e.detail);
 });
 
-ipcRenderer.on('loaded', () => {
-  let event = new Event('loaded');
-  window.dispatchEvent(event);
-});
+
+// analytics events
 
 window.addEventListener('analyticsRequest', (e) => {
   ipcRenderer.send('analyticsParams', e.detail);
