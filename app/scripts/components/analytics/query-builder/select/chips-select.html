@@ -1,5 +1,5 @@
 <md-chips ng-model="ChipsSelect.currentSelectItems" on-change="ChipsSelect.logItems()">
   <md-chip-template>
-    <small>{{$chip}}</small>
+    <small ng-bind="$chip"></small>
   </md-chip-template>
 </md-chips>

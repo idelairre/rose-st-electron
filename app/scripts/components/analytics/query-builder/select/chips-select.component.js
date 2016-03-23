@@ -4,12 +4,13 @@ import { Component, EventEmitter, Input, Inject } from 'ng-forward';
   selector: 'rs-chips-select',
   controllerAs: 'ChipsSelect',
   template: require('./chips-select.html'),
-  inputs: ['model', 'placeholder', 'selection', 'selectItems'],
+  inputs: ['mask', 'model', 'placeholder', 'selection', 'selectItems'],
   outputs: ['onChange']
 })
 
 @Inject('$element', '$compile', '$scope', '$timeout')
 export default class ChipsSelect {
+  @Input() mask;
   @Input() model;
   @Input() placeholder;
   @Input() selection;
@@ -30,7 +31,7 @@ export default class ChipsSelect {
 
     this.selectValue = {};
 
-    this.$scope.$watch(() => {
+    this.$scope.$watchCollection(() => {
       return this.currentSelection;
     }, (current) => {
       if (current !== null) {
@@ -43,6 +44,11 @@ export default class ChipsSelect {
 
   evalItems() {
   	return this.currentSelectItems;
+  }
+
+  mask(item) {
+    console.log(this.mask);
+    return this.mask ? this.mask(item) : item;
   }
 
   pushItem(item) {

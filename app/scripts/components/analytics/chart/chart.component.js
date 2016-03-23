@@ -118,14 +118,21 @@ export default class Chart {
 		return `rgb(${r},${g},${b})`;
 	}
 
-	generateLabels() {
+	generateLabels(data) {
+    console.log(data);
 		if (this.query.dimensions.includes('ga:hour')) {
 			return this.generateHourLabels();
 		} else if (this.query.dimensions.includes('ga:day') || this.query.dimensions.includes('ga:date') ) {
 			return this.generateDaysLabels();
 		} else if (this.query.dimensions.includes('ga:month')) {
 			return this.generateMonthsLabels();
-		}
+		} else {
+      let labels = [];
+      for (let i = 0; data.rows.length > i; i += 1) {
+        labels.push(data.rows[i][0]);
+      }
+      return labels;
+    }
 	}
 
 	generateHourLabels() {
@@ -201,6 +208,7 @@ export default class Chart {
 			label = row[0];
 			return HOURS[parseInt(label)];
 		} else {
+      label = row[0];
 			return label;
 		}
 	}
@@ -268,7 +276,7 @@ export default class Chart {
 						data: []
 					}]
 				};
-				this.chartData.labels = this.generateLabels();
+				this.chartData.labels = this.generateLabels(current);
 				this.chartData.datasets[0].data = this.normalizeLabels(data2);
 				this.chartData.datasets[1].data = this.normalizeLabels(data);
 			} else if (this.chartState === 'composition') {
@@ -276,7 +284,7 @@ export default class Chart {
 				this.doughnutData = this.parseDoughnutData(current);
 			} else {
 				this.resetChart();
-				this.chartData.labels = this.generateLabels();
+				this.chartData.labels = this.generateLabels(current);
 				this.chartData.datasets[0].data = this.normalizeLabels(data);
 			}
 		}

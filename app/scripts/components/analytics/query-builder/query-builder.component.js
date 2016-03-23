@@ -42,7 +42,7 @@ export default class QueryBuilder {
 				dimensions: ['ga:date', 'ga:year', 'ga:month', 'ga:day', 'ga:hour', 'ga:nthMonth', 'ga:nthDay', 'ga:nthHour']
 			},
 			users: {
-				selected: true,
+				selected: false,
 				metrics: ['ga:users', 'ga:newUsers', 'ga:percentNewSessions', 'ga:1dayUsers', 'ga:7dayUsers', 'ga:14dayUsers', 'ga:30dayUsers', 'ga:sessionsPerUser'],
 				dimensions: ['ga:userType', 'ga:sessionCount', 'ga:daysSinceLastSession', 'ga:userDefinedValue']
 			},
@@ -65,9 +65,6 @@ export default class QueryBuilder {
 			metrics: []
 		};
 
-		this.state.dimensions = this.state.time.dimensions;
-
-		// this.$scope.$watch(::this.evalComparison, ::this.setDate);
 		this.$scope.$watchCollection(::this.evalQuery, ::this.setQuery);
 
   }
@@ -78,15 +75,6 @@ export default class QueryBuilder {
 		this.endDate = angular.copy(new Date());
 		this.fields.dimensions = 'time';
 		this.fields.metrics = 'users';
-		this.state.dimensions = this.state.time.dimensions;
-	}
-
-	ngAfterViewInit() {
-		this.chartState = 'trends';
-	}
-
-	evalComparison() {
-		return this.fields.comparison;
 	}
 
 	evalQuery() {
@@ -125,6 +113,10 @@ export default class QueryBuilder {
 		this.state[state].selected = true;
 		this.state.metrics = this.state[state].metrics;
 		this.state.dimensions = this.state[state].dimensions;
+	}
+
+	renderUiName(item) {
+		return inflected.humanize(inflected.underscore(item.replace(/(\d+)/, '$1 ').replace(/ga:/, '')));
 	}
 
 	resetState() {

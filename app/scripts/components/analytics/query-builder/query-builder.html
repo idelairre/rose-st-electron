@@ -17,8 +17,8 @@
         <md-input-container class="time-input-container" ng-if="QueryBuilder.query.dimensions.includes('ga:nthHour')">
           <input type="time" class="time-input" ng-model="QueryBuilder.fields['end-date']" ng-blur="QueryBuilder.setParam('time', 'end-date')" aria-label="end time" min="QueryBuilder.fields['start-date']">
         </md-input-container>
-        <span class="label limit-label" ng-if="QueryBuilder.chartState === 'comparison'">comparison: </span>
-        <md-input-container ng-if="QueryBuilder.chartState === 'comparison'">
+        <span class="label limit-label" ng-if="QueryBuilder.chartState === 'comparison' && QueryBuilder.showDatePicker1()">comparison: </span>
+        <md-input-container ng-if="QueryBuilder.chartState === 'comparison' && QueryBuilder.showDatePicker1()">
           <md-switch aria-label="comparison switch" ng-model="QueryBuilder.fields.comparison" ng-change="QueryBuilder.toggleComparison(QueryBuilder.fields.comparison)"></md-switch>
         </md-input-container>
       <md-menu>
@@ -65,7 +65,7 @@
     </div>
     <div layout="row">
       <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
-        <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.setParam('dimension', '')" placeholder="Dimensions" flex="80"></rs-chips-select>
+        <rs-chips-select class="dimensions" [mask]="QueryBuilder.renderUiName" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.setParam('dimension', '')" placeholder="Dimensions" flex="80"></rs-chips-select>
       </md-input-container>
       <md-input-container flex="20">
         <label>Category</label>
