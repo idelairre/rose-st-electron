@@ -44,7 +44,7 @@
             <div ng-message="passwordMatch">Your passwords did not match.</div>
           </div>
         </md-input-container>
-        <md-input-container class="md-block" ng-repeat="(key, value) in Edit.filterProps(Edit.object._meta_, 'boolean')">
+        <md-input-container class="md-block" ng-repeat="(key, value) in Edit.filterProps(Edit.object._meta_, 'boolean')" ng-style="!$first && { 'margin-top': '46px' }">
           <label>{{ ::Edit.parseField(key) }}</label>
           <md-select name="{{ key }}" ng-model="Edit.object[key]" placeholder="{{ ::Edit.parseField(key) }}" required>
             <md-option ng-value="true">true</md-option>

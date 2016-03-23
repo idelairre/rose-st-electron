@@ -59,9 +59,9 @@ export default class Table {
 }
 
 @Injectable()
-@Inject(ModalService, AuthenticationService)
+@Inject(AuthenticationService, ModalService)
 export class TableComponent {
-  constructor(ModalService, AuthenticationService) {
+  constructor(AuthenticationService, ModalService) {
     this.selected = [];
 
     this.options = {
@@ -80,11 +80,6 @@ export class TableComponent {
 
     this.authService = AuthenticationService;
     this.modalService = ModalService;
-  }
-
-  evalAdmin() {
-    let user = this.authService.getUser();
-    this.isAdmin = user.admin;
   }
 
   getSelected() {

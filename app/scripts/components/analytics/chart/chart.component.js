@@ -2,6 +2,7 @@ import { Component, Input, Inject } from 'ng-forward';
 import ChartTitle from './chart-title/chart-title.component';
 import RenderUiName from '../render-ui-name.filter';
 import inflected from 'inflected';
+import { MONTHS, HOURS, HOURS_APM, DAYS } from '../../../constants/constants';
 import 'reflect-metadata';
 
 // NOTE: this is arguably the worst code I've ever written but I was dealing with a bitter depression.
@@ -13,7 +14,7 @@ Date.prototype.addDays = function(days) {
 }
 
 let getDates = (startDate, stopDate) => {
-	let dateArray = [];
+	let dateArray = new Array();
 	let currentDate = startDate;
 	while (currentDate <= stopDate) {
 		dateArray.push(new Date(currentDate));
@@ -21,15 +22,6 @@ let getDates = (startDate, stopDate) => {
 	}
 	return dateArray;
 }
-
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-const HOURS = ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00'];
-
-const HOURS_APM = ['1:00am', '2:00am', '3:00am', '4:00am', '5:00am', '6:00am', '7:00am', '8:00am', '9:00am', '10:00am', '11:00am', '12:00am', '1:00pm', '2:00pm', '3:00pm','4:00pm','5:00pm','6:00pm','7:00pm','8:00pm','9:00pm','10:00pm','11:00pm','12:00pm'];
-
-const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-
 
 @Component({
 	selector: 'chart',
@@ -101,10 +93,6 @@ export default class Chart {
 
 		this.$scope.$watchCollection(::this.evalData, ::this.setData);
 
-		this.$scope.$watchCollection(::this.evalFields, ::this.setLabels);
-
-		this.$scope.$watchCollection(::this.evalQuery, ::this.setLabels);
-
 		this.$scope.$watch(::this.evalChartState, ::this.setChartState);
   }
 
@@ -141,7 +129,7 @@ export default class Chart {
 	generateLabels() {
 		if (this.query.dimensions.includes('ga:hour')) {
 			return this.generateHourLabels();
-		} else if (this.query.dimensions.includes('ga:day')) {
+		} else if (this.query.dimensions.includes('ga:day') || this.query.dimensions.includes('ga:date') ) {
 			return this.generateDaysLabels();
 		} else if (this.query.dimensions.includes('ga:month')) {
 			return this.generateMonthsLabels();
@@ -159,11 +147,7 @@ export default class Chart {
 
 	generateDaysLabels() {
 		let datesArray = getDates(this.fields['start-date'], this.fields['end-date']);
-		return datesArray;
-	}
-
-	generateWeekLabels() {
-
+		return datesArray.map(date => { return this.$filter('date')(date, 'MMM d')});
 	}
 
 	generateMonthsLabels() {
@@ -176,11 +160,12 @@ export default class Chart {
 	initializeFields() {
 		let startDate = this.fields['start-date'];
 		let endDate = this.fields['end-date'];
-		this.fields['start-date'] = new Date(startDate.getFullYear() - 1, startDate.getDay(), startDate.getHours());
-		this.fields['start-date'] = new Date(endDate.getFullYear() - 1, endDate.getDay(), startDate.getHours());
+		this.fields['start-date'] = new Date(startDate.getFullYear() - 1, startDate.getMonth() - 1, startDate.getDate(), startDate.getHours());
+		this.fields['start-date'] = new Date(endDate.getFullYear() - 1, endDate.getMonth() - 1, endDate.getDate(), startDate.getHours());
 	}
 
 	normalizeLabels(data) {
+		console.log(data, this.chartData);
 		for (let i = 0; this.chartData.labels.length > i; i += 1) {
 			if (typeof data[i] === 'undefined') {
 				data[i] = null;
@@ -195,27 +180,56 @@ export default class Chart {
 
 	parseData(data) {
 		return data.rows.map(row => {
-			return +row[2]
+			return (typeof row[2] !== 'undefined' ? +row[2] : +row[1]);
 		});
 	}
 
-	parseDoughnutLabels(label) {
-		// let uiName = this.$filter('RenderUiName')(this.query.metrics[0]).toLowerCase();
-		if (this.query.dimensions.includes('ga:month')) {
-			return `${MONTHS[parseInt(label)]}`;
-		} else if (this.query.dimensions.includes('ga:week')) {
+	parseDoughnutLabels(row) {
+		if (typeof row[0] === 'undefined') {
+			return;
+		}
+		let label;
+		if (this.query.dimensions.includes('ga:month') || this.query.dimensions.includes('ga:nthMonth')) {
+			label = row[1];
+			return MONTHS[parseInt(label)];
+		} else if (this.query.dimensions.includes('ga:week') || this.query.dimensions.includes('ga:nthWeek')) {
+			label = row[1];
 			return `Week ${parseInt(label)}`;
 		} else if (this.query.dimensions.includes('ga:day')) {
-			return `${DAYS[parseInt(label)]}`;
+			label = row[0];
+			return this.$filter('date')(this.datesArray[parseInt(label)], 'shortDate');
+		} else if (this.query.dimensions.includes('ga:date')) {
+			label = row[0].split('');
+			let year = parseInt(label.splice(0, 4).join(''));
+			let month = parseInt(label.splice(0, 2).join(''));
+			let day = parseInt(label.splice(0, 2).join(''));
+			let date = new Date(year, month - 1, day);
+			return this.$filter('date')(date, 'shortDate');
+		} else if (this.query.dimensions.includes('ga:hour')) {
+			label = row[0];
+			return HOURS[parseInt(label)];
+		} else {
+			return label;
 		}
+	}
+
+	parseDoughnutValue(row) {
+		if (typeof row[0] === 'undefined') {
+			return;
+		}
+		return typeof row[2] !== 'undefined' ? parseInt(row[2]) : parseInt(row[1]);
 	}
 
 	parseDoughnutData(data) {
 		let chartData = [];
+
+		let startDate = this.fields['start-date'];
+		let endDate = this.fields['end-date'];
+		this.datesArray = getDates(startDate, endDate);
 		for (let i = 0; data.rows.length > i; i += 1) {
 			chartData.push({
-				label: this.parseDoughnutLabels(data.rows[i][1]),
-				value: `${parseInt(data.rows[i][2])}`,
+				label: this.parseDoughnutLabels(data.rows[i]),
+				value: this.parseDoughnutValue(data.rows[i]),
 				color: this.generateColor(),
 				highlight: this.generateColor()
 			});
@@ -235,6 +249,7 @@ export default class Chart {
 
 	setData(current, prev) {
 		if (current !== prev) {
+			console.log(current);
 			let data = this.parseData(current);
 			if (this.chartState === 'comparison' && this.fields.comparison) {
 				let data2 = this.parseData(prev);
@@ -266,8 +281,8 @@ export default class Chart {
 				this.chartData.datasets[1].data = this.normalizeLabels(data);
 			} else if (this.chartState === 'composition') {
 				this.doughnutData = this.parseDoughnutData(current);
-				console.log(this.doughnutData);
 			} else {
+				this.chartData.labels = this.generateLabels();
 				this.chartData.datasets[0].data = this.normalizeLabels(data);
 			}
 		}
@@ -275,12 +290,7 @@ export default class Chart {
 
 	setLabels(current, prev) {
 		if (current !== prev) {
-			if (this.query.dimensions.includes('ga:hour') && this.query.dimensions.includes('ga:nthHour')) {
-				this.chartData.labels = this.generateHourLabels();
-			}
-			if (this.query.dimensions.includes('ga:month') && this.query.dimensions.includes('ga:nthMonth')) {
-				this.chartData.labels = this.generateMonthsLabels();
-			}
+			// this.chartData.labels = this.generateLabels();
 			if (!current.comparison && prev.comparison) {
 				this.chartData.datasets.length = 1;
 			}

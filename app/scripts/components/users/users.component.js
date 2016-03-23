@@ -24,12 +24,12 @@ export default class Users extends TableComponent {
   }
 
   constructor($mdDialog, users, AuthenticationService, ModalService) {
-    super(ModalService);
-    this.authService = AuthenticationService;
+    super(AuthenticationService, ModalService);
 
     this.fields = ['id', 'email', 'name', 'posts', 'sign_in_count', 'confirmed', 'created_at', 'updated_at'];
 
-    this.options.actions = (::this.evalAdmin() ? ['add', 'edit', 'delete', 'deleteAll'] : []);
+    this.options.actions = (this.authService.evalAdmin() ? ['add', 'edit', 'delete', 'deleteAll'] : []);
+    // this.options.actions = ['add', 'edit', 'delete', 'deleteAll'];
     this.options.selectParam = 'email';
     this.options.filterFields = {
       created_at: 'date',

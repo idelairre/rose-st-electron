@@ -2,10 +2,10 @@
   <md-card>
     <md-card-title flex="none">
       <md-card-title-text>
-        <span class="md-headline" ng-show="!Donations.state.customers">Gross Volume</span>
-        <span class="md-subhead" ng-show="!Donations.state.customers">Total {{ Donations.total | currency }}</span>
-        <span class="md-headline" ng-show="Donations.state.customers">Customers</span>
-        <span class="md-subhead" ng-show="Donations.state.customers">Total {{ Donations.transactions.length }}</span>
+        <span class="md-headline" ng-if="!Donations.state.customers">Gross Volume</span>
+        <span class="md-subhead" ng-if="!Donations.state.customers">Total {{ Donations.total | currency }}</span>
+        <span class="md-headline" ng-if="Donations.state.customers">Customers</span>
+        <span class="md-subhead" ng-if="Donations.state.customers">Total {{ Donations.transactions.length }}</span>
       </md-card-title-text>
       <md-card-title-media layout-align="end center" class="md-table-pagination limit" style="padding: 0">
         <md-datepicker ng-model="Donations.chartOptions.startDate" ng-change="Donations.setTransactions(Donations.transactions)" md-placeholder="Start date" md-max-date="Donations.maxStartDate"></md-datepicker>
@@ -18,7 +18,7 @@
           </md-select>
         </md-input-container>
         <md-menu>
-          <md-button class="md-icon-button" aria-label="graph options menu" ng-click="Donations.openMenu($mdOpenMenu, $event)">
+          <md-button class="md-icon-button" flex aria-label="graph options menu" ng-click="Donations.openMenu($mdOpenMenu, $event)" style="padding-left: 15px">
             <md-icon md-menu-origin>more_vert</md-icon>
           </md-button>
           <md-menu-content width="4">

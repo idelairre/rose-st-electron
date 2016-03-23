@@ -42,7 +42,7 @@ export default class Login extends AuthModal {
       .escapeToClose(false)
       .textContent(`error: ${error.reason}`)
       .ariaLabel(`error modal: ${error}`)
-      .ok('try again');
+      .ok('ok');
     this.$mdDialog.show(errorDialogue).then(::this.openLogin);
   }
 

@@ -10,6 +10,8 @@ import 'reflect-metadata';
 // compositiom doughnut chart: disable grouped labels
 // trend line graph: disable grouped labels, enable series
 
+// TODO: the following dimensions: ['ga:week', 'ga:nthWeek', 'ga:dayOfWeek', 'ga:dayOfWeekName', 'ga:dateHour', 'ga:yearMonth', 'ga:yearWeek']
+
 const DATE_FORMAT = 'YYYY-MM-DD';
 
 @Component({
@@ -37,7 +39,7 @@ export default class QueryBuilder {
 				dimensions: ['ga:continent', 'ga:subContinent', 'ga:country', 'ga:region', 'ga:metro', 'ga:city', 'ga:latitude', 'ga:longitude', 'ga:networkDomain', 'ga:networkLocation']
 			},
 			time: {
-				dimensions: ['ga:date', 'ga:year', 'ga:month', 'ga:week', 'ga:day', 'ga:hour', 'ga:minute', 'ga:nthMonth', 'ga:nthWeek', 'ga:nthDay', 'ga:nthHour', 'ga:nthMinute', 'ga:dayOfWeek', 'ga:dayOfWeekName', 'ga:dateHour', 'ga:yearMonth', 'ga:yearWeek']
+				dimensions: ['ga:date', 'ga:year', 'ga:month', 'ga:day', 'ga:hour', 'ga:nthMonth', 'ga:nthDay', 'ga:nthHour']
 			},
 			users: {
 				selected: true,
@@ -83,17 +85,6 @@ export default class QueryBuilder {
 		this.chartState = 'trends';
 	}
 
-	addParam(field, param) {
-		if (field === 'time' && param === 'start-date' && this.query.dimensions.includes('ga:hour')) {
-			this.startTimeCache = angular.copy(this.fields['start-date']);
-		} else if (field === 'date' && param === 'start-date' && this.startTimeCache && this.query.dimensions.includes('ga:month')) {
-			let date = this.fields['start-date'];
-			let time = this.startTimeCache;
-			this.fields['start-date'] = new Date(date.getFullYear(), date.getDay(), time.getHours());
-		}
-		this.onQueryChange.next();
-	}
-
 	evalComparison() {
 		return this.fields.comparison;
 	}
@@ -109,8 +100,8 @@ export default class QueryBuilder {
 				let endDate = this.fields['end-date'];
 				this.prevStartDate = startDate;
 				this.prevEndDate = endDate;
-				this.fields['start-date'] = new Date(startDate.getFullYear() - 1, startDate.getMonth(), startDate.getDay(), startDate.getHours());
-				this.fields['end-date'] = new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDay(), endDate.getHours());
+				this.fields['start-date'] = new Date(startDate.getFullYear() - 1, startDate.getMonth(), startDate.getDate(), startDate.getHours());
+				this.fields['end-date'] = new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDate(), endDate.getHours());
 			}
 			if (!current) {
 				this.fields['start-date'] = this.prevStartDate;
@@ -118,6 +109,17 @@ export default class QueryBuilder {
 			}
 			this.onQueryChange.next();
 		}
+	}
+
+	setParam(field, param) {
+		if (field === 'time' && param === 'start-date' && this.query.dimensions.includes('ga:hour')) {
+			this.startTimeCache = angular.copy(this.fields['start-date']);
+		} else if (field === 'date' && param === 'start-date' && this.startTimeCache && this.query.dimensions.includes('ga:month')) {
+			let date = this.fields['start-date'];
+			let time = this.startTimeCache;
+			this.fields['start-date'] = new Date(date.getFullYear(), date.getDay(), time.getHours());
+		}
+		this.onQueryChange.next();
 	}
 
 	setState(state) {
@@ -155,13 +157,14 @@ export default class QueryBuilder {
 		return this.query.dimensions.includes('ga:month') ||
 		this.query.dimensions.includes('ga:week') ||
 		this.query.dimensions.includes('ga:day') ||
+		this.query.dimensions.includes('ga:date') ||
 		this.query.dimensions.includes('ga:hour');
 	}
 
 	showDatePicker2() {
-		return this.query.dimensions.includes('ga:month') && this.query.dimensions.includes('ga:nthMonth') ||
+		return this.query.dimensions.includes('ga:month') && this.chartState !== 'composition' ||
 		this.query.dimensions.includes('ga:week') && this.query.dimensions.includes('ga:nthWeek') ||
-		this.query.dimensions.includes('ga:day') && this.query.dimensions.includes('ga:nthDay')
+		this.query.dimensions.includes('ga:day') || this.query.dimensions.includes('ga:date');
 	}
 
 	openMenu($mdOpenMenu, event	) {

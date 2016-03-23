@@ -6,21 +6,17 @@
 }
 
 #analytics-line {
-  height: 400px !important;
+  height: 350px !important;
   margin: 0;
   border: 0;
   vertical-align: bottom;
-  /*width: 100% !important;*/
-  /*max-height: 350px;*/
 }
 
 #analytics-bar {
-  height: 400px !important;
+  height: 350px !important;
   margin: 0;
   border: 0;
   vertical-align: bottom;
-  /*width: 100% !important;*/
-  /*max-height: 350px;*/
 }
 
 .chart-container {

@@ -79,9 +79,9 @@ export default class Donations extends TableComponent {
     this.data = {
         labels: [],
         datasets: [{
-          fillColor: 'rgba(151,187,205,0.2)',
-          strokeColor: 'rgba(151,187,205,1)',
-          pointColor: 'rgba(151,187,205,1)',
+          fillColor: 'rgba(220,220,220,0.2)',
+          strokeColor: 'rgba(220,220,220,1)',
+          pointColor: 'rgba(220,220,220,1)',
           pointStrokeColor: '#fff',
           pointHighlightFill: '#fff',
           pointHighlightStroke: 'rgba(151,187,205,1)',
@@ -95,19 +95,19 @@ export default class Donations extends TableComponent {
     array.splice(0, 1);
 
     let today = new Date();
+    let lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDay());
 
-    let maxStartDate = new Date(today.getFullYear(), today.getMonth(), today.getDay() - 1);
     // let maxEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDay());
 
     this.limits = array;
 
-    this.maxStartDate = maxStartDate;
+    this.maxStartDate = today;
     // this.maxEndDate = maxEndDate;
 
     this.chartOptions = {
       limit: 100,
-      startDate: new Date(today.getFullYear(), today.getMonth(), today.getDay() - 6),
-      endDate: undefined,
+      startDate: lastMonth,
+      endDate: today,
       responsive: true,
       maintainAspectRatio: false,
       scaleShowGridLines: true,

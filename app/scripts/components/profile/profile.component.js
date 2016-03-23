@@ -78,6 +78,7 @@ export default class Profile {
   openProfileModal() {
     this.resetFields();
     this.user._meta_.admin = 'hidden';
+    this.user._meta_.confirmed = 'hidden';
     let locals = {
       action: 'Update',
       object: this.user

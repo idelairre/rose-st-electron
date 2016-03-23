@@ -1,21 +1,21 @@
-<md-card flex layout="column">
-  <md-card-title flex="none" layout-align="space-between end">
+<md-card>
+  <md-card-title flex="none">
     <md-card-title-text>
       <span class="md-headline">Query (BETA)</span>
       <span class="md-subhead">{{ QueryBuilder.chartState | Inflector:'capitalize' }}</span>
     </md-card-title-text>
     <md-card-title-media layout-align="end center" class="md-table-pagination limit" style="padding: 0">
-        <md-datepicker ng-if="QueryBuilder.showDatePicker1()" ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.addParam('date', 'start-date')"></md-datepicker>
-        <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:month') && QueryBuilder.query.dimensions.includes('ga:nthMonth')">to: </span>
+        <md-datepicker ng-if="QueryBuilder.showDatePicker1()" ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.setParam('date', 'start-date')"></md-datepicker>
+        <span class="label limit-label" ng-if="QueryBuilder.showDatePicker2()">to: </span>
         <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:hour') && QueryBuilder.query.dimensions.includes('ga:nthHour') && QueryBuilder.chartState === 'comparison'">vs: </span>
-        <md-datepicker ng-if="QueryBuilder.showDatePicker2()" ng-model="QueryBuilder.fields['end-date']" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.addParam('date', 'end-date')"></md-datepicker>
+        <md-datepicker ng-if="QueryBuilder.showDatePicker2()" ng-model="QueryBuilder.fields['end-date']" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.setParam('date', 'end-date')"></md-datepicker>
         <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:hour')"></span>
-        <md-input-container class="time-input-container" ng-if="QueryBuilder.query.dimensions.includes('ga:hour')">
-          <input type="time" class="time-input" ng-model="QueryBuilder.fields['start-date']" ng-blur="QueryBuilder.setQuery('time', 'start-date')" aria-label="start time">
+        <md-input-container class="time-input-container" ng-if="QueryBuilder.query.dimensions.includes('ga:hour') && QueryBuilder.chartState !== 'composition'">
+          <input type="time" class="time-input" ng-model="QueryBuilder.fields['start-date']" ng-blur="QueryBuilder.setParam('time', 'start-date')" aria-label="start time">
         </md-input-container>
         <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:nthHour')">to: </span>
         <md-input-container class="time-input-container" ng-if="QueryBuilder.query.dimensions.includes('ga:nthHour')">
-          <input type="time" class="time-input" ng-model="QueryBuilder.fields['end-date']" ng-blur="QueryBuilder.addParam('time', 'end-date')" aria-label="end time" min="QueryBuilder.fields['start-date']">
+          <input type="time" class="time-input" ng-model="QueryBuilder.fields['end-date']" ng-blur="QueryBuilder.setParam('time', 'end-date')" aria-label="end time" min="QueryBuilder.fields['start-date']">
         </md-input-container>
         <span class="label limit-label" ng-if="QueryBuilder.chartState === 'comparison'">comparison: </span>
         <md-input-container ng-show="QueryBuilder.chartState === 'comparison'">
@@ -65,7 +65,7 @@
     </div>
     <div layout="row">
       <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
-        <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.addParam('dimension', '')" placeholder="Dimensions" flex="80"></rs-chips-select>
+        <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.setParam('dimension', '')" placeholder="Dimensions" flex="80"></rs-chips-select>
       </md-input-container>
       <md-input-container flex="20">
         <label>Category</label>

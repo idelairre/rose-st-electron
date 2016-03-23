@@ -7,6 +7,7 @@ var utils = require('../utils');
 var constants = require('../constants');
 var packageJson = constants.packageJson;
 var rcedit = require('rcedit');
+var squirrelBuilder = require('electron-installer-squirrel-windows');
 
 var APP_NAME = constants.appName;
 var BUILD_DIR = constants.buildDir;
@@ -46,70 +47,34 @@ var tasks = {
 		return callback ? callback(null) : null;
 	},
 
-	readInstallerNsi: function(callback) {
-		var installScript = 'resources/windows/installer.nsi';
-		utils.logger.start('Parsing installer.nsi', installScript);
-		fs.readFile(installScript, 'utf-8', function(error, data) {
-			if (error) {
-				utils.handleErrors(error);
-				callback ? callback(error) : error;
-				return;
-			}
-			utils.logger.end('Parsed installer.nsi');
-			return callback ? callback(null, data) : data;
-		});
-	},
-
-	writeInstallScript: function(installScript, callback) {
+	createInstaller: function(installScript, callback) {
 		utils.logger.start('Creating installer');
 		var finalPackageName = 'setup.exe';
 
-		installScript = utils.replace(installScript, {
-			name: packageJson.name,
-			productName: packageJson.productName,
-			author: packageJson.author,
-			version: packageJson.version,
-			src: '.',
-			dest: finalPackageName,
-			icon: '../../../resources/windows/icon.ico',
-			setupIcon: '../../../resources/windows/setup-icon.ico',
-			banner: '../../../resources/windows/setup-banner.bmp',
-		});
+		squirrelBuilder({
+				exe: 'Setup.exe',
+				path: APP_DIR,
+				product_name: packageJson.productName,
+				authors: packageJson.author,
+				version: packageJson.version,
+				out: WIN_DIR,
+				setup_icon: '../../../resources/windows/setup-icon.ico',
+				debug: true
+			}, function(error) {
+				if (error) {
+					utils.handleErrors(error);
+					return;
+				}
 
-		utils.logger.end('Finished creating installer');
+				utils.logger.end('Finished creating installer');
 
-		utils.writeFile(APP_DIR + '/installer.nsi', installScript);
-
-		return callback ? callback(null) : installScript;
-	},
-
-	createInstaller: function(callback) {
-
-		utils.logger.start('Building installer with NSIS');
-
-		// Note: NSIS have to be added to PATH (environment variables).
-		var nsis = childProcess.spawn('makensis', [
-			APP_DIR + '/installer.nsi'
-		], {
-			stdio: 'inherit'
-		});
-
-		nsis.on('error', function(error) {
-			if (error) {
-				utils.handleErrors(error);
-				callback ? callback(error) : error;
-				return;
-			}
-		});
-
-		nsis.on('close', function() {
-			utils.logger.end('Finished building installer with NSIS');
-		});
+				return callback ? callback(null) : installScript;
+			});
 	}
 }
 
 module.exports = function() {
 	return function() {
-		async.waterfall([tasks.copyIcon, tasks.setExeProperties, tasks.readInstallerNsi, tasks.writeInstallScript, tasks.createInstaller])
+		async.waterfall([tasks.copyIcon, tasks.setExeProperties, tasks.createInstaller])
 	};
 };

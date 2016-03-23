@@ -1,2 +1,5 @@
-<span class="md-headline" ng-if="ChartTitle.query.metrics"><font ng-repeat="item in ChartTitle.query.metrics track by $index">{{ item | RenderUiName }}</font></span><br>
-<span class="md-subhead"><font ng-if="ChartTitle.query.dimensions.includes('ga:month')">{{ ChartTitle.query['start-date'] | date: 'shortDate' }}<font ng-show="ChartTitle.query.dimensions.includes('ga:month') && ChartTitle.query.dimensions.includes('ga:nthMonth')"> - {{ ChartTitle.query['end-date'] | date: 'shortDate' }}</font></span>
+<span class="md-headline" ng-if="ChartTitle.query.metrics"><font ng-repeat="item in ChartTitle.query.metrics track by $index">{{ ChartTitle.renderUiName(item) }}</font></span><br>
+<span class="md-subhead">
+  <font ng-if="ChartTitle.query.dimensions.includes('ga:date') || ChartTitle.query.dimensions.includes('ga:hour')">{{ ChartTitle.fields['start-date'] | date: 'shortDate' }}<font ng-if="ChartTitle.query.dimensions.includes('ga:date')"> - {{ ChartTitle.fields['end-date'] | date: 'shortDate' }}</font></font>
+  <font ng-if="ChartTitle.query.dimensions.includes('ga:month') || ChartTitle.query.dimensions.includes('ga:day')">{{ ChartTitle.renderMonth(ChartTitle.fields['start-date']) }}<font ng-if="ChartTitle.query.dimensions.includes('ga:day') || ChartTitle.query.dimensions.includes('ga:month') && ChartTitle.query.dimensions.includes('ga:nthMonth')"> - {{ ChartTitle.renderMonth(ChartTitle.fields['end-date']) }}</font></font>
+</span>

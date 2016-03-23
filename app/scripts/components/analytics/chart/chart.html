@@ -7,7 +7,7 @@
     </md-card-title-media>
   </md-card-title>
   <md-card-content layout="column" layout-align="space-between" layout-wrap class="chart-container">
-    <div layout="row" layout-align="center center" class="widget">
+    <div layout="row" layout-align="center center" class="widget" ng-if="Chart.query.dimensions.length > 0">
       <canvas id="analytics-line" class="chart-line" tc-chartjs-line chart-data="Chart.chartData" chart-labels="Chart.labels" chart-options="Chart.chartOptions" ng-if="Chart.state.trends" width="640" height=""></canvas>
       <canvas id="analytics-doughnut" tc-chartjs-doughnut chart-data="Chart.doughnutData" chart-options="Chart.doughnutOptions" chart-legend="Chart.doughnutOptions.legendTemplate" ng-if="Chart.state.composition" height="" width="640"></canvas>
       <canvas id="analytics-bar" tc-chartjs-bar chart-data="Chart.chartData" chart-options="Chart.chartOptions" ng-if="Chart.state.comparison" width="640" height=""></canvas>

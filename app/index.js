@@ -4,6 +4,7 @@ import Menu from 'menu';
 import path from 'path';
 import qs from 'qs';
 import 'babel-polyfill';
+import 'electron-squirrel-startup';
 
 let authenticated = false;
 
@@ -30,6 +31,8 @@ function onClosed() {
 	// for multiple windows store them in an array
 	mainWindow = null;
 }
+
+// TODO: turn this into a service to get rid of all those ridiculous window events
 
 function analyticsRequest(params, callback) {
 	google.auth.getApplicationDefault((err, authClient) => {
@@ -61,7 +64,8 @@ function createMainWindow() {
 	const win = new electron.BrowserWindow({
 		width: 800,
 		height: 640,
-		frame: true
+		frame: true,
+		autoHideMenuBar: true
 	});
 
 	// win.setMenu(null);
@@ -229,4 +233,5 @@ app.on('ready', () => {
 
 	let menu = Menu.buildFromTemplate(template);
 	Menu.setApplicationMenu(menu);
+	// Menu.setApplicationMenu(null);
 });

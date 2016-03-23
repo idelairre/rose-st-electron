@@ -6,9 +6,11 @@ import qs from 'qs';
 import 'babel-polyfill';
 
 @Injectable()
+@Inject('$window')
 export default class AuthenticationService {
-  constructor($mdDialog) {
-  	Auth.configure({
+  constructor($window) {
+    this.$window = $window;
+  	this.auth = Auth.configure({
   		apiUrl: SERVER_URL,
   		storage: 'localStorage',
   		cookieExpiry: 14,
@@ -17,6 +19,11 @@ export default class AuthenticationService {
   			return window.location.href.replace(/#.*/g, '');
   		}
   	});
+    this.user = Auth.user;
+  }
+
+  evalAdmin() {
+    return Auth.user.admin;
   }
 
   getHeaders() {

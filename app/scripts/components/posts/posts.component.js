@@ -27,28 +27,34 @@ export default class Posts extends TableComponent {
   constructor($window, posts, AuthenticationService, ModalService) {
     super(AuthenticationService, ModalService);
     this.$window = $window;
-    this.authService = AuthenticationService;
-    this.fields = ['id', 'title', 'subheading', 'user', 'created_at', 'updated_at'];
-    this.options.actions = (::this.evalAdmin() ? ['add', 'preview', 'edit', 'delete', 'deleteAll'] : ['preview']);
+    this.fields = (this.authService.evalAdmin() ? ['id', 'title', 'subheading', 'user', 'created_at', 'updated_at'] : ['id', 'title', 'subheading', 'created_at', 'updated_at']);
+    this.options.actions = (this.authService.evalAdmin() ? ['add', 'preview', 'edit', 'delete', 'deleteAll'] : ['add', 'preview', 'edit', 'delete']);
     this.options.selectParam = 'title';
     this.options.filterFields = {
       created_at: 'date',
       updated_at: 'date'
     };
     this.model = Post;
-    this.posts = posts;
+    this.posts = (this.authService.evalAdmin() ? posts : posts.map(post => {
+    	if (post.user_id === this.authService.user.id) {
+    		return post;
+    	}
+    }));
   }
 
   add(event) {
+    let post = new Post();
+    this.authService.evalAdmin() ? null : post._meta_.user = 'hidden';
     let locals = {
       action: 'Create',
-      object: new Post()
+      object: post
     };
     this.modalService.addDialog(locals).then(::this.handleSubmit);
   }
 
   edit(event) {
     let post = this.getSelected();
+    this.authService.evalAdmin() ? null : post._meta_.user = 'hidden';
     let locals = {
       action: 'Update',
       object: post,
@@ -75,7 +81,7 @@ export default class Posts extends TableComponent {
       }
     } catch (error) {
       console.log(error);
-      super.handleErrors(error);
+      this.handleErrors(error);
     }
   }
 }

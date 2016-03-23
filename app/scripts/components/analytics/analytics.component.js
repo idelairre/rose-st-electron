@@ -1,12 +1,9 @@
 import { Component, Inject } from 'ng-forward';
+import { DATE, TODAY, YEAR_START } from '../../constants/constants';
 import Chart from './chart/chart.component';
 import QueryBuilder from './query-builder/query-builder.component';
 import moment from 'moment';
 import 'reflect-metadata';
-
-const DATE = new Date();
-const TODAY = [DATE.getFullYear(), DATE.getMonth() + 1, DATE.getDay(), 12];
-const YEAR_START = [DATE.getFullYear(), 0, 1, 1];
 
 @Component({
 	selector: 'analytics',
@@ -29,6 +26,8 @@ export default class Analytics {
 		let startDate = new Date(...YEAR_START);
 		let endDate = new Date(...TODAY);
 
+		console.log('day: ', DATE.getDay());
+
 		this.fields = {
 			'start-date': startDate,
 			'end-date': endDate,
@@ -36,6 +35,8 @@ export default class Analytics {
 			metrics: null,
 			comparison: false
 		};
+
+		console.log(this.fields['end-date']);
 
 		this.resolved = true;
 
@@ -64,16 +65,20 @@ export default class Analytics {
 
 	generateSlug(query) {
 		let slug = Object.assign({}, query);
+		slug['start-date'] = moment(this.fields['start-date']).format('YYYY-MM-DD');
+		if (query.dimensions.includes('ga:hour')) {
+			slug['end-date'] = slug['start-date'];
+		} else {
+			slug['end-date'] = moment(this.fields['end-date']).format('YYYY-MM-DD');
+		}
 		slug.dimensions = query.dimensions.toString();
 		slug.metrics = query.metrics.toString();
-		slug['start-date'] = moment(this.fields['start-date']).format('YYYY-MM-DD');
-		slug['end-date'] = moment(this.fields['end-date']).format('YYYY-MM-DD');
 		return slug;
 	}
 
 	postQuery(query) {
 		console.log(query);
-		if (this.resolved && this.query.metrics.length !== 0) {
+		if (this.resolved && this.query.metrics.length !== 0 && this.query.dimensions.length !== 0) {
 			this.resolved = false;
 			let slug = this.generateSlug(query);
 			let event = new CustomEvent('analyticsRequest', {
