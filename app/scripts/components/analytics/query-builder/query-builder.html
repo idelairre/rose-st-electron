@@ -18,8 +18,8 @@
           <input type="time" class="time-input" ng-model="QueryBuilder.fields['end-date']" ng-blur="QueryBuilder.setParam('time', 'end-date')" aria-label="end time" min="QueryBuilder.fields['start-date']">
         </md-input-container>
         <span class="label limit-label" ng-if="QueryBuilder.chartState === 'comparison'">comparison: </span>
-        <md-input-container ng-show="QueryBuilder.chartState === 'comparison'">
-          <md-switch aria-label="comparison switch" ng-model="QueryBuilder.fields.comparison"></md-switch>
+        <md-input-container ng-if="QueryBuilder.chartState === 'comparison'">
+          <md-switch aria-label="comparison switch" ng-model="QueryBuilder.fields.comparison" ng-change="QueryBuilder.toggleComparison(QueryBuilder.fields.comparison)"></md-switch>
         </md-input-container>
       <md-menu>
         <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)" style="padding-left: 15px">

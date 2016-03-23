@@ -67,7 +67,7 @@ export default class QueryBuilder {
 
 		this.state.dimensions = this.state.time.dimensions;
 
-		this.$scope.$watch(::this.evalComparison, ::this.setDate);
+		// this.$scope.$watch(::this.evalComparison, ::this.setDate);
 		this.$scope.$watchCollection(::this.evalQuery, ::this.setQuery);
 
   }
@@ -93,22 +93,19 @@ export default class QueryBuilder {
 		return this.query;
 	}
 
-	setDate(current, prev) {
-		if (current !== prev) {
-			if (current) {
-				let startDate = this.fields['start-date'];
-				let endDate = this.fields['end-date'];
-				this.prevStartDate = startDate;
-				this.prevEndDate = endDate;
-				this.fields['start-date'] = new Date(startDate.getFullYear() - 1, startDate.getMonth(), startDate.getDate(), startDate.getHours());
-				this.fields['end-date'] = new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDate(), endDate.getHours());
-			}
-			if (!current) {
-				this.fields['start-date'] = this.prevStartDate;
-				this.fields['end-date'] = this.prevEndDate;
-			}
-			this.onQueryChange.next();
+	toggleComparison(comparison) {
+		if (comparison) {
+			let startDate = this.fields['start-date'];
+			let endDate = this.fields['end-date'];
+			this.prevStartDate = startDate;
+			this.prevEndDate = endDate;
+			this.fields['start-date'] = new Date(startDate.getFullYear() - 1, startDate.getMonth(), startDate.getDate(), startDate.getHours());
+			this.fields['end-date'] = new Date(endDate.getFullYear() - 1, endDate.getMonth(), endDate.getDate(), endDate.getHours());
+		} else {
+			this.fields['start-date'] = this.prevStartDate;
+			this.fields['end-date'] = this.prevEndDate;
 		}
+		this.onQueryChange.next();
 	}
 
 	setParam(field, param) {

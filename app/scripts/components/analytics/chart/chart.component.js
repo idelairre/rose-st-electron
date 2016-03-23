@@ -108,14 +108,6 @@ export default class Chart {
 		return this.data;
 	}
 
-	evalFields() {
-		return this.fields;
-	}
-
-	evalQuery() {
-		return this.query.dimensions;
-	}
-
 	generateColor() {
 		let getRandomInt = (min, max) => {
   		return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -280,21 +272,19 @@ export default class Chart {
 				this.chartData.datasets[0].data = this.normalizeLabels(data2);
 				this.chartData.datasets[1].data = this.normalizeLabels(data);
 			} else if (this.chartState === 'composition') {
+				this.resetChart();
 				this.doughnutData = this.parseDoughnutData(current);
 			} else {
+				this.resetChart();
 				this.chartData.labels = this.generateLabels();
 				this.chartData.datasets[0].data = this.normalizeLabels(data);
 			}
 		}
 	}
 
-	setLabels(current, prev) {
-		if (current !== prev) {
-			// this.chartData.labels = this.generateLabels();
-			if (!current.comparison && prev.comparison) {
-				this.chartData.datasets.length = 1;
-			}
-		}
+	resetChart() {
+		this.chartData.datasets.length = 1;
+		this.fields.comparison = false;
 	}
 
 	setState(state) {
