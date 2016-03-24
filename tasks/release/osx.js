@@ -12,13 +12,6 @@ var TEMP_DIR = constants.tempDir;
 var DARWIN_DIR = RELEASE_DIR + '/darwin/';
 var APP_DIR = RELEASE_DIR + '/darwin/' + APP_NAME + '-darwin-x64'
 
-projectDir = jetpack;
-tmpDir = projectDir.dir('./tmp', {
-	empty: true
-});
-releasesDir = projectDir.dir('./releases');
-finalAppDir = tmpDir.cwd(packageJson.productName + '.app');
-
 var finalize = function() {
 	// Prepare main Info.plist
 	var info = projectDir.read('resources/osx/Info.plist');
@@ -28,6 +21,7 @@ var finalize = function() {
 		version: packageJson.version,
 		copyright: packageJson.copyright
 	});
+
 	finalAppDir.write('Contents/Info.plist', info);
 
 	// Prepare Info.plist of Helper apps
@@ -51,7 +45,8 @@ var signApp = function() {
 		var cmd = 'codesign --deep --force --sign "' + identity + '" "' + finalAppDir.path() + '"';
 		utils.logger.start('Signing with: ' + cmd);
 		child_process.exec, cmd);
-} else {}
+} else {
+	
 };
 
 var packToDmgFile = function() {

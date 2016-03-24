@@ -53,7 +53,6 @@ var tasks = {
 	},
 
 	copyIcon: function(callback) {
-		// Copy icon
 		return utils.copyFile('resources/icon.png', DEB_PATH + '/opt/' + FILE_NAME + '/icon.png', callback);
 	},
 
@@ -117,7 +116,7 @@ var tasks = {
 module.exports = function() {
 	return function() {
 		if (os.platform() === 'win32' || os.platform() === 'darwin') {
-			utils.handleErrors(new Error('Incompatable archicture: ' + os.platform()));
+			utils.handleErrors(new Error('Incompatable archicture: ' + os.platform()) + 'skipping...');
 			return;
 		}
 		async.waterfall([tasks.copyIcon, tasks.configureDesktop, tasks.writeDesktopFile, tasks.readDebianControl, tasks.writeDebianControl, tasks.packageDebFile])

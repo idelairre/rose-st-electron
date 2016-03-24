@@ -6,7 +6,6 @@ var stringify = require('stringify');
 var source = require('vinyl-source-stream');
 var watchify = require('watchify');
 var prettyHrtime = require('pretty-hrtime');
-
 var constants = require('./constants');
 var handleErrors = require('./utils').handleErrors;
 

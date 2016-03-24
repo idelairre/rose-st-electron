@@ -10,7 +10,6 @@ var path = require('path');
 var utils = require('./utils');
 var babel = require('babel-core');
 var os = require('os');
-
 var constants = require('./constants');
 
 var BUILD_DIR = constants.buildDir;

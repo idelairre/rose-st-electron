@@ -20,31 +20,25 @@ function getTask(task) {
   return require('./tasks/' + task)(gulp, $);
 }
 
-gulp.task('package:debian', getTask('release/linux'));
-
-gulp.task('package:win', getTask('release/windows'));
-
-gulp.task('package', ['package:debian', 'package:win']);
-
 gulp.task('clean', function() {
 	return del.sync([constants.buildDir, constants.releaseDir, constants.tempDir]);
 });
 
-gulp.task('compress', getTask('compress'));
+gulp.task('set-production', function() {
+	process.env.NODE_ENV = 'production';
+});
 
-gulp.task('styles', assets.tasks[0]); // this is mad ugly but whatevs
+// assets
 
-gulp.task('html', assets.tasks[1]);
+gulp.task('styles', assets.styles);
 
-gulp.task('extras', assets.tasks[2]); // this is mad ugly but whatevs
+gulp.task('html', assets.html);
 
-gulp.task('assets', ['styles', 'html', 'extras'], assets.tasks[3]);
+gulp.task('extras', assets.extras);
 
-gulp.task('build', getTask('build').build);
+gulp.task('assets', ['styles', 'html', 'extras'], assets.assets);
 
-gulp.task('build:dist', ['set-production'], getTask('build').buildDist);
-
-gulp.task('release', getTask('release/release'));
+// browserify
 
 gulp.task('bundle:scripts', function() {
 	bundler.init();
@@ -57,16 +51,40 @@ gulp.task('bundle', gulpsync.sync(['bundle:scripts', 'bundle:build']));
 
 gulp.task('scripts', ['bundle:scripts']);
 
-gulp.task('set-production', function() {
-	process.env.NODE_ENV = 'production';
-});
+// build release
+
+gulp.task('build', getTask('build').build);
+
+gulp.task('build:dist', ['set-production'], getTask('build').buildDist);
+
+// distribution
+
+gulp.task('package:debian', getTask('release/linux'));
+
+gulp.task('package:win', getTask('release/windows'));
+
+gulp.task('package', ['package:debian', 'package:win']);
+
+gulp.task('compress', getTask('compress'));
+
+// electron
 
 gulp.task('serve', function() {
 	electron.start();
-	gulp.watch(['app/scripts/**/*.css'], ['styles', electron.reload]);
-	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['scripts', electron.reload]);
+	gulp.watch(['app/scripts/**/*.css'], ['styles', electron.restart]);
+	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['scripts', electron.restart]);
 	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build', electron.restart]);
 });
+
+// versioning
+
+gulp.task('patch', getTask('semver').patch);
+
+gulp.task('patch:major', getTask('semver').major);
+
+gulp.task('patch:minor', getTask('semver').minor);
+
+// watch tasks
 
 gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'bundle']));
 
