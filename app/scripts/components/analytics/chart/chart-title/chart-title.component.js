@@ -15,7 +15,6 @@ import 'reflect-metadata';
 export default class ChartTitle {
   @Input() chartState;
   @Input() query;
-  @Input() query;
   constructor($filter) {
     this.$filter = $filter;
   }
@@ -24,15 +23,14 @@ export default class ChartTitle {
     this.queryCache = angular.copy(this.query);
   }
 
-  renderMetrics() {
-    // if (this.validateQuery()) {
-      let items = this.query.metrics.map(item => {
-        return this.query.metrics.indexOf(item) !== 0 ? ` ${this.renderUiName(item)}` : this.renderUiName(item);
-      });
-      return items.toString();
-    // } else {
-    //   return 'No data';
-    // }
+  renderMetrics(query) {
+    if (!this.validateQuery(query)) {
+      query = this.queryCache;
+    }
+    let items = query.metrics.map(item => {
+      return query.metrics.indexOf(item) !== 0 ? ` ${this.renderUiName(item)}` : this.renderUiName(item);
+    });
+    return items.toString();
   }
 
   renderUiName(item) {

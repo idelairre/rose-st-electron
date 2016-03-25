@@ -143,18 +143,15 @@ export default class Donations extends TableComponent {
       this.chartTitle = 'Transactions';
       this.fields = TRANSACTION_FIELDS;
       Donation.listTransactions().then(::this.setTransactions);
-    }
-    if (currentState.charges) {
+    } else if (currentState.charges) {
       this.chartTitle = 'Charges';
       this.fields = CHARGES_FIELDS;
       Donation.listCharges().then(::this.setTransactions);
-    }
-    if (currentState.customers) {
+    } else if (currentState.customers) {
       this.chartTitle = 'Customers';
       this.fields = CUSTOMER_FIELDS;
       Donation.listCustomers().then(::this.setTransactions);
-    }
-    if (currentState.subscriptions) {
+    } else if (currentState.subscriptions) {
       this.chartTitle = 'Subscriptions';
       this.fields = SUBSCRIPTION_FIELDS;
       Donation.listSubscriptions().then(::this.setTransactions);

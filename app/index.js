@@ -1,10 +1,12 @@
 import electron, { app, dialog, ipcMain, shell } from 'electron';
-import GhReleases from 'electron-gh-releases';
+import GhReleases from './gh-releases';
 import google from 'googleapis';
 import Menu from 'menu';
 import path from 'path';
 import qs from 'qs';
 import 'babel-polyfill';
+
+// require('module').globalPaths.push(`${__dirname}output`);
 
 process.env.GOOGLE_APPLICATION_CREDENTIALS = `${__dirname}/credentials.json`;
 process.env.NODE_ENV = require('./package.json').environment;
@@ -31,7 +33,7 @@ updater.check((err, status) => {
 // When an update has been downloaded
 updater.on('update-downloaded', (info) => {
   // Restart the app and install the update
-  updater.install()
+  updater.install();
 });
 
 // Access electrons autoUpdater

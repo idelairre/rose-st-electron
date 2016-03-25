@@ -20,9 +20,6 @@ export default class ChipsSelect {
     this.$compile = $compile;
     this.$element = $element;
     this.$scope = $scope;
-    this.selectActive = false;
-    this.chipInput = {};
-    this.chipItems = angular.copy(this.selectItems);
     this.currentSelectItems = [];
     this.currentSelection = null;
 
@@ -34,12 +31,11 @@ export default class ChipsSelect {
   }
 
   ngAfterViewInit() {
-    let items = this.selectItems.map(item => {
-        return `<md-option><p>${item}</p></md-option>`;
-    }).join('');
     let menu = this.$compile(`
-      <md-select ng-model="ChipsSelect.currentSelection" ng-change="ChipsSelect.pushItem(ChipsSelect.currentSelection)"	aria-label="chip select" style="display: inline; margin:'0 0 0 0" placeholder="{{ ::ChipsSelect.placeholder }}">
-        ${items}
+      <md-select ng-model="ChipsSelect.currentSelection" ng-change="ChipsSelect.pushItem(ChipsSelect.currentSelection)" aria-label="chip select" style="display: inline; margin:'0 0 0 0" placeholder="{{ ::ChipsSelect.placeholder }}">
+        <md-option ng-repeat="item in ChipsSelect.selectItems track by $index">
+          <p ng-bind="item"></p>
+        </md-option>
       </md-select>`
     )(this.$scope);
     setTimeout(() => {
@@ -67,9 +63,9 @@ export default class ChipsSelect {
 
   pushItem(item) {
     if (!this.currentSelectItems.includes(item)) {
-      this.currentSelection = null;
       this.currentSelectItems.push(item);
       this.onChange.next();
     }
+    this.currentSelection = null;
   }
 }

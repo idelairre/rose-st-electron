@@ -33,6 +33,8 @@ export default class QueryBuilder {
 
 		this.onQueryChange = new EventEmitter();
 
+		this.showQueryBuilder = true;
+
 		this.state = {
 			location: {
 				dimensions: ['ga:continent', 'ga:subContinent', 'ga:country', 'ga:region', 'ga:metro', 'ga:city', 'ga:latitude', 'ga:longitude', 'ga:networkDomain', 'ga:networkLocation']
@@ -80,6 +82,11 @@ export default class QueryBuilder {
 		return inflected[argument](item);
 	}
 
+	openMenu($mdOpenMenu, event) {
+		event.preventDefault();
+		$mdOpenMenu(event);
+	}
+
 	renderUiName(item) {
 		return inflected.humanize(inflected.underscore(item.replace(/(\d+)/, '$1 ').replace(/ga:/, '')));
 	}
@@ -111,8 +118,7 @@ export default class QueryBuilder {
 		this.state[field] = this.state[category][field];
 	}
 
-	openMenu($mdOpenMenu, event) {
-		event.preventDefault();
-		$mdOpenMenu(event);
+	toggleQueryBuilder() {
+		this.showQueryBuilder = !this.showQueryBuilder;
 	}
 }

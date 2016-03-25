@@ -29,13 +29,22 @@
               <p>Trends</p>
             </button>
           </md-menu-item>
+          <md-divider></md-divider>
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.toggleQueryBuilder()">
+              <md-icon md-menu-align-target ng-if="QueryBuilder.showQueryBuilder">keyboard_arrow_up</md-icon>
+              <md-icon md-menu-align-target ng-if="!QueryBuilder.showQueryBuilder">keyboard_arrow_down</md-icon>
+              <p ng-if="QueryBuilder.showQueryBuilder">Hide query builder</p>
+              <p ng-if="!QueryBuilder.showQueryBuilder">Show query builder</p>
+            </button>
+          </md-menu-item>
         </md-menu-content>
       </md-menu>
     </md-card-title-media>
   </md-card-title>
-  <md-card-content>
+  <md-card-content ng-class="{ hide : !QueryBuilder.showQueryBuilder }">
     <div layout="row">
-      <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
+      <md-input-container flex="80" class="chips-select-row metric-select-container" style="margin-top: -17px">
         <rs-chips-select class="metrics" [(model)]="QueryBuilder.query.metrics" [select-items]="QueryBuilder.state.metrics" (on-change)="QueryBuilder.onQueryChange.next()" placeholder="Metrics" flex="80"></rs-chips-select>
       </md-input-container>
       <md-input-container flex="20" class="chips-select-row">
@@ -49,7 +58,7 @@
       </md-input-container>
     </div>
     <div layout="row">
-      <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
+      <md-input-container flex="80" class="chips-select-row dimensions-select-container" style="margin-top: -17px">
         <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.onQueryChange.next()" placeholder="Dimensions" flex="80"></rs-chips-select>
       </md-input-container>
       <md-input-container flex="20">

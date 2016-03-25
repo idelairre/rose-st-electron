@@ -18,7 +18,12 @@ var OUTPUT = 'app.js';
 var opts = {
 	entries: ['app/scripts/app.js'],
 	extensions: ['.js'],
+	paths: ['./node_modules'],
 	debug: true
+};
+
+var stringifyOpts = {
+	extensions: ['.html']
 };
 
 module.exports = function(gulp, $) {
@@ -27,9 +32,7 @@ module.exports = function(gulp, $) {
 		init: function() {
 			this.w = watchify(browserify(opts))
 				.transform(babelify.configure(BABEL_PRESET))
-				.transform(stringify({
-					extensions: ['.html']
-				}))
+				.transform(stringify(stringifyOpts))
 			bundleLogger.start(OUTPUT);
 		},
 		bundle: function() {

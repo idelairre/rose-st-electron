@@ -23,7 +23,7 @@ var OUT_DIR;
 var tasks = {
 	buildElectron: function(callback) {
 		utils.logger.start('Parsing electron files');
-		async.each(['app/events.js', 'app/menu.js', 'app/index.js'], function(entry, callback) {
+		async.each(['app/events.js', 'app/menu.js', 'app/index.js', 'app/gh-releases.js'], function(entry, callback) {
 			var file = path.parse(entry).base;
 			var filePath = BUILD_DIR + '/' + file;
 			utils.logger.start('Parsing file', file);
@@ -51,7 +51,7 @@ var tasks = {
 
 	buildRuntime: function(callback) {
 		utils.logger.start('Building runtime');
-		async.each(['node_modules/electron-prebuilt', 'node_modules/electron-debug'], function(entry, callback) {
+		async.each(['node_modules/electron-prebuilt', 'node_modules/electron-debug', 'node_modules/electron-squirrel-startup'], function(entry, callback) {
 			var filePath = BUILD_DIR + '/' + entry;
 			utils.copyDir(entry, filePath, callback);
 		}, function (error) {
@@ -139,21 +139,6 @@ var tasks = {
 			});
 		});
 		return callback ? callback(null) : null;
-	},
-
-	build: function(data, callback) {
-		utils.logger.start('Building electron files');
-		async.waterfall([tasks.buildElectron, tasks.buildRuntime, tasks.packageJson, tasks.install],
-			function(error, data) {
-				if (error) {
-					utils.handleErrors(error);
-					callback ? callback(error, null) : null;
-					return;
-				} else {
-					utils.logger.end('Finished building electron files');
-					return callback ? callback(null, data) : data;
-				}
-			});
 	}
 };
 
@@ -162,8 +147,19 @@ module.exports = function() {
 		buildDist: function() {
 			async.waterfall([tasks.buildElectron, tasks.buildRuntime, tasks.packageJson, tasks.install, tasks.packageDist]);
 		},
-		build: function() {
-			tasks.build();
+		build: function(callback) {
+			utils.logger.start('Building electron files');
+			async.waterfall([tasks.packageJson, tasks.buildElectron, tasks.buildRuntime, tasks.install],
+				function(error, data) {
+					if (error) {
+						utils.handleErrors(error);
+						callback ? callback(error, null) : null;
+						return;
+					} else {
+						utils.logger.end('Finished building electron files');
+						return callback ? callback(null, data) : data;
+					}
+				});
 		}
 	}
 }

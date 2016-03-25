@@ -84,13 +84,13 @@ gulp.task('patch:minor', getTask('semver').minor);
 
 // watch tasks
 
-gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'bundle']));
+gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'build', 'bundle']));
 
 gulp.task('default', ['build']);
 
 gulp.task('serve:production', gulpsync.sync(['build:production', 'serve']));
 
-gulp.task('watch', gulpsync.async(['clean', 'assets', ['build', 'bundle', 'serve']])),
+gulp.task('watch', gulpsync.sync(['clean', 'assets', 'build', 'bundle', 'serve'])),
 	function() {
 		bundler.watch();
 	};

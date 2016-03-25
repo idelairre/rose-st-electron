@@ -34,11 +34,19 @@
               <p>Refresh</p>
             </button>
           </md-menu-item>
+          <md-menu-item>
+              <button class="md-button md-ink-ripple" ng-click="Chart.toggleChart()">
+                <md-icon md-menu-align-target ng-if="Chart.showChart">keyboard_arrow_up</md-icon>
+                <md-icon md-menu-align-target ng-if="!Chart.showChart">keyboard_arrow_down</md-icon>
+                <p ng-if="Chart.showChart">Hide chart</p>
+                <p ng-if="!Chart.showChart">Show chart</p>
+              </button>
+          </md-menu-item>
         </md-menu-content>
       </md-menu>
     </md-card-title-media>
   </md-card-title>
-  <md-card-content layout="column" layout-align="space-between" layout-wrap class="chart-container">
+  <md-card-content layout="column" layout-align="space-between" layout-wrap class="chart-container" ng-class="{ hide : !Chart.showChart }">
     <div layout="row" layout-align="center center" class="widget">
       <canvas id="analytics-line" ng-if="Chart.state.trends" class="chart-line" tc-chartjs-line chart-data="Chart.chartData" chart-labels="Chart.labels" chart-options="Chart.chartOptions" width="640" height=""></canvas>
       <canvas id="analytics-doughnut" ng-if="Chart.state.composition" tc-chartjs-doughnut chart-data="Chart.doughnutData" chart-options="Chart.doughnutOptions" chart-legend="Chart.doughnutOptions.legendTemplate" height="" width="640"></canvas>

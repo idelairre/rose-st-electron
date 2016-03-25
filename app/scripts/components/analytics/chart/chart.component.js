@@ -97,6 +97,8 @@ export default class Chart {
 
     this.valid = true;
 
+    this.showChart = true;
+
     this.$window.addEventListener('analyticsReply', event => {
       console.log(event);
       if (!this.state.comparison) {
@@ -134,6 +136,10 @@ export default class Chart {
 			return this.generateMonthsLabels();
 		} else {
       let labels = [];
+      console.log(data.rows);
+      if (!data.rows) {
+        return labels;
+      }
       for (let i = 0; data.rows.length > i; i += 1) {
         labels.push(data.rows[i][0]);
       }
@@ -170,7 +176,9 @@ export default class Chart {
 	}
 
 	normalizeLabels(data) {
-		// console.log(data, this.chartData);
+    if (typeof this.chartData.labels === 'undefined') {
+      return data;
+    }
 		for (let i = 0; this.chartData.labels.length > i; i += 1) {
 			if (typeof data[i] === 'undefined') {
 				data[i] = null;
@@ -195,10 +203,9 @@ export default class Chart {
 			return;
 		}
 		let label;
-		if (this.query.dimensions.includes('ga:month') || this.query.dimensions.includes('ga:nthMonth')) {
-			label = row[1];
-			return MONTHS[parseInt(label)];
-		} else if (this.query.dimensions.includes('ga:week') || this.query.dimensions.includes('ga:nthWeek')) {
+		if (this.query.dimensions.includes('ga:month')) {
+			return MONTHS[parseInt(row[1])] || MONTHS[parseInt(row[0]) - 1];
+		} else if (this.query.dimensions.includes('ga:week')) {
 			label = row[1];
 			return `Week ${parseInt(label)}`;
 		} else if (this.query.dimensions.includes('ga:day')) {
@@ -313,12 +320,16 @@ export default class Chart {
 			this.doughnutData = this.parseDoughnutData(response);
 		} else {
 			this.resetChart();
-			this.chartData.labels = this.generateLabels(data);
+			this.chartData.labels = this.generateLabels(response);
 			this.chartData.datasets[0].data = this.normalizeLabels(data);
 		}
     this.chartValid = this.validateChart();
     this.valid = this.chartValid && this.queryValid;
 	}
+
+  toggleChart() {
+    this.showChart = !this.showChart;
+  }
 
   validateChart() {
     let valid = false;
@@ -343,7 +354,7 @@ export default class Chart {
         }
       }
     } else {
-      valid = true // temporary
+      valid = true // TODO: build this out for doughnut chart
     }
     console.log('chart valid? ', valid);
     return valid;
