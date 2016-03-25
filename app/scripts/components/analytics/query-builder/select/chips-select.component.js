@@ -8,7 +8,7 @@ import { Component, EventEmitter, Input, Inject } from 'ng-forward';
   outputs: ['onChange']
 })
 
-@Inject('$element', '$compile', '$scope', '$timeout')
+@Inject('$element', '$compile', '$scope')
 export default class ChipsSelect {
   @Input() mask;
   @Input() model;
@@ -16,14 +16,13 @@ export default class ChipsSelect {
   @Input() selection;
   @Input() selectItems;
   @Output() onChange;
-  constructor($element, $compile, $scope, $timeout) {
+  constructor($element, $compile, $scope) {
     this.$compile = $compile;
     this.$element = $element;
-    this.$timeout = $timeout;
     this.$scope = $scope;
     this.selectActive = false;
     this.chipInput = {};
-    this.chipItems = [];
+    this.chipItems = angular.copy(this.selectItems);
     this.currentSelectItems = [];
     this.currentSelection = null;
 
@@ -31,49 +30,19 @@ export default class ChipsSelect {
 
     this.selectValue = {};
 
-    this.$scope.$watchCollection(() => {
-      return this.currentSelection;
-    }, (current) => {
-      if (current !== null) {
-        this.currentSelection = null;
-      }
-    });
-
-    this.$scope.$watchCollection(::this.evalItems, ::this.setModel);
-  }
-
-  evalItems() {
-  	return this.currentSelectItems;
-  }
-
-  mask(item) {
-    console.log(this.mask);
-    return this.mask ? this.mask(item) : item;
-  }
-
-  pushItem(item) {
-    if (!this.currentSelectItems.includes(item)) {
-      this.currentSelectItems.push(item);
-    }
-  }
-
-  setModel(current, prev) {
-    if (current !== prev) {
-      this.model = this.currentSelectItems;
-      console.log('model changed', current, prev);
-      this.onChange.next();
-    }
+    this.model = this.currentSelectItems;
   }
 
   ngAfterViewInit() {
+    let items = this.selectItems.map(item => {
+        return `<md-option><p>${item}</p></md-option>`;
+    }).join('');
     let menu = this.$compile(`
-      <md-select ng-model="ChipsSelect.currentSelection" ng-change="ChipsSelect.pushItem(ChipsSelect.currentSelection)" aria-label="chip select" ng-style="{ display: 'inline', margin: '0 0 0 0'}" placeholder="{{ ChipsSelect.placeholder }}">
-        <md-option ng-repeat="item in ChipsSelect.selectItems" ng-if="!ChipsSelect.currentSelectItems.includes(item)">
-          <p>{{ item }}</p>
-        </md-option>
+      <md-select ng-model="ChipsSelect.currentSelection" ng-change="ChipsSelect.pushItem(ChipsSelect.currentSelection)"	aria-label="chip select" style="display: inline; margin:'0 0 0 0" placeholder="{{ ::ChipsSelect.placeholder }}">
+        ${items}
       </md-select>`
     )(this.$scope);
-    this.$timeout(() => {
+    setTimeout(() => {
       let chipsWrap = this.$element.find('md-chips').find('md-chips-wrap');
       chipsWrap.addClass('md-chips-select-container');
       let inputContainer = chipsWrap.children()[0]; // what the actual fuck angular
@@ -85,5 +54,22 @@ export default class ChipsSelect {
       angular.element(inputContainer).append(menu);
       this.currentSelectItems = this.model;
     }, 0);
+  }
+
+  evalItems() {
+  	return this.currentSelectItems;
+  }
+
+  mask(item) {
+    // console.log(this.mask);
+    return this.mask ? this.mask(item) : item;
+  }
+
+  pushItem(item) {
+    if (!this.currentSelectItems.includes(item)) {
+      this.currentSelection = null;
+      this.currentSelectItems.push(item);
+      this.onChange.next();
+    }
   }
 }

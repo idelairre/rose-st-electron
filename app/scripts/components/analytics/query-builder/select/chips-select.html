@@ -1,4 +1,4 @@
-<md-chips ng-model="ChipsSelect.currentSelectItems" on-change="ChipsSelect.logItems()">
+<md-chips ng-model="ChipsSelect.currentSelectItems" ng-model-options="{ debounce: 500 }">
   <md-chip-template>
     <small ng-bind="$chip"></small>
   </md-chip-template>

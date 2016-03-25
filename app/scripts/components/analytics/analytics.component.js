@@ -16,8 +16,6 @@ import 'reflect-metadata';
 @Inject('$scope', '$window')
 export default class Analytics {
 	constructor($scope, $window) {
-		let date = new Date();
-
 		this.$scope = $scope;
 		this.$window = $window;
 
@@ -36,7 +34,7 @@ export default class Analytics {
 
 		this.resolved = true;
 
-		this.chartState = '';
+		this.chartState;
 
 		this.query = {
 			ids: 'ga:118196120',
@@ -59,6 +57,12 @@ export default class Analytics {
 		});
 	}
 
+	ngOnInit() {
+		setTimeout(() => {
+			this.postQuery(this.query);
+		}, 0);
+	}
+
 	generateSlug(query) {
 		let slug = Object.assign({}, query);
 		slug['start-date'] = moment(this.fields['start-date']).format('YYYY-MM-DD');
@@ -73,7 +77,6 @@ export default class Analytics {
 	}
 
 	postQuery(query) {
-		console.log(query);
 		if (this.resolved && this.query.metrics.length !== 0 && this.query.dimensions.length !== 0) {
 			this.resolved = false;
 			let slug = this.generateSlug(query);

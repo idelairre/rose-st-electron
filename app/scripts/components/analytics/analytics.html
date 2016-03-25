@@ -9,6 +9,7 @@
 		[data]="Analytics.data"
 		[chart-state]="Analytics.chartState"
 		[query]="Analytics.query"
-		[fields]="Analytics.fields">
+		[fields]="Analytics.fields"
+		(refresh)="Analytics.postQuery(Analytics.query)">
 	</chart>
 </md-content>

@@ -8,23 +8,62 @@ import 'reflect-metadata';
   selector: 'rs-chart-title',
   controllerAs: 'ChartTitle',
   template: require('./chart-title.html'),
-  pipes: [RenderUiName],
-  inputs: ['fields', 'query']
+  inputs: ['chartState', 'query']
 })
 
 @Inject('$filter')
 export default class ChartTitle {
+  @Input() chartState;
+  @Input() query;
   @Input() query;
   constructor($filter) {
     this.$filter = $filter;
+  }
+
+  ngOnInit() {
+    this.queryCache = angular.copy(this.query);
+  }
+
+  renderMetrics() {
+    // if (this.validateQuery()) {
+      let items = this.query.metrics.map(item => {
+        return this.query.metrics.indexOf(item) !== 0 ? ` ${this.renderUiName(item)}` : this.renderUiName(item);
+      });
+      return items.toString();
+    // } else {
+    //   return 'No data';
+    // }
   }
 
   renderUiName(item) {
     return inflected.humanize(inflected.underscore(item.replace(/(\d+)/, '$1 ').replace(/ga:/, '')));
   }
 
-  renderMonth(date) {
-    // console.log(date, parseInt(this.$filter('date')(date, 'M')), MONTHS[parseInt(this.$filter('date')(date, 'M'))]);
-    return MONTHS[parseInt(this.$filter('date')(date, 'M')) - 1];
+  renderDate(query) {
+    if (!this.validateQuery(query)) {
+      query = this.queryCache;
+    }
+    this.queryCache = angular.copy(query);
+    if (this.chartState === 'composition') {
+      let startDate = parseInt(this.$filter('date')(query['start-date'], 'M')) - 1;
+      let endDate = parseInt(this.$filter('date')(query['end-date'], 'M')) - 1;
+      return `${MONTHS[startDate]} - ${MONTHS[endDate]}`;
+    } else if (query.dimensions.includes('ga:date') || query.dimensions.includes('ga:month') || query.dimensions.includes('ga:nthMonth') || query.dimensions.includes('ga:day') || query.dimensions.includes('ga:hour')) {
+      let startDate = this.$filter('date')(query['start-date'], 'shortDate');
+      let endDate = this.$filter('date')(query['end-date'], 'shortDate');
+      return `${startDate} - ${endDate}`;
+    } else if (query.dimensions.includes('ga:year')) {
+      return this.$filter('date')(query['start-date'], 'yyyy')
+    }
+  }
+
+  validateQuery(query) {
+    if (query.metrics.length === 0 || query.dimensions.length === 0) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }
+
+// ChartTitle.query.dimensions.includes('ga:day') || ChartTitle.query.dimensions.includes('ga:month') && ChartTitle.query.dimensions.includes('ga:nthMonth') && ChartTitle.chartState !== 'composition''

@@ -1,46 +1,31 @@
 <md-card>
   <md-card-title flex="none">
     <md-card-title-text>
-      <span class="md-headline">Query (BETA)</span>
-      <span class="md-subhead">{{ QueryBuilder.chartState | Inflector:'capitalize' }}</span>
+      <span class="md-headline">Query (beta)</span>
+      <span class="md-subhead" ng-bind="QueryBuilder.inflect(QueryBuilder.chartState, 'capitalize')"></span>
     </md-card-title-text>
     <md-card-title-media layout-align="end center" class="md-table-pagination limit" style="padding: 0">
-        <md-datepicker ng-if="QueryBuilder.showDatePicker1()" ng-model="QueryBuilder.fields['start-date']" md-placeholder="Start date" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.setParam('date', 'start-date')"></md-datepicker>
-        <span class="label limit-label" ng-if="QueryBuilder.showDatePicker2()">to: </span>
-        <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:hour') && QueryBuilder.query.dimensions.includes('ga:nthHour') && QueryBuilder.chartState === 'comparison'">vs: </span>
-        <md-datepicker ng-if="QueryBuilder.showDatePicker2()" ng-model="QueryBuilder.fields['end-date']" md-max-date="QueryBuilder.endDate" ng-change="QueryBuilder.setParam('date', 'end-date')"></md-datepicker>
-        <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:hour')"></span>
-        <md-input-container class="time-input-container" ng-if="QueryBuilder.query.dimensions.includes('ga:hour') && QueryBuilder.chartState !== 'composition'">
-          <input type="time" class="time-input" ng-model="QueryBuilder.fields['start-date']" ng-blur="QueryBuilder.setParam('time', 'start-date')" aria-label="start time">
-        </md-input-container>
-        <span class="label limit-label" ng-if="QueryBuilder.query.dimensions.includes('ga:nthHour')">to: </span>
-        <md-input-container class="time-input-container" ng-if="QueryBuilder.query.dimensions.includes('ga:nthHour')">
-          <input type="time" class="time-input" ng-model="QueryBuilder.fields['end-date']" ng-blur="QueryBuilder.setParam('time', 'end-date')" aria-label="end time" min="QueryBuilder.fields['start-date']">
-        </md-input-container>
-        <span class="label limit-label" ng-if="QueryBuilder.chartState === 'comparison' && QueryBuilder.showDatePicker1()">comparison: </span>
-        <md-input-container ng-if="QueryBuilder.chartState === 'comparison' && QueryBuilder.showDatePicker1()">
-          <md-switch aria-label="comparison switch" ng-model="QueryBuilder.fields.comparison" ng-change="QueryBuilder.toggleComparison(QueryBuilder.fields.comparison)"></md-switch>
-        </md-input-container>
+        <query-header [fields]="QueryBuilder.fields" [query]="QueryBuilder.query" [chart-state]="QueryBuilder.chartState" [state]="QueryBuilder.chartState" (on-change)="QueryBuilder.onQueryChange.next()" flex></query-header>
       <md-menu>
         <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)" style="padding-left: 15px">
           <md-icon md-menu-origin>more_vert</md-icon>
         </md-button>
         <md-menu-content width="4">
           <md-menu-item>
-            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.setChartState('comparison')">
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.setChartState($event, 'comparison')">
               <md-icon md-menu-align-target>insert_chart</md-icon>
               <p>Comparison</p>
             </button>
           </md-menu-item>
           <md-menu-item>
-            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.setChartState('composition')">
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.setChartState($event, 'composition')">
               <md-icon md-menu-align-target>pie_chart</md-icon>
               <p>Composition</p>
             </button>
           </md-menu-item>
           <md-menu-item>
-            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.setChartState('trends')">
-              <md-icon md-menu-align-target>multiline_chart </md-icon>
+            <button class="md-button md-ink-ripple" ng-click="QueryBuilder.setChartState($event, 'trends')">
+              <md-icon md-menu-align-target>multiline_chart</md-icon>
               <p>Trends</p>
             </button>
           </md-menu-item>
@@ -51,7 +36,7 @@
   <md-card-content>
     <div layout="row">
       <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
-        <rs-chips-select class="metrics" [(model)]="QueryBuilder.query.metrics" [select-items]="QueryBuilder.state.metrics" (on-change)="QueryBuilder.onQueryChange.next('dimension', '')" placeholder="Metrics" flex="80"></rs-chips-select>
+        <rs-chips-select class="metrics" [(model)]="QueryBuilder.query.metrics" [select-items]="QueryBuilder.state.metrics" (on-change)="QueryBuilder.onQueryChange.next()" placeholder="Metrics" flex="80"></rs-chips-select>
       </md-input-container>
       <md-input-container flex="20" class="chips-select-row">
         <label>Category</label>
@@ -65,7 +50,7 @@
     </div>
     <div layout="row">
       <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
-        <rs-chips-select class="dimensions" [mask]="QueryBuilder.renderUiName" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.setParam('dimension', '')" placeholder="Dimensions" flex="80"></rs-chips-select>
+        <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.evalChips()" placeholder="Dimensions" flex="80"></rs-chips-select>
       </md-input-container>
       <md-input-container flex="20">
         <label>Category</label>

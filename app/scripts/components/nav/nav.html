@@ -1,4 +1,4 @@
-<md-tabs flex md-no-pagination md-selected="Nav.tabIndex" md-autoselect ng-hide="Nav.evalLoginState()">
+<md-tabs flex md-no-pagination md-selected="Nav.tabIndex" md-autoselect ng-if="!Nav.evalLoginState()">
   <md-tab id="home" aria-controls="home">
     <md-tab-label>Home</md-tab-label>
   </md-tab>

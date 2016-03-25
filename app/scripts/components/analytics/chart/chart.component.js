@@ -1,4 +1,4 @@
-import { Component, Input, Inject } from 'ng-forward';
+import { Component, EventEmitter, Input, Inject, Output } from 'ng-forward';
 import ChartTitle from './chart-title/chart-title.component';
 import RenderUiName from '../render-ui-name.filter';
 import inflected from 'inflected';
@@ -27,27 +27,31 @@ let getDates = (startDate, stopDate) => {
 	selector: 'chart',
 	controllerAs: 'Chart',
 	template: require('./chart.html'),
-	pipes: [RenderUiName],
 	directives: [ChartTitle],
 	providers: ['tc.chartjs'],
-  inputs: ['chartState', 'data', 'fields', 'query']
+  inputs: ['data', 'fields', 'query'],
+  outputs: ['refresh']
 })
 
-@Inject('$filter', '$scope')
+@Inject('$filter', '$scope', '$window')
 export default class Chart {
-	@Input() chartState;
   @Input() data;
 	@Input() fields;
 	@Input() query;
-	constructor($filter, $scope) {
+  @Output() refresh;
+	constructor($filter, $scope, $window) {
 		this.$filter = $filter;
 		this.$scope = $scope;
+    this.$window = $window;
+
+    this.refresh = new EventEmitter();
 
 		this.state = { trends: true, composition: false, comparison: false };
 
+    this.chartType = 'line';
+
 		this.chartData = {
-			datasets: [
-				{
+			datasets: [{
 					label: 'dataset 1',
 					fillColor: 'rgba(220,220,220,0.2)',
 					strokeColor: 'rgba(220,220,220,1)',
@@ -57,8 +61,7 @@ export default class Chart {
 					pointHighlightStroke: 'rgba(220,220,220,1)',
 					legendTemplate: '<ul class="tc-chart-js-legend"><% for (var i=0; i<datasets.length; i++){%><li><span style="background-color:<%=datasets[i].strokeColor%>"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>',
 					data: []
-				}
-			]
+				}]
 		};
 
 		this.chartOptions = {
@@ -91,17 +94,20 @@ export default class Chart {
       animateScale : false,
     };
 
-		this.$scope.$watchCollection(::this.evalData, ::this.setData);
+    this.chartValid = true;
+    this.queryValid = true;
 
-		this.$scope.$watch(::this.evalChartState, ::this.setChartState);
+    this.valid = true;
+
+    this.$window.addEventListener('analyticsReply', event => {
+      console.log(event);
+      this.setData(event.detail);
+    });
   }
 
 	ngOnInit() {
 		this.chartData.labels = this.generateMonthsLabels();
-	}
-
-	evalChartState() {
-		return this.chartState;
+    this.dataCache = angular.copy(this.data);
 	}
 
 	evalData() {
@@ -119,7 +125,6 @@ export default class Chart {
 	}
 
 	generateLabels(data) {
-    console.log(data);
 		if (this.query.dimensions.includes('ga:hour')) {
 			return this.generateHourLabels();
 		} else if (this.query.dimensions.includes('ga:day') || this.query.dimensions.includes('ga:date') ) {
@@ -164,7 +169,7 @@ export default class Chart {
 	}
 
 	normalizeLabels(data) {
-		console.log(data, this.chartData);
+		// console.log(data, this.chartData);
 		for (let i = 0; this.chartData.labels.length > i; i += 1) {
 			if (typeof data[i] === 'undefined') {
 				data[i] = null;
@@ -174,6 +179,7 @@ export default class Chart {
 	}
 
 	openMenu($mdOpenMenu, event) {
+    event.preventDefault();
 		$mdOpenMenu(event);
 	}
 
@@ -221,8 +227,8 @@ export default class Chart {
 	}
 
 	parseDoughnutData(data) {
+    console.log(data);
 		let chartData = [];
-
 		let startDate = this.fields['start-date'];
 		let endDate = this.fields['end-date'];
 		this.datesArray = getDates(startDate, endDate);
@@ -237,69 +243,114 @@ export default class Chart {
 		return chartData;
 	}
 
+  refreshAction(event) {
+    event.preventDefault();
+  	this.refresh.next();
+  }
+
 	resetState() {
 		Object.keys(this.state).map((value, index) => { this.state[value] = false });
 	}
 
-	setChartState(current, prev) {
-		if (current !== prev) {
-			this.setState(this.chartState);
-		}
+  resetChart() {
+    this.chartData.datasets.length = 1;
+    this.fields.comparison = false;
+  }
+
+	setChartState(event, state) {
+    event.preventDefault();
+    this.resetState();
+    console.log(state, this.data);
+    this.state[state] = true;
+    this.setData(this.data);
+    if (state === 'composition') {
+      this.chartType = 'doughnut';
+    } else if (state === 'comparison') {
+      this.chartType = 'bar';
+      this.dataCache = angular.copy(this.data);
+    } else if (state === 'trends') {
+      this.chartType = 'line';
+    }
+    // this.$scope.$digest();
 	}
 
-	setData(current, prev) {
-		if (current !== prev) {
-			console.log(current);
-			let data = this.parseData(current);
-			if (this.chartState === 'comparison' && this.fields.comparison) {
-				let data2 = this.parseData(prev);
-				this.chartData = {
-					datasets: [{
-						label: 'dataset 1',
-						fillColor: 'rgba(220,220,220,0.2)',
-						strokeColor: 'rgba(220,220,220,1)',
-						pointColor: 'rgba(220,220,220,1)',
-						pointStrokeColor: '#fff',
-						pointHighlightFill: '#fff',
-						pointHighlightStroke: 'rgba(220,220,220,1)',
-						legendTemplate: '<ul class="tc-chart-js-legend"><% for (var i=0; i<datasets.length; i++){%><li><span style="background-color:<%=datasets[i].strokeColor%>"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>',
-						data: []
-					}, {
-						label: 'dataset 2',
-						fillColor: 'rgba(220,220,220,0.2)',
-						strokeColor: 'rgba(220,220,220,1)',
-						pointColor: 'rgba(220,220,220,1)',
-						pointStrokeColor: '#fff',
-						pointHighlightFill: '#fff',
-						pointHighlightStroke: 'rgba(220,220,220,1)',
-						legendTemplate: '<ul class="tc-chart-js-legend"><% for (var i=0; i<datasets.length; i++){%><li><span style="background-color:<%=datasets[i].strokeColor%>"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>',
-						data: []
-					}]
-				};
-				this.chartData.labels = this.generateLabels(current);
-				this.chartData.datasets[0].data = this.normalizeLabels(data2);
-				this.chartData.datasets[1].data = this.normalizeLabels(data);
-			} else if (this.chartState === 'composition') {
-				this.resetChart();
-				this.doughnutData = this.parseDoughnutData(current);
-			} else {
-				this.resetChart();
-				this.chartData.labels = this.generateLabels(current);
-				this.chartData.datasets[0].data = this.normalizeLabels(data);
-			}
+	setData(response) {
+    // this.queryValid = this.validateQuery();
+		let data = this.parseData(response);
+		if (this.state.comparison && this.fields.comparison) {
+			let data2 = this.parseData(this.dataCache);
+			this.chartData = {
+				datasets: [{
+					label: 'dataset 1',
+					fillColor: 'rgba(220,220,220,0.2)',
+					strokeColor: 'rgba(220,220,220,1)',
+					pointColor: 'rgba(220,220,220,1)',
+					pointStrokeColor: '#fff',
+					pointHighlightFill: '#fff',
+					pointHighlightStroke: 'rgba(220,220,220,1)',
+					legendTemplate: '<ul class="tc-chart-js-legend"><% for (var i=0; i<datasets.length; i++){%><li><span style="background-color:<%=datasets[i].strokeColor%>"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>',
+					data: []
+				}, {
+					label: 'dataset 2',
+					fillColor: 'rgba(220,220,220,0.2)',
+					strokeColor: 'rgba(220,220,220,1)',
+					pointColor: 'rgba(220,220,220,1)',
+					pointStrokeColor: '#fff',
+					pointHighlightFill: '#fff',
+					pointHighlightStroke: 'rgba(220,220,220,1)',
+					legendTemplate: '<ul class="tc-chart-js-legend"><% for (var i=0; i<datasets.length; i++){%><li><span style="background-color:<%=datasets[i].strokeColor%>"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>',
+					data: []
+				}]
+			};
+			this.chartData.labels = this.generateLabels(data);
+			this.chartData.datasets[0].data = this.normalizeLabels(data2);
+			this.chartData.datasets[1].data = this.normalizeLabels(data);
+		} else if (this.state.composition) {
+			this.resetChart();
+			this.doughnutData = this.parseDoughnutData(response);
+		} else {
+			this.resetChart();
+			this.chartData.labels = this.generateLabels(data);
+			this.chartData.datasets[0].data = this.normalizeLabels(data);
 		}
+    this.chartValid = this.validateChart();
+    this.valid = this.chartValid && this.queryValid;
 	}
 
-	resetChart() {
-		this.chartData.datasets.length = 1;
-		this.fields.comparison = false;
-	}
+  validateChart() {
+    let valid = false;
+    if (typeof this.chartData.datasets[0].data === 'undefined') {
+      return valid;
+    }
+    let amount;
+    if (this.chartState !== 'composition') {
+      let data1 = this.chartData.datasets[0].data;
+      if (data1.length === 0) {
+        return valid;
+      } else {
+        if (typeof this.chartData.datasets[1] !== 'undefined') {
+          let data2 = this.chartData.datasets[1].data;
+          data1.concat(data2);
+        }
+        amount = data1.reduce((prev, current) => {
+          return prev + current;
+        });
+        if (amount !== 0) {
+          valid = true;
+        }
+      }
+    } else {
+      valid = true // temporary
+    }
+    console.log('chart valid? ', valid);
+    return valid;
+  }
 
-	setState(state) {
-		this.resetState();
-		this.state[state] = true;
-		if (this.chartState === 'composition') {
-			this.doughnutData = this.parseDoughnutData(this.data);
-		}
-	}
+  validateQuery() {
+    if (this.query.metrics.length === 0 || this.query.dimensions.length === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }

@@ -1,16 +1,48 @@
 <md-card>
   <md-card-title flex="none">
     <md-card-title-text>
-      <rs-chart-title [fields]="Chart.fields" [query]="Chart.query"></rs-chart-title>
+      <rs-chart-title [chart-state]="Chart.chartState" [query]="Chart.query"></rs-chart-title>
     </md-card-title-text>
     <md-card-title-media>
+      <md-menu>
+        <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="Chart.openMenu($mdOpenMenu, $event)" style="padding-left: 15px">
+          <md-icon md-menu-origin>more_vert</md-icon>
+        </md-button>
+        <md-menu-content width="4">
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="Chart.setChartState($event, 'comparison')">
+              <md-icon md-menu-align-target>insert_chart</md-icon>
+              <p>Comparison</p>
+            </button>
+          </md-menu-item>
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="Chart.setChartState($event, 'composition')">
+              <md-icon md-menu-align-target>pie_chart</md-icon>
+              <p>Composition</p>
+            </button>
+          </md-menu-item>
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="Chart.setChartState($event, 'trends')">
+              <md-icon md-menu-align-target>multiline_chart</md-icon>
+              <p>Trends</p>
+            </button>
+          </md-menu-item>
+          <md-divider></md-divider>
+          <md-menu-item>
+            <button class="md-button md-ink-ripple" ng-click="Chart.refreshAction($event)">
+              <md-icon md-menu-align-target>refresh</md-icon>
+              <p>Refresh</p>
+            </button>
+          </md-menu-item>
+        </md-menu-content>
+      </md-menu>
     </md-card-title-media>
   </md-card-title>
   <md-card-content layout="column" layout-align="space-between" layout-wrap class="chart-container">
-    <div layout="row" layout-align="center center" class="widget" ng-if="Chart.query.dimensions.length > 0">
-      <canvas id="analytics-line" class="chart-line" tc-chartjs-line chart-data="Chart.chartData" chart-labels="Chart.labels" chart-options="Chart.chartOptions" ng-if="Chart.state.trends" width="640" height=""></canvas>
-      <canvas id="analytics-doughnut" tc-chartjs-doughnut chart-data="Chart.doughnutData" chart-options="Chart.doughnutOptions" chart-legend="Chart.doughnutOptions.legendTemplate" ng-if="Chart.state.composition" height="" width="640"></canvas>
-      <canvas id="analytics-bar" tc-chartjs-bar chart-data="Chart.chartData" chart-options="Chart.chartOptions" ng-if="Chart.state.comparison" width="640" height=""></canvas>
+    <div layout="row" layout-align="center center" class="widget">
+      <canvas id="analytics-line" ng-if="Chart.state.trends" class="chart-line" tc-chartjs-line chart-data="Chart.chartData" chart-labels="Chart.labels" chart-options="Chart.chartOptions" width="640" height=""></canvas>
+      <canvas id="analytics-doughnut" ng-if="Chart.state.composition" tc-chartjs-doughnut chart-data="Chart.doughnutData" chart-options="Chart.doughnutOptions" chart-legend="Chart.doughnutOptions.legendTemplate" height="" width="640"></canvas>
+      <canvas id="analytics-bar" ng-if="Chart.state.comparison" tc-chartjs-bar chart-data="Chart.chartData" chart-options="Chart.chartOptions" width="640" height=""></canvas>
     </div>
     <div tc-chart-js-legend="Chart.doughnutOptions.legendTemplate"></div>
   </md-card-content>

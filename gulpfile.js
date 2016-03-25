@@ -14,8 +14,6 @@ var $ = require('gulp-load-plugins')({
 
 var bundler = getTask('browserify');
 
-var assets = getTask('assets');
-
 function getTask(task) {
   return require('./tasks/' + task)(gulp, $);
 }
@@ -30,13 +28,13 @@ gulp.task('set-production', function() {
 
 // assets
 
-gulp.task('styles', assets.styles);
+gulp.task('styles', getTask('assets').styles);
 
-gulp.task('html', assets.html);
+gulp.task('html', getTask('assets').html);
 
-gulp.task('extras', assets.extras);
+gulp.task('extras', getTask('assets').extras);
 
-gulp.task('assets', ['styles', 'html', 'extras'], assets.assets);
+gulp.task('assets', ['styles', 'html', 'extras'], getTask('assets').assets);
 
 // browserify
 
@@ -72,8 +70,8 @@ gulp.task('compress', getTask('compress'));
 gulp.task('serve', function() {
 	electron.start();
 	gulp.watch(['app/scripts/**/*.css'], ['styles', electron.restart]);
-	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['scripts', electron.restart]);
-	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build', electron.restart]);
+	gulp.watch(['app/scripts/**/*.html', 'app/**/*.js'], ['scripts', electron.reload]);
+	gulp.watch(['app/index.js', 'app/events.js', 'app/menu.js', 'app/index.html'], ['build', electron.reload]);
 });
 
 // versioning
