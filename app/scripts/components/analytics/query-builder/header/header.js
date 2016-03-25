@@ -20,12 +20,6 @@ export default class QueryHeader {
     this.$scope = $scope;
 
     this.onChange = new EventEmitter();
-
-    console.log(this.$scope);
-  }
-
-  evalQuery() {
-    return this.query;
   }
 
   setParam(field, param) {
@@ -54,6 +48,7 @@ export default class QueryHeader {
   }
 
   toggleComparison(comparison) {
+    this.fields.comparison = comparison;
     if (comparison) {
       let startDate = this.fields['start-date'];
       let endDate = this.fields['end-date'];

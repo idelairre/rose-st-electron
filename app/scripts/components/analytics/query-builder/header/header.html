@@ -3,14 +3,14 @@
 <span class="label limit-label" ng-if="Header.query.dimensions.includes('ga:hour') && Header.query.dimensions.includes('ga:nthHour') && Header.state === 'comparison'">vs: </span>
 <md-datepicker ng-if="Header.showDatePicker2()" ng-model="Header.fields['end-date']" md-max-date="Header.endDate" ng-change="Header.setParam('date', 'end-date')"></md-datepicker>
 <span class="label limit-label" ng-if="Header.query.dimensions.includes('ga:hour')"></span>
-<md-input-container class="time-input-container" ng-if="Header.query.dimensions.includes('ga:hour') && Header.state !== 'composition'">
+<md-input-container class="time-input-container" ng-if="Header.query.dimensions.includes('ga:hour') && !Header.composition">
   <input type="time" class="time-input" ng-model="Header.fields['start-date']" ng-blur="Header.setParam('time', 'start-date')" aria-label="start time">
 </md-input-container>
 <span class="label limit-label" ng-if="Header.query.dimensions.includes('ga:nthHour')">to: </span>
 <md-input-container class="time-input-container" ng-if="Header.query.dimensions.includes('ga:nthHour')">
   <input type="time" class="time-input" ng-model="Header.fields['end-date']" ng-blur="Header.setParam('time', 'end-date')" aria-label="end time" min="Header.fields['start-date']">
 </md-input-container>
-<span class="label limit-label" ng-if="Header.state === 'comparison' && Header.showDatePicker1()">comparison: </span>
-<md-input-container ng-if="Header.state === 'comparison' && Header.showDatePicker1()" flex style="padding: 0">
+<span class="label limit-label" ng-if="Header.chartState.comparison && Header.showDatePicker1()">comparison: </span>
+<md-input-container ng-if="Header.chartState.comparison && Header.showDatePicker1()" flex style="padding: 0">
   <md-switch aria-label="comparison switch" ng-model="Header.fields.comparison" ng-change="Header.toggleComparison(Header.fields.comparison)"></md-switch>
 </md-input-container>

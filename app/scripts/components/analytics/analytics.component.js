@@ -19,6 +19,8 @@ export default class Analytics {
 		this.$scope = $scope;
 		this.$window = $window;
 
+		this.chartState = { trends: true, composition: false, comparison: false };
+
 		this.data = {};
 
 		let startDate = new Date(...YEAR_START);
@@ -26,15 +28,10 @@ export default class Analytics {
 
 		this.fields = {
 			'start-date': startDate,
-			'end-date': endDate,
-			dimensions: null,
-			metrics: null,
-			comparison: false
+			'end-date': endDate
 		};
 
 		this.resolved = true;
-
-		this.chartState;
 
 		this.query = {
 			ids: 'ga:118196120',

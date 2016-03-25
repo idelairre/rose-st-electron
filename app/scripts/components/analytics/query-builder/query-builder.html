@@ -2,10 +2,10 @@
   <md-card-title flex="none">
     <md-card-title-text>
       <span class="md-headline">Query (beta)</span>
-      <span class="md-subhead" ng-bind="QueryBuilder.inflect(QueryBuilder.chartState, 'capitalize')"></span>
+      <span class="md-subhead" ng-bind="QueryBuilder.renderSubheader(QueryBuilder.chartState)"></span>
     </md-card-title-text>
     <md-card-title-media layout-align="end center" class="md-table-pagination limit" style="padding: 0">
-        <query-header [fields]="QueryBuilder.fields" [query]="QueryBuilder.query" [chart-state]="QueryBuilder.chartState" [state]="QueryBuilder.chartState" (on-change)="QueryBuilder.onQueryChange.next()" flex></query-header>
+        <query-header [(fields)]="QueryBuilder.fields" [query]="QueryBuilder.query" [chart-state]="QueryBuilder.chartState" (on-change)="QueryBuilder.onQueryChange.next()" flex></query-header>
       <md-menu>
         <md-button class="md-icon-button" flex aria-label="query options menu" ng-click="QueryBuilder.openMenu($mdOpenMenu, $event)" style="padding-left: 15px">
           <md-icon md-menu-origin>more_vert</md-icon>
@@ -50,7 +50,7 @@
     </div>
     <div layout="row">
       <md-input-container flex="80" class="chips-select-row" style="margin-top: -17px">
-        <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.evalChips()" placeholder="Dimensions" flex="80"></rs-chips-select>
+        <rs-chips-select class="dimensions" [(model)]="QueryBuilder.query.dimensions" [select-items]="QueryBuilder.state.dimensions" (on-change)="QueryBuilder.onQueryChange.next()" placeholder="Dimensions" flex="80"></rs-chips-select>
       </md-input-container>
       <md-input-container flex="20">
         <label>Category</label>

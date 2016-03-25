@@ -76,22 +76,20 @@ export default class QueryBuilder {
 		this.setField('metrics');
 	}
 
-	evalChips() {
-		if (this.query.dimensions.includes('ga:hour')) {
-			this.headerState.date = false;
-			this.headerState.time = true;
-		} else if (this.query.dimensions.includes('ga:date') || this.query.dimensions.includes('ga:month') || this.query.dimensions.includes('ga:day')) {
-			this.headerState.date = true;
-			this.headerState.time = false;
-		}
-	}
-
 	inflect(item, argument) {
 		return inflected[argument](item);
 	}
 
 	renderUiName(item) {
 		return inflected.humanize(inflected.underscore(item.replace(/(\d+)/, '$1 ').replace(/ga:/, '')));
+	}
+
+	renderSubheader(chartState) {
+		for (let key in chartState) {
+			if (chartState[key] === true) {
+				return this.inflect(key, 'capitalize')
+			}
+		}
 	}
 
 	resetState() {
@@ -103,9 +101,10 @@ export default class QueryBuilder {
 	}
 
 	setChartState(event, state) {
-		event.preventDefault();
-		this.chartState = state;
-	}
+		Object.keys(this.chartState).map((value, index) => { this.chartState[value] = false });
+    this.chartState[state] = true;
+		this.onQueryChange.next();
+  }
 
 	setField(field) {
 		let category = this.fields[field];

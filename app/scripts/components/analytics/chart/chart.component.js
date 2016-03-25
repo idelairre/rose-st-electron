@@ -29,7 +29,7 @@ let getDates = (startDate, stopDate) => {
 	template: require('./chart.html'),
 	directives: [ChartTitle],
 	providers: ['tc.chartjs'],
-  inputs: ['data', 'fields', 'query'],
+  inputs: ['state:chartState', 'data', 'fields', 'query'],
   outputs: ['refresh']
 })
 
@@ -45,8 +45,6 @@ export default class Chart {
     this.$window = $window;
 
     this.refresh = new EventEmitter();
-
-		this.state = { trends: true, composition: false, comparison: false };
 
     this.chartType = 'line';
 
@@ -101,6 +99,9 @@ export default class Chart {
 
     this.$window.addEventListener('analyticsReply', event => {
       console.log(event);
+      if (!this.state.comparison) {
+        this.dataCache = event.detail;
+      }
       this.setData(event.detail);
     });
   }
@@ -278,6 +279,7 @@ export default class Chart {
     // this.queryValid = this.validateQuery();
 		let data = this.parseData(response);
 		if (this.state.comparison && this.fields.comparison) {
+      console.log(this.dataCache);
 			let data2 = this.parseData(this.dataCache);
 			this.chartData = {
 				datasets: [{
@@ -303,6 +305,7 @@ export default class Chart {
 				}]
 			};
 			this.chartData.labels = this.generateLabels(data);
+      console.log(data2, data);
 			this.chartData.datasets[0].data = this.normalizeLabels(data2);
 			this.chartData.datasets[1].data = this.normalizeLabels(data);
 		} else if (this.state.composition) {
@@ -323,7 +326,7 @@ export default class Chart {
       return valid;
     }
     let amount;
-    if (this.chartState !== 'composition') {
+    if (!this.state.composition) {
       let data1 = this.chartData.datasets[0].data;
       if (data1.length === 0) {
         return valid;
