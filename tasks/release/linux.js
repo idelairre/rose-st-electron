@@ -120,17 +120,15 @@ module.exports = function() {
 			return;
 		}
 		utils.logger.start('Packaging for linux', path);
-		async.waterfall([tasks.copyIcon, tasks.configureDesktop, tasks.writeDesktopFile, tasks.readDebianControl, tasks.writeDebianControl, tasks.packageDebFile], function (error, result) {
-			function(error, result) {
-				if (error) {
-					utils.handleErrors(error);
-					callback ? callback(error, null) : null;
-					return;
-				} else {
-					utils.logger.end('Finished packaging for linux');
-					callback ? callback() : null;
-				}
+		async.waterfall([tasks.copyIcon, tasks.configureDesktop, tasks.writeDesktopFile, tasks.readDebianControl, tasks.writeDebianControl, tasks.packageDebFile], function(error, result) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error, null) : null;
+				return;
+			} else {
+				utils.logger.end('Finished packaging for linux');
+				callback ? callback() : null;
 			}
 		});
-	};
+	}
 }

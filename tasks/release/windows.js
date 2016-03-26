@@ -127,16 +127,14 @@ var tasks = {
 
 module.exports = function() {
 	return function(callback) {
-		async.waterfall([tasks.packageInstaller, tasks.clearReleaseFolder, tasks.electronRelease], function (error, result) {
-			function(error, result) {
-				if (error) {
-					utils.handleErrors(error);
-					callback ? callback(error, null) : null;
-					return;
-				} else {
-					utils.logger.end('Finished packaging for linux');
-					callback ? callback() : null;
-				};
+		async.waterfall([tasks.packageInstaller, tasks.clearReleaseFolder, tasks.electronRelease], function(error, result) {
+			if (error) {
+				utils.handleErrors(error);
+				callback ? callback(error, null) : null;
+				return;
+			} else {
+				utils.logger.end('Finished packaging for linux');
+				callback ? callback() : null;
 			}
 		});
 	}

@@ -37,7 +37,7 @@ var tasks = {
 					utils.writeFile(filePath, data.code, callback);
 				}
 			});
-		}, function (error) {
+		}, function(error) {
 			if (error) {
 				utils.handleErrors(error);
 				callback ? callback(error, null) : error;
@@ -54,7 +54,7 @@ var tasks = {
 		async.each(['node_modules/electron-prebuilt', 'node_modules/electron-debug', 'node_modules/electron-squirrel-startup'], function(entry, callback) {
 			var filePath = BUILD_DIR + '/' + entry;
 			utils.copyDir(entry, filePath, callback);
-		}, function (error) {
+		}, function(error) {
 			if (error) {
 				utils.handleErrors(error);
 				callback ? callback(error, null) : error;
@@ -69,6 +69,7 @@ var tasks = {
 	// Write a package.json for distribution
 	packageJson: function(callback) {
 		utils.logger.start('Copying package.json');
+
 		function replacer(key, value) {
 			if (key === 'devDependencies') {
 				return undefined;
@@ -85,7 +86,7 @@ var tasks = {
 		var filePath = BUILD_DIR + '/package.json';
 		json.dependencies["babel-polyfill"] = "^6.3.14";
 
-		utils.writeFile(filePath, JSON.stringify(json, replacer, 3), function (error) {
+		utils.writeFile(filePath, JSON.stringify(json, replacer, 3), function(error) {
 			if (error) {
 				callback ? callback(error, null) : null;
 				return;
@@ -146,32 +147,29 @@ module.exports = function() {
 	return {
 		buildDist: function(callback) {
 			utils.logger.start('Building electron files');
-			async.waterfall([tasks.packageJson, tasks.install, tasks.buildElectron, tasks.buildRuntime, tasks.packageDist], function (error, result) {
-				function(error, result) {
-					if (error) {
-						utils.handleErrors(error);
-						callback ? callback(error, null) : null;
-						return;
-					} else {
-						utils.logger.end('Finished building electron files');
-						callback ? callback() : null;
-					}
+			async.waterfall([tasks.packageJson, tasks.install, tasks.buildElectron, tasks.buildRuntime, tasks.packageDist], function(error, result) {
+				if (error) {
+					utils.handleErrors(error);
+					callback ? callback(error, null) : null;
+					return;
+				} else {
+					utils.logger.end('Finished building electron files');
+					callback ? callback() : null;
+				}
 			});
 		},
 		build: function(callback) {
-				utils.logger.start('Building electron files');
-				async.waterfall([tasks.packageJson, tasks.install, tasks.buildElectron, tasks.buildRuntime],
-					function(error, result) {
-						if (error) {
-							utils.handleErrors(error);
-							callback ? callback(error, null) : null;
-							return;
-						} else {
-							utils.logger.end('Finished building electron files');
-							callback ? callback() : null;
-						}
-					});
-				};
+			utils.logger.start('Building electron files');
+			async.waterfall([tasks.packageJson, tasks.install, tasks.buildElectron, tasks.buildRuntime], function(error, result) {
+				if (error) {
+					utils.handleErrors(error);
+					callback ? callback(error, null) : null;
+					return;
+				} else {
+					utils.logger.end('Finished building electron files');
+					callback ? callback() : null;
+				}
+			});
 		}
 	}
 }
