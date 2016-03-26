@@ -11,33 +11,39 @@ import 'babel-polyfill';
 process.env.GOOGLE_APPLICATION_CREDENTIALS = `${__dirname}/credentials.json`;
 process.env.NODE_ENV = require('./package.json').environment;
 
-const options = {
-	debug: (process.env.NODE_ENV === 'production' ? false : true),
-	rootView: 'index.html',
-};
-
 const updater = new GhReleases({
   repo: 'idelairre/rose_st_electron',
-  currentVersion: app.getVersion()
+  currentVersion: require('./package.json').version
 });
+
+const options = {
+	debug: (process.env.NODE_ENV === 'production' ? false : true),
+	rootView: 'index.html'
+};
 
 // Check for updates
 // `status` returns true if there is a new update available
-updater.check((err, status) => {
-  if (!err && status) {
-    // Download the update
-    updater.download();
-  }
+updater.check((error, status) => {
+	if (error) {
+		console.error(error);
+		return;
+	}
+	// Download the update
+	console.log(status);
+	updater.download();
 });
 
 // When an update has been downloaded
 updater.on('update-downloaded', (info) => {
   // Restart the app and install the update
+  console.log(info);
   updater.install();
 });
 
 // Access electrons autoUpdater
 updater.autoUpdater;
+
+console.log(updater);
 
 if (process.env.NODE_ENV !== 'production') {
 	require('electron-debug')();

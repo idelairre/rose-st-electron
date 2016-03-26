@@ -11,14 +11,12 @@ export default class GhReleases extends events.EventEmitter {
 	constructor(gh) {
 		super();
 
-		let self = this;
+		this.repo = gh.repo;
+		this.repoUrl = 'https://github.com/' + gh.repo;
+		this.currentVersion = gh.currentVersion;
+		this.autoUpdater = autoUpdater;
 
-		self.repo = gh.repo;
-		self.repoUrl = 'https://github.com/' + gh.repo;
-		self.currentVersion = gh.currentVersion;
-		self.autoUpdater = autoUpdater;
-
-		self.autoUpdater.on('update-downloaded', (...args) => self.emit('update-downloaded', args));
+		this.autoUpdater.on('update-downloaded', (...args) => this.emit('update-downloaded', args));
 	}
 
 	/**

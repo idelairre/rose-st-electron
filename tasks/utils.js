@@ -76,12 +76,12 @@ module.exports.copyDir = function(source, target, callback) {
 
 module.exports.copyFile = function(source, target, callback) {
 	logger.start('Copying ' + source + ' to ' + target);
-	if (!fs.existsSync(path.parse(target).dir)) {
-		fs.mkdirSync(path.parse(target).dir);
-	}
+	// if (!fs.existsSync(path.parse(target).dir)) {
+	// 	fs.mkdirSync(path.parse(target).dir);
+	// }
 	fs.copy(source, target, function(error) {
 		if (error) {
-			handleErrors(error)
+			handleErrors(error);
 			callback ? callback(error, null) : error;
 			return;
 		}

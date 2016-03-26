@@ -12,12 +12,13 @@ var babel = require('babel-core');
 var os = require('os');
 var constants = require('./constants');
 
-var BUILD_DIR = constants.buildDir;
+var APP_NAME = constants.packageJson.name;
 var BABEL_PRESET = constants.babelPreset;
+var BUILD_DIR = constants.buildDir;
 var ELECTRON_VERSION = constants.electronVersion;
 var RELEASE_DIR = constants.releaseDir;
+var RESOURCE_DIR = constants.resourceDir;
 var TEMP_DIR = constants.tempDir;
-var APP_NAME = constants.packageJson.name;
 var OUT_DIR;
 
 var tasks = {
@@ -107,7 +108,7 @@ var tasks = {
 				callback ? callback(error, null) : null;
 				return;
 			} else {
-				utils.logger.end('Finished installing npm modules');
+				utils.logger.end('Finished installing npm modules' + stdout);
 				return callback ? callback(null) : null;
 			}
 		});
@@ -117,10 +118,8 @@ var tasks = {
 		utils.logger.start('Packaging distribution');
 		var targets = ['win32', 'linux', 'darwin'];
 		os.platform() === 'win32' ? targets = ['win32'] : null;
-		targets.map(function(platform) {
+		async.each(targets, function(platform, callback) {
 			OUT_DIR = RELEASE_DIR + '/' + platform;
-			var taskName = 'package:' + platform;
-
 			packager({
 				asar: true,
 				dir: BUILD_DIR,
@@ -135,26 +134,33 @@ var tasks = {
 					utils.handleErrors(error);
 					callback ? callback(error, null) : error;
 					return;
+				} else {
+					utils.logger.end('Finished packaging ' + platform + ' distribution');
 				}
-				utils.logger.start('Finished packaging distribution');
 			});
+		}, function (error) {
+			if (error) {
+				console.log('well shit');
+			} else {
+				utils.logger.end('Finished packaging all distributions');
+				return callback ? callback(null) : null;
+			}
 		});
-		return callback ? callback(null) : null;
-	}
+	},
 };
 
 module.exports = function() {
 	return {
 		buildDist: function(callback) {
 			utils.logger.start('Building electron files');
-			async.waterfall([tasks.packageJson, tasks.install, tasks.buildElectron, tasks.buildRuntime, tasks.packageDist], function(error, result) {
+			async.waterfall([tasks.packageJson, tasks.install, tasks.buildElectron, tasks.buildRuntime, tasks.packageDist, tasks.copyCom], function(error, result) {
 				if (error) {
 					utils.handleErrors(error);
 					callback ? callback(error, null) : null;
 					return;
 				} else {
 					utils.logger.end('Finished building electron files');
-					callback ? callback() : null;
+					return callback ? callback(null) : null;
 				}
 			});
 		},
@@ -167,7 +173,7 @@ module.exports = function() {
 					return;
 				} else {
 					utils.logger.end('Finished building electron files');
-					callback ? callback() : null;
+					return callback ? callback(null) : null;
 				}
 			});
 		}

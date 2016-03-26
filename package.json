@@ -1,7 +1,7 @@
 {
   "name": "rose-st-admin",
   "productName": "RoseStAdmin",
-  "version": "1.0.1",
+  "version": "1.0.6",
   "description": "Admin dashboard for the Rose St. Community Center",
   "companyName": "Rose St. Community Center",
   "copywrite": "Rose St. Web Development Collective",
@@ -15,7 +15,7 @@
     "test": "xo",
     "karma": "karma start karma.conf.js",
     "start": "gulp watch",
-    "build": "gulp build:production && gulp build:dist",
+    "build": "gulp build:production",
     "package": "npm run build && gulp package"
   },
   "dependencies": {
@@ -35,6 +35,7 @@
     "electron-release": "git+https://github.com/maxcnunes/electron-release.git#improve-compress",
     "electron-squirrel-startup": "^0.1.4",
     "googleapis": "^2.1.7",
+    "got": "^6.2.0",
     "inflected": "^1.1.6",
     "j-toker": "0.0.10-beta3",
     "mdPickers": "git+https://github.com/alenaksu/mdPickers.git",

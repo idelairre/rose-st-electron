@@ -53,6 +53,8 @@ gulp.task('scripts', ['bundle:scripts']);
 
 gulp.task('build', getTask('build').build);
 
+gulp.task('copyCom', getTask('build').copyCom);
+
 gulp.task('build:dist', ['set-production'], getTask('build').buildDist);
 
 // distribution
@@ -84,7 +86,7 @@ gulp.task('patch:minor', getTask('semver').minor);
 
 // watch tasks
 
-gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'build', 'bundle']));
+gulp.task('build:production', gulpsync.sync(['clean', 'set-production', 'assets', 'scripts', 'bundle:build', 'build:dist']));
 
 gulp.task('default', ['build']);
 
