@@ -114,11 +114,23 @@ var tasks = {
 };
 
 module.exports = function() {
-	return function() {
+	return function(callback) {
 		if (os.platform() === 'win32' || os.platform() === 'darwin') {
-			utils.handleErrors(new Error('Incompatable archicture: ' + os.platform()) + 'skipping...');
+			utils.handleErrors(new Error('Incompatable archicture: ' + os.platform()) + ' skipping...');
 			return;
 		}
-		async.waterfall([tasks.copyIcon, tasks.configureDesktop, tasks.writeDesktopFile, tasks.readDebianControl, tasks.writeDebianControl, tasks.packageDebFile])
+		utils.logger.start('Packaging for linux', path);
+		async.waterfall([tasks.copyIcon, tasks.configureDesktop, tasks.writeDesktopFile, tasks.readDebianControl, tasks.writeDebianControl, tasks.packageDebFile], function (error, result) {
+			function(error, result) {
+				if (error) {
+					utils.handleErrors(error);
+					callback ? callback(error, null) : null;
+					return;
+				} else {
+					utils.logger.end('Finished packaging for linux');
+					callback ? callback() : null;
+				}
+			}
+		});
 	};
 }

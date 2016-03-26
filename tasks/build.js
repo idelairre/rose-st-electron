@@ -81,7 +81,7 @@ var tasks = {
 			}
 			return value;
 		}
-		var json = cloneDeep(require('./constants').packageJson);
+		var json = cloneDeep(constants.packageJson);
 		var filePath = BUILD_DIR + '/package.json';
 		json.dependencies["babel-polyfill"] = "^6.3.14";
 
@@ -144,22 +144,34 @@ var tasks = {
 
 module.exports = function() {
 	return {
-		buildDist: function() {
-			async.waterfall([tasks.buildElectron, tasks.buildRuntime, tasks.packageJson, tasks.install, tasks.packageDist]);
-		},
-		build: function(callback) {
+		buildDist: function(callback) {
 			utils.logger.start('Building electron files');
-			async.waterfall([tasks.packageJson, tasks.buildElectron, tasks.buildRuntime, tasks.install],
-				function(error, data) {
+			async.waterfall([tasks.packageJson, tasks.install, tasks.buildElectron, tasks.buildRuntime, tasks.packageDist], function (error, result) {
+				function(error, result) {
 					if (error) {
 						utils.handleErrors(error);
 						callback ? callback(error, null) : null;
 						return;
 					} else {
 						utils.logger.end('Finished building electron files');
-						return callback ? callback(null, data) : data;
+						callback ? callback() : null;
 					}
-				});
+			});
+		},
+		build: function(callback) {
+				utils.logger.start('Building electron files');
+				async.waterfall([tasks.packageJson, tasks.install, tasks.buildElectron, tasks.buildRuntime],
+					function(error, result) {
+						if (error) {
+							utils.handleErrors(error);
+							callback ? callback(error, null) : null;
+							return;
+						} else {
+							utils.logger.end('Finished building electron files');
+							callback ? callback() : null;
+						}
+					});
+				};
 		}
 	}
 }

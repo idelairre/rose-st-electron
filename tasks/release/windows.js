@@ -1,7 +1,7 @@
 'use strict';
 
 var async = require('async');
-var childProcess = require('child_process');
+var exec = require('child_process').exec;
 var fs = require('fs-extra');
 var utils = require('../utils');
 var constants = require('../constants');
@@ -10,11 +10,13 @@ var rcedit = require('rcedit');
 var squirrelBuilder = require('electron-installer-squirrel-windows');
 var path = require('path');
 var inflected = require('inflected');
+var token = require('./token.json').token;
 
 var APP_NAME = constants.appName;
 var BUILD_DIR = constants.buildDir;
 var RELEASE_DIR = constants.releaseDir;
 var TEMP_DIR = constants.tempDir;
+var SETUP_FILE = 'RoseStAdminSetup.exe';
 var WIN_DIR = RELEASE_DIR + '/win32/';
 var APP_DIR = RELEASE_DIR + '/win32/' + APP_NAME + '-win32-x64'
 
@@ -117,14 +119,25 @@ var tasks = {
 				return;
 			} else {
 				utils.logger.end('Finished clearing release folder');
-				return callback(null);
+				return callback ? callback(null) : null
 			}
 		});
 	}
 }
 
 module.exports = function() {
-	return function() {
-		async.waterfall([tasks.packageInstaller, tasks.clearReleaseFolder, tasks.electronRelease, tasks.clearWindowsFolder]);
+	return function(callback) {
+		async.waterfall([tasks.packageInstaller, tasks.clearReleaseFolder, tasks.electronRelease], function (error, result) {
+			function(error, result) {
+				if (error) {
+					utils.handleErrors(error);
+					callback ? callback(error, null) : null;
+					return;
+				} else {
+					utils.logger.end('Finished packaging for linux');
+					callback ? callback() : null;
+				};
+			}
+		});
 	}
 }
