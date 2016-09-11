@@ -5,13 +5,13 @@ import Table, { TableComponent } from '../table/table.component';
 import { uniq } from 'lodash';
 
 Date.prototype.addDays = function(days) {
-    let date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
-    return date;
+  const date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
 }
 
-let getDates = (startDate, stopDate) => {
-	let dateArray = new Array();
+const getDates = (startDate, stopDate) => {
+	const dateArray = new Array();
 	let currentDate = startDate;
 	while (currentDate <= stopDate) {
 		dateArray.push(new Date(currentDate));
@@ -89,13 +89,11 @@ export default class Donations extends TableComponent {
         }]
     };
 
-    let N = 11;
-
-    let array = Array.apply(null, { length: N }).map(Number.call, Number).map(n => n * 10);
+    const array = Array.apply(null, { length: 11 }).map(Number.call, Number).map(n => n * 10);
     array.splice(0, 1);
 
-    let today = new Date();
-    let lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDay());
+    const today = new Date();
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDay());
 
     // let maxEndDate = new Date(today.getFullYear(), today.getMonth(), today.getDay());
 
@@ -125,7 +123,12 @@ export default class Donations extends TableComponent {
       legendTemplate: '<ul class="tc-chart-js-legend"><% for (var i=0; i<datasets.length; i++){%><li><span style="background-color:<%=datasets[i].strokeColor%>"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>'
     };
 
-    this.state = { transactions: true, charges: false, customers: false, subscriptions: false };
+    this.state = {
+      transactions: true,
+      charges: false,
+      customers: false,
+      subscriptions: false
+    };
 
     this.chartTitle = 'Transactions';
 
@@ -177,7 +180,7 @@ export default class Donations extends TableComponent {
     this.transactions = transactions;
     this.cachedTransactions = transactions;
     this.total = this.parseTotal(transactions);
-    let transactionsCopy = Object.assign([], transactions);
+    const transactionsCopy = Object.assign([], transactions);
 
     if (this.state.customers) {
       let { datesArray, data } = this.parseCustomers(transactionsCopy);
@@ -198,9 +201,9 @@ export default class Donations extends TableComponent {
   }
 
   initializeDates(transactions, type) {
-    let dates = {};
+    const dates = {};
     if (typeof this.chartOptions.startDate === 'undefined') {
-      let startDate = Math.min.apply(Math, transactions.map(transaction => {
+      const startDate = Math.min.apply(Math, transactions.map(transaction => {
         return transaction.created_at * 1000;
       }));
       this.chartOptions.startDate = new Date(startDate);
@@ -209,12 +212,12 @@ export default class Donations extends TableComponent {
       this.chartOptions.endDate = new Date().addDays(1)
     }
 
-    let datesArray = getDates(this.chartOptions.startDate, this.chartOptions.endDate);
+    const datesArray = getDates(this.chartOptions.startDate, this.chartOptions.endDate);
 
     for (let i = 0; datesArray.length > i; i += 1) {
       let date = datesArray[i];
       date = date.toString().split(' ');
-      let DATE_KEY = date[1] + date[2] + date[3];
+      const DATE_KEY = date[1] + date[2] + date[3];
       type === 'transactions' ? dates[DATE_KEY] = [] : dates[DATE_KEY] = 0;
     }
     return { datesArray, dates };
@@ -245,14 +248,14 @@ export default class Donations extends TableComponent {
 
     parseCustomerDates(customers);
 
-    for (let key in dates) {
+    for (const key in dates) {
       data.push(dates[key]);
     }
     return { datesArray, data };
   }
 
   reduceAmounts(data, dates) {
-    for (let key in dates) {
+    for (const key in dates) {
       if (dates[key].length !== 0) {
         dates[key] = dates[key].reduce((prev, current) => {
           return prev + current;
@@ -267,7 +270,7 @@ export default class Donations extends TableComponent {
 
   parseCharges(transactions) {
     let data = [];
-    let { datesArray, dates } = this.initializeDates(transactions, 'transactions');
+    const { datesArray, dates } = this.initializeDates(transactions, 'transactions');
 
     let parseChargeDates = (transactions) => { // i hate math and fuck unix time
       for (let i = 0; transactions.length > i;) {

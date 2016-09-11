@@ -19,11 +19,10 @@ export default class Profile {
   @Resolve()
   @Inject(AuthenticationService)
   static profile(AuthenticationService) {
-    let user = new User(AuthenticationService.getUser());
-    return user;
+    return new User(AuthenticationService.getUser());
   }
 
-  constructor(profile, AuthenticationService, ModalService) {
+  constructor(profile, AuthenticationService, ModalService) { // NOTE: there is a bug where user names won't change because the authentication service is caching the user name
     this.authService = AuthenticationService;
     this.modalService = ModalService;
     this.user = profile;
@@ -63,12 +62,12 @@ export default class Profile {
   }
 
   openFieldModal(field) {
-    for (let key in this.user._meta_) {
+    for (const key in this.user._meta_) {
       if (key !== field) {
         this.user._meta_[key] = 'hidden';
       }
     }
-    let locals = {
+    const locals = {
       action: 'Update',
       object: this.user
     };
@@ -79,7 +78,7 @@ export default class Profile {
     this.resetFields();
     this.user._meta_.admin = 'hidden';
     this.user._meta_.confirmed = 'hidden';
-    let locals = {
+    const locals = {
       action: 'Update',
       object: this.user
     };
@@ -89,7 +88,7 @@ export default class Profile {
   openPostModal(slug) {
     slug.post = (typeof slug.post !== 'undefined' ? new Post(slug.post) : new Post());
     slug.post._meta_.user = 'hidden';
-    let locals = {
+    const locals = {
       action: slug.action,
       object: slug.post
     };
@@ -101,15 +100,13 @@ export default class Profile {
   }
 
   handleErrors(error) {
-    console.error(error);
     return this.modalService.hide().then(() => {
       this.modalService.error(error);
     });
   }
 
   handleSubmitPost(slug) {
-    console.log(slug);
-    let post = slug.objectSlug;
+    const post = slug.objectSlug;
     try {
       post.user_id = this.user.id;
       post.save();
@@ -119,7 +116,7 @@ export default class Profile {
   }
 
   handleSubmitUser(slug) {
-    let user = slug.objectSlug;
+    const user = slug.objectSlug;
     try {
       user.save();
       this.user = user;

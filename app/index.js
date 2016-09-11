@@ -29,21 +29,17 @@ updater.check((error, status) => {
 		return;
 	}
 	// Download the update
-	console.log(status);
 	updater.download();
 });
 
 // When an update has been downloaded
-updater.on('update-downloaded', (info) => {
+updater.on('update-downloaded', info => {
   // Restart the app and install the update
-  console.log(info);
   updater.install();
 });
 
 // Access electrons autoUpdater
 updater.autoUpdater;
-
-console.log(updater);
 
 if (process.env.NODE_ENV !== 'production') {
 	require('electron-debug')();
@@ -53,40 +49,13 @@ if (process.env.NODE_ENV !== 'production') {
 // prevent window being garbage collected
 let mainWindow;
 
-function onClosed() {
+const onClosed = () => {
 	// dereference the window
 	// for multiple windows store them in an array
 	mainWindow = null;
 }
 
-// TODO: turn this into a service to get rid of all those ridiculous window events
-function analyticsRequest(params, callback) {
-	google.auth.getApplicationDefault((err, authClient) => {
-		if (err) {
-			console.error(err);
-			return;
-		}
-
-		if (authClient.createScopedRequired && authClient.createScopedRequired()) {
-			// Scopes can be specified either as an array or as a single, space-delimited string.
-			authClient = authClient.createScoped(['https://www.googleapis.com/auth/analytics']);
-		}
-
-		const analytics = google.analytics({ version: 'v3', auth: authClient });
-
-		analytics.data.ga.get(params, (error, response) => {
-			if (error) {
-				console.error(`${error}`);
-				return callback ? callback(error) : error;
-			} else {
-				console.log(response);
-				return callback(null, response) || response;
-			}
-		});
-	});
-}
-
-function createMainWindow() {
+const createMainWindow = () => {
 	const win = new electron.BrowserWindow({
 		width: 800,
 		height: 640,
@@ -101,11 +70,11 @@ function createMainWindow() {
 
 	win.webContents.on('did-get-redirect-request', (event, oldUrl, newUrl, isMainFrame) => {
 		event.preventDefault();
-		let params = qs.parse(newUrl);
+		const params = qs.parse(newUrl);
 		if (params.hasOwnProperty('client_id') && params.hasOwnProperty('uid')) { // if it has a client id, its a request to heroku. if not, its to google
-			for (let key in params) {
+			for (const key in params) {
 				if (key.includes('client_id')) {
-					let clientId = params[key];
+					const clientId = params[key];
 					delete params[key];
 					params.client_id = clientId;
 				}
@@ -126,16 +95,6 @@ function createMainWindow() {
 	return win;
 }
 
-ipcMain.on('analyticsParams', (event, args) => {
-	analyticsRequest(args, (error, response) => {
-		if (error !== null) {
-			event.sender.send('ipcAnalyticsError', error);
-			return;
-		}
-  	event.sender.send('ipcAnalyticsReply', response);
-	});
-});
-
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') {
 		app.quit();
@@ -154,12 +113,11 @@ app.on('ready', () => {
 		mainWindow.openDevTools();
 	}
 
-	function goto(location) {
-		console.log(location);
+	const goto = location => {
 		mainWindow.webContents.send('goto', location);
 	}
 
-	function fullscreenAcc() {
+	const fullscreenAcc = () => {
 		if (process.platform === 'darwin') {
 			return 'Ctrl+Command+F';
 		} else {
@@ -167,7 +125,7 @@ app.on('ready', () => {
 		}
 	}
 
-	function devToolsAcc() {
+	const devToolsAcc = () => {
 		if (process.platform === 'darwin') {
 			return 'Alt+Command+I';
 		} else {
@@ -175,18 +133,18 @@ app.on('ready', () => {
 		}
 	}
 
-	function setFullScreen(focusedWindow) {
+	const setFullScreen = focusedWindow => {
 		focusedWindow ? focusedWindow.setFullScreen(!focusedWindow.isFullScreen()) : null
 	}
 
-	function toggleDevTools(focusedWindow) {
+	const toggleDevTools = focusedWindow => {
 		focusedWindow ? focusedWindow.toggleDevTools() : null;
 	}
 
 	const README_LINK = `https://github.com/atom/electron/tree/v${process.versions.electron}/docs#readme`;
 	const ISSUES_LINK = 'https://github.com/idelairre/rose_st_electron/issues';
 
-	let template = [{
+	const template = [{
 			label: 'File',
 			submenu: [
 				{ label: 'Logout', click: () => { mainWindow.webContents.send('logout') } },
@@ -237,7 +195,6 @@ app.on('ready', () => {
 			template[3].submenu.push({ type: 'separator' }, { label: 'Bring All to Front', role: 'front' });
 		}
 
-	let menu = Menu.buildFromTemplate(template);
+	const menu = Menu.buildFromTemplate(template);
 	Menu.setApplicationMenu(menu);
-	// Menu.setApplicationMenu(null);
 });

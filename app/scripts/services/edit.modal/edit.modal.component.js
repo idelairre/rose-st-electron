@@ -43,7 +43,7 @@ export default class EditModal {
 
   filterProps(model, property) {
     let newModel = Object.assign({}, model);
-    for (let key in newModel) {
+    for (const key in newModel) {
       if (newModel[key] !== property) {
         delete newModel[key];
       }
@@ -65,12 +65,11 @@ export default class EditModal {
   }
 
   ok(object) {
-    console.log(this.object);
     return this.$mdDialog.hide({ action: this.action, objectSlug: this.object });
   }
 
   checkField(field) {
-    for (let key in this.object) {
+    for (const key in this.object) {
       if (key === field && this.object._meta_[key] !== 'hidden') {
         return true;
       }

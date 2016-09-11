@@ -38,19 +38,19 @@ export default class Donation {
     }
   }
 
-  static async listCharges() {
+  static listCharges() {
     return Donation.get('charges');
   }
 
-  static async listCustomers() {
+  static listCustomers() {
     return Donation.get('customers');
   }
 
-  static async listSubscriptions() {
+  static listSubscriptions() {
     return Donation.get('subscriptions');
   }
 
-  static async listTransactions() {
+  static listTransactions() {
     return Donation.get('transactions');
   }
 

@@ -38,10 +38,12 @@ export default class Users extends TableComponent {
 
     this.model = User;
     this.users = users;
+
+    console.log(this.users);
   }
 
   add(event) {
-    let locals = {
+    const locals = {
       action: 'Create',
       object: new User()
     };
@@ -49,8 +51,8 @@ export default class Users extends TableComponent {
   }
 
   edit(event) {
-    let user = this.getSelected();
-    let locals = {
+    const user = this.getSelected();
+    const locals = {
       action: 'Update',
       object: user
     };
@@ -59,14 +61,12 @@ export default class Users extends TableComponent {
 
   handleRegister(response) {
     this.modalService.hide();
-    console.log(response);
     this.modalService.success('User', response);
   }
 
   handleSubmit(slug) {
-    console.log(slug);
-    let user = slug.objectSlug;
-    let action = slug.action;
+    const user = slug.objectSlug;
+    const action = slug.action;
     try {
       if (action === 'Update') {
         user.save();

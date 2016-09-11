@@ -99,18 +99,19 @@ var tasks = {
 
 	install: function(callback) {
 		utils.logger.start('Installing npm modules');
-		exec('cd build && npm install', function(error, stdout, stderr) {
-			if (error || stderr) {
+		exec('npm install', {
+			cwd: './build'
+		}, function(error, stdout, stderr) {
+			if (error) {
 				console.error('ERROR while installing npm modules:');
 				console.error(error);
-				console.error(stderr);
 				utils.handleErrors(error)
 				callback ? callback(error, null) : null;
-				return;
-			} else {
-				utils.logger.end('Finished installing npm modules' + stdout);
-				return callback ? callback(null) : null;
+			} else if (stderr) {
+				console.error(stderr);
 			}
+			utils.logger.end('Finished installing npm modules' + stdout);
+			return callback ? callback(null) : null;
 		});
 	},
 

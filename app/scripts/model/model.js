@@ -1,9 +1,8 @@
 import Auth from 'j-toker';
 import axios from 'axios';
+import inflect from 'inflected';
 import { SERVER_URL } from '../constants/constants';
 import 'babel-polyfill';
-
-const inflect = require('inflected');
 
 export default class Model {
   constructor() {
@@ -14,7 +13,7 @@ export default class Model {
     if (typeof params === 'undefined') {
       return;
     }
-    for (let key in params) {
+    for (const key in params) {
       if (this.hasOwnProperty(key)) {
         this[key] = params[key];
       }
@@ -28,7 +27,7 @@ export default class Model {
 
   initialize(args, fields) {
     args = args[0] || {};
-    for (let key in fields) {
+    for (const key in fields) {
       this[key] = (typeof args[key] !== 'undefined') ? args[key] : undefined;
     }
     if (this.initialized(fields) && typeof this.id === 'undefined') { // NOTE: this causes trouble, this seems bogus, the purpose of this is to make sure that dummy instances are not posted
@@ -57,11 +56,10 @@ export default class Model {
 
   static async get(param) {
   	try {
-  		let response = await axios.get(`${SERVER_URL}/${this.getInstance()._route}/${param}`, {
+  		const response = await axios.get(`${SERVER_URL}/${this.getInstance()._route}/${param}`, {
         headers: Auth.retrieveData('authHeaders')
       });
-      console.log(response.data);
-      let item = this.getInstance().assignProps(response.data);
+      const item = this.getInstance().assignProps(response.data);
       return Promise.resolve(item);
   	} catch (error) {
   		console.error(error);
@@ -91,8 +89,8 @@ export default class Model {
 
   static async query() {
     try {
-      let response = await axios.get(`${SERVER_URL}/${this.getInstance()._route}`, { params: Auth.retrieveData('authHeaders') });
-      let items = response.data.map(item => {
+      const response = await axios.get(`${SERVER_URL}/${this.getInstance()._route}`, { params: Auth.retrieveData('authHeaders') });
+      const items = response.data.map(item => {
         return this.getInstance().assignProps(item);
       });
       return Promise.resolve(items);

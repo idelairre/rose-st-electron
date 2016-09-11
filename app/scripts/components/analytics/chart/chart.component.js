@@ -8,13 +8,13 @@ import 'reflect-metadata';
 // NOTE: this is arguably the worst code I've ever written but I was dealing with a bitter depression.
 
 Date.prototype.addDays = function(days) {
-    let date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
-    return date;
+  const date = new Date(this.valueOf());
+  date.setDate(date.getDate() + days);
+  return date;
 }
 
-let getDates = (startDate, stopDate) => {
-	let dateArray = new Array();
+const getDates = (startDate, stopDate) => {
+	const dateArray = new Array();
 	let currentDate = startDate;
 	while (currentDate <= stopDate) {
 		dateArray.push(new Date(currentDate));
@@ -99,16 +99,19 @@ export default class Chart {
 
     this.showChart = true;
 
-    this.$window.addEventListener('analyticsReply', event => {
-      console.log(event);
-      if (!this.state.comparison) {
-        this.dataCache = event.detail;
-      }
-      this.setData(event.detail);
-    });
+    console.log(this.data);
+
+    // this.$window.addEventListener('analyticsReply', event => {
+    //   console.log(event);
+    //   if (!this.state.comparison) {
+    //     this.dataCache = event.detail;
+    //   }
+    //   this.setData(event.detail);
+    // });
   }
 
 	ngOnInit() {
+    this.setData(this.data);
 		this.chartData.labels = this.generateMonthsLabels();
     this.dataCache = angular.copy(this.data);
 	}
@@ -118,12 +121,12 @@ export default class Chart {
 	}
 
 	generateColor() {
-		let getRandomInt = (min, max) => {
+		const getRandomInt = (min, max) => {
   		return Math.floor(Math.random() * (max - min + 1)) + min;
 		}
-		let r = getRandomInt(0, 255);
-		let g = getRandomInt(0, 255);
-		let b = getRandomInt(0, 255);
+		const r = getRandomInt(0, 255);
+		const g = getRandomInt(0, 255);
+		const b = getRandomInt(0, 255);
 		return `rgb(${r},${g},${b})`;
 	}
 
@@ -148,23 +151,21 @@ export default class Chart {
 	}
 
 	generateHourLabels() {
-		let startTime = this.$filter('date')(this.fields['start-date'], 'h:mma');
-		let endTime = this.$filter('date')(this.fields['end-date'], 'h:mma');
-		startTime = startTime.toLowerCase();
-		endTime = endTime.toLowerCase();
-		let labels = HOURS_APM.slice(HOURS_APM.indexOf(startTime), HOURS_APM.indexOf(endTime) + 1);
+	  const startTime = this.$filter('date')(this.fields['start-date'], 'h:mma').toLowerCase();
+		const endTime = this.$filter('date')(this.fields['end-date'], 'h:mma').toLowerCase();
+		const labels = HOURS_APM.slice(HOURS_APM.indexOf(startTime), HOURS_APM.indexOf(endTime) + 1);
 		return labels;
 	}
 
 	generateDaysLabels() {
-		let datesArray = getDates(this.fields['start-date'], this.fields['end-date']);
-		return datesArray.map(date => { return this.$filter('date')(date, 'MMM d')});
+		const datesArray = getDates(this.fields['start-date'], this.fields['end-date']);
+		return datesArray.map(date => this.$filter('date')(date, 'MMM d'));
 	}
 
 	generateMonthsLabels() {
-		let startDate = this.$filter('date')(this.fields['start-date'], 'MMMM');
-		let endDate = this.$filter('date')(this.fields['end-date'], 'MMMM');
-		let labels = MONTHS.slice(MONTHS.indexOf(startDate), MONTHS.indexOf(endDate) + 1);
+		const startDate = this.$filter('date')(this.fields['start-date'], 'MMMM');
+		const endDate = this.$filter('date')(this.fields['end-date'], 'MMMM');
+		const labels = MONTHS.slice(MONTHS.indexOf(startDate), MONTHS.indexOf(endDate) + 1);
 		return labels;
 	}
 

@@ -64,14 +64,14 @@ export default class Posts extends TableComponent {
   }
 
   preview() {
-    let post = this.getSelected();
-    let event = new CustomEvent('openBrowser', { detail: `${CLIENT_URL}/posts/${post.title_url}` });
+    const post = this.getSelected();
+    const event = new CustomEvent('openBrowser', { detail: `${CLIENT_URL}/posts/${post.title_url}` });
     this.$window.dispatchEvent(event);
   }
 
   async handleSubmit(slug) {
     try {
-      let action = slug.action;
+      const action = slug.action;
       if (action === 'Update') {
         let post = slug.objectSlug;
         post.save();

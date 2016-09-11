@@ -1,11 +1,10 @@
 import { Component, EventEmitter, Input, Injectable, Inject, Output } from 'ng-forward';
+import inflect from 'inflected';
 import AuthenticationService from '../../services/authentication.service';
 import ModalService from '../../services/modal.service';
 import Pagination from './pagination/pagination';
 import TableContainer from './table-container/table-container';
 import Toolbar from './toolbar/toolbar';
-
-const inflect = require('inflected');
 
 @Component({
   selector: 'rs-table',

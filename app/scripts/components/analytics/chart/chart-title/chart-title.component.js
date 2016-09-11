@@ -43,12 +43,12 @@ export default class ChartTitle {
     }
     this.queryCache = angular.copy(query);
     if (this.chartState === 'composition') {
-      let startDate = parseInt(this.$filter('date')(query['start-date'], 'M')) - 1;
-      let endDate = parseInt(this.$filter('date')(query['end-date'], 'M')) - 1;
+      const startDate = parseInt(this.$filter('date')(query['start-date'], 'M')) - 1;
+      const endDate = parseInt(this.$filter('date')(query['end-date'], 'M')) - 1;
       return `${MONTHS[startDate]} - ${MONTHS[endDate]}`;
     } else if (query.dimensions.includes('ga:date') || query.dimensions.includes('ga:month') || query.dimensions.includes('ga:nthMonth') || query.dimensions.includes('ga:day') || query.dimensions.includes('ga:hour')) {
-      let startDate = this.$filter('date')(query['start-date'], 'shortDate');
-      let endDate = this.$filter('date')(query['end-date'], 'shortDate');
+      const startDate = this.$filter('date')(query['start-date'], 'shortDate');
+      const endDate = this.$filter('date')(query['end-date'], 'shortDate');
       return `${startDate} - ${endDate}`;
     } else if (query.dimensions.includes('ga:year')) {
       return this.$filter('date')(query['start-date'], 'yyyy')

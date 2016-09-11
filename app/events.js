@@ -35,20 +35,3 @@ ipcRenderer.on('authUrl', (e, args) => {
 window.addEventListener('authenticated', (e) => {
   ipcRenderer.send('authenticated', e.detail);
 });
-
-
-// analytics events
-
-window.addEventListener('analyticsRequest', (e) => {
-  ipcRenderer.send('analyticsParams', e.detail);
-});
-
-ipcRenderer.on('ipcAnalyticsReply', (e, args) => {
-  let event = new CustomEvent('analyticsReply', { detail: args });
-  window.dispatchEvent(event);
-});
-
-ipcRenderer.on('ipcAnalyticsError', (e, args) => {
-  let event = new CustomEvent('analyticsError', { detail: args });
-  window.dispatchEvent(event);
-});

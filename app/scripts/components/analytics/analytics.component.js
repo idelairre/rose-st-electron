@@ -1,9 +1,14 @@
-import { Component, Inject } from 'ng-forward';
+import { Component, Inject, Resolve } from 'ng-forward';
 import { DATE, TODAY, YEAR_START } from '../../constants/constants';
+import AnalyticsService from '../../services/analytics.service';
 import Chart from './chart/chart.component';
+import ModalService from '../../services/modal.service';
 import QueryBuilder from './query-builder/query-builder.component';
 import moment from 'moment';
 import 'reflect-metadata';
+
+const startDate = new Date(...YEAR_START);
+const endDate = new Date(...TODAY);
 
 @Component({
 	selector: 'analytics',
@@ -13,18 +18,36 @@ import 'reflect-metadata';
 	providers: ['ngMaterial']
 })
 
-@Inject('$scope', '$window')
+@Inject('$scope', '$window', 'data', AnalyticsService, ModalService)
 export default class Analytics {
-	constructor($scope, $window) {
+	@Resolve()
+	@Inject(AnalyticsService)
+	static data(AnalyticsService) {
+		return AnalyticsService.request({
+			ids: 'ga:118196120',
+			'start-date': moment(startDate).format('YYYY-MM-DD'),
+			'end-date': moment(endDate).format('YYYY-MM-DD'),
+			metrics: ['ga:users'],
+			dimensions: ['ga:month', 'ga:nthMonth'],
+			segments: []
+		});
+	}
+
+	constructor($scope, $window, data, AnalyticsService, ModalService) {
 		this.$scope = $scope;
 		this.$window = $window;
 
-		this.chartState = { trends: true, composition: false, comparison: false };
+		this.analyticsService = AnalyticsService;
 
-		this.data = {};
+		this.modalService = ModalService;
 
-		let startDate = new Date(...YEAR_START);
-		let endDate = new Date(...TODAY);
+		this.chartState = {
+			trends: true,
+			composition: false,
+			comparison: false
+		};
+
+		this.data = data;
 
 		this.fields = {
 			'start-date': startDate,
@@ -41,47 +64,31 @@ export default class Analytics {
 			dimensions: ['ga:month', 'ga:nthMonth'],
 			segments: []
 		};
-
-		this.$window.addEventListener('analyticsReply', event => {
-			this.data = event.detail;
-			console.log(this.data);
-			this.resolved = true;
-		});
-
-		this.$window.addEventListener('analyticsError', event => {
-			this.resolved = true;
-			console.error(event.detail);
-		});
-	}
-
-	ngOnInit() {
-		setTimeout(() => {
-			this.postQuery(this.query);
-		}, 0);
 	}
 
 	generateSlug(query) {
-		let slug = Object.assign({}, query);
+		const slug = Object.assign({}, query);
 		slug['start-date'] = moment(this.fields['start-date']).format('YYYY-MM-DD');
 		if (query.dimensions.includes('ga:hour')) {
 			slug['end-date'] = slug['start-date'];
 		} else {
 			slug['end-date'] = moment(this.fields['end-date']).format('YYYY-MM-DD');
 		}
-		slug.dimensions = query.dimensions.toString();
-		slug.metrics = query.metrics.toString();
+		slug.dimensions = query.dimensions.toString().trim();
+		slug.metrics = query.metrics.toString().trim();
 		return slug;
 	}
 
-	postQuery(query) {
-		if (this.resolved && this.query.metrics.length !== 0 && this.query.dimensions.length !== 0) {
-			this.resolved = false;
-			let slug = this.generateSlug(query);
-			let event = new CustomEvent('analyticsRequest', {
-				detail: slug
-			});
-
-			this.$window.dispatchEvent(event);
+	async postQuery(query) {
+		try {
+			if (this.resolved && this.query.metrics.length !== 0 && this.query.dimensions.length !== 0) {
+				this.resolved = false;
+				const slug = this.generateSlug(query);
+				const response = await this.analyticsService.request(slug);
+				Object.assign(this.data, response);
+			}
+		} catch (err) {
+			this.modalService.error(err.errors[0].message.trim());
 		}
 	}
 }

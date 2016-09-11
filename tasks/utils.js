@@ -12,7 +12,6 @@ var startTime;
 
 var handleErrors = function() {
 	var args = Array.prototype.slice.call(arguments);
-	console.log(args);
 
 	notify.logLevel(2);
 
