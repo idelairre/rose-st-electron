@@ -18,7 +18,7 @@ const endDate = new Date(...TODAY);
 	providers: ['ngMaterial']
 })
 
-@Inject('$scope', '$window', 'data', AnalyticsService, ModalService)
+@Inject('data', AnalyticsService, ModalService)
 export default class Analytics {
 	@Resolve()
 	@Inject(AnalyticsService)
@@ -33,10 +33,7 @@ export default class Analytics {
 		});
 	}
 
-	constructor($scope, $window, data, AnalyticsService, ModalService) {
-		this.$scope = $scope;
-		this.$window = $window;
-
+	constructor(data, AnalyticsService, ModalService) {
 		this.analyticsService = AnalyticsService;
 
 		this.modalService = ModalService;

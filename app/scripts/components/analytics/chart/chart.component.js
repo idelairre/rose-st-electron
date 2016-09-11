@@ -33,16 +33,14 @@ const getDates = (startDate, stopDate) => {
   outputs: ['refresh']
 })
 
-@Inject('$filter', '$scope', '$window')
+@Inject('$filter')
 export default class Chart {
   @Input() data;
 	@Input() fields;
 	@Input() query;
   @Output() refresh;
-	constructor($filter, $scope, $window) {
+	constructor($filter) {
 		this.$filter = $filter;
-		this.$scope = $scope;
-    this.$window = $window;
 
     this.refresh = new EventEmitter();
 
@@ -98,16 +96,6 @@ export default class Chart {
     this.valid = true;
 
     this.showChart = true;
-
-    console.log(this.data);
-
-    // this.$window.addEventListener('analyticsReply', event => {
-    //   console.log(event);
-    //   if (!this.state.comparison) {
-    //     this.dataCache = event.detail;
-    //   }
-    //   this.setData(event.detail);
-    // });
   }
 
 	ngOnInit() {
